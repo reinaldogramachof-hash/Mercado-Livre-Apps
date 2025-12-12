@@ -6,25 +6,44 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
     <title>Plena Estoque - Controle Inteligente</title>
 
+    <!-- PWA Meta Tags -->
+    <meta name="theme-color" content="#06B6D4">
+    <meta name="apple-mobile-web-app-capable" content="yes">
+    <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+    <meta name="description" content="Controle de estoque e validade offline - Plena Aplicativos">
+    <link rel="manifest" href="data:application/manifest+json,{}">
+
+    <!-- Tailwind CSS -->
     <script src="https://cdn.tailwindcss.com"></script>
     <script>
         tailwind.config = {
             theme: {
                 extend: {
                     colors: {
-                        plena: { cyan: '#06B6D4', dark: '#0E7490', black: '#1a1a1a' }, // Cyan Theme for Stock
-                        success: '#10B981', danger: '#EF4444', warning: '#F59E0B'
+                        plena: { cyan: '#06B6D4', dark: '#0891B2', black: '#1a1a1a', blue: '#3B82F6', green: '#10B981', red: '#EF4444', yellow: '#F59E0B' },
+                    },
+                    animation: {
+                        'pulse-slow': 'pulse 3s infinite',
+                        'slide-in': 'slideIn 0.3s ease-out',
                     }
                 }
             }
         }
     </script>
+
+    <!-- Lucide Icons -->
     <script src="https://unpkg.com/lucide@latest"></script>
 
     <style>
+        /* CSS Otimizado (Standard Plena) */
+        :root {
+            --plena-cyan: #06B6D4;
+            --plena-dark: #0891B2;
+        }
+
         body {
             font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
-            background-color: #ECFEFF;
+            background-color: #F3F4F6;
             -webkit-tap-highlight-color: transparent;
         }
 
@@ -48,11 +67,26 @@
             }
         }
 
-        .modal-backdrop {
-            background-color: rgba(0, 0, 0, 0.6);
-            backdrop-filter: blur(2px);
+        @keyframes slideIn {
+            from {
+                transform: translateX(-10px);
+                opacity: 0;
+            }
+
+            to {
+                transform: translateX(0);
+                opacity: 1;
+            }
         }
 
+        /* Modal Backdrop */
+        .modal-backdrop {
+            background-color: rgba(0, 0, 0, 0.7);
+            backdrop-filter: blur(4px);
+            animation: fadeIn 0.2s ease;
+        }
+
+        /* Sidebar Mobile */
         @media (max-width: 1024px) {
             .sidebar {
                 transform: translateX(-100%);
@@ -78,20 +112,52 @@
                 margin-left: 280px;
             }
         }
+
+        /* Card Hover Effects */
+        .card-hover {
+            transition: all 0.3s ease;
+        }
+
+        .card-hover:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 10px 25px rgba(0, 0, 0, 0.1);
+        }
+
+        /* Custom Scrollbar */
+        ::-webkit-scrollbar {
+            width: 6px;
+            height: 6px;
+        }
+
+        ::-webkit-scrollbar-track {
+            background: #f1f1f1;
+            border-radius: 3px;
+        }
+
+        ::-webkit-scrollbar-thumb {
+            background: #c1c1c1;
+            border-radius: 3px;
+        }
+
+        ::-webkit-scrollbar-thumb:hover {
+            background: #a1a1a1;
+        }
     </style>
 </head>
 
 <body class="text-gray-800 antialiased">
 
+    <!-- Overlay para sidebar mobile -->
     <div id="overlay" class="fixed inset-0 bg-black/50 hidden z-40 transition-opacity" onclick="toggleSidebar()"></div>
 
+    <!-- Sidebar -->
     <aside id="sidebar"
         class="sidebar bg-plena-black text-white transition-transform duration-300 flex flex-col shadow-2xl">
-        <div class="h-20 flex items-center px-6 bg-plena-cyan">
+        <div class="h-20 flex items-center px-6 bg-gradient-to-r from-plena-cyan to-plena-dark">
             <i data-lucide="package-search" class="w-8 h-8 mr-3"></i>
             <div>
-                <h1 class="text-xl font-bold tracking-tight">PLENA</h1>
-                <p class="text-xs text-white/90 font-medium">Estoque & Dispensa</p>
+                <h1 class="text-xl font-bold tracking-tight">PLENA ESTOQUE</h1>
+                <p class="text-xs text-white/90 font-medium">Controle Inteligente</p>
             </div>
         </div>
 
@@ -99,136 +165,199 @@
             <button onclick="router('dashboard')"
                 class="nav-item w-full flex items-center px-4 py-3 rounded-xl hover:bg-white/10 transition-all group active-nav"
                 id="nav-dashboard">
-                <i data-lucide="layout-dashboard" class="w-5 h-5 mr-3 text-gray-400 group-hover:text-white"></i> Visão
-                Geral
+                <i data-lucide="layout-dashboard" class="w-5 h-5 mr-3 text-gray-400 group-hover:text-white"></i>
+                Visão Geral
             </button>
             <button onclick="router('inventory')"
                 class="nav-item w-full flex items-center px-4 py-3 rounded-xl hover:bg-white/10 transition-all group"
                 id="nav-inventory">
-                <i data-lucide="boxes" class="w-5 h-5 mr-3 text-gray-400 group-hover:text-white"></i> Meu Estoque
+                <i data-lucide="boxes" class="w-5 h-5 mr-3 text-gray-400 group-hover:text-white"></i>
+                Meu Estoque
             </button>
             <button onclick="router('shopping')"
                 class="nav-item w-full flex items-center px-4 py-3 rounded-xl hover:bg-white/10 transition-all group"
                 id="nav-shopping">
-                <i data-lucide="shopping-cart" class="w-5 h-5 mr-3 text-gray-400 group-hover:text-white"></i> Lista de
-                Compras
+                <i data-lucide="shopping-cart" class="w-5 h-5 mr-3 text-gray-400 group-hover:text-white"></i>
+                Lista de Compras
             </button>
             <button onclick="router('history')"
                 class="nav-item w-full flex items-center px-4 py-3 rounded-xl hover:bg-white/10 transition-all group"
                 id="nav-history">
-                <i data-lucide="history" class="w-5 h-5 mr-3 text-gray-400 group-hover:text-white"></i> Movimentações
+                <i data-lucide="history" class="w-5 h-5 mr-3 text-gray-400 group-hover:text-white"></i>
+                Movimentações
             </button>
             <button onclick="router('settings')"
                 class="nav-item w-full flex items-center px-4 py-3 rounded-xl hover:bg-white/10 transition-all group"
                 id="nav-settings">
-                <i data-lucide="settings" class="w-5 h-5 mr-3 text-gray-400 group-hover:text-white"></i> Configurações
+                <i data-lucide="settings" class="w-5 h-5 mr-3 text-gray-400 group-hover:text-white"></i>
+                Configurações
             </button>
             <button onclick="router('instructions')"
                 class="nav-item w-full flex items-center px-4 py-3 rounded-xl hover:bg-white/10 transition-all group"
                 id="nav-instructions">
-                <i data-lucide="book-open" class="w-5 h-5 mr-3 text-gray-400 group-hover:text-white"></i> Manual de Uso
+                <i data-lucide="book-open" class="w-5 h-5 mr-3 text-gray-400 group-hover:text-white"></i>
+                Manual de Uso
             </button>
             <button onclick="router('about')"
                 class="nav-item w-full flex items-center px-4 py-3 rounded-xl hover:bg-white/10 transition-all group"
                 id="nav-about">
-                <i data-lucide="info" class="w-5 h-5 mr-3 text-gray-400 group-hover:text-white"></i> Saiba Mais
+                <i data-lucide="info" class="w-5 h-5 mr-3 text-gray-400 group-hover:text-white"></i>
+                Sobre a Plena
             </button>
         </nav>
 
         <div class="p-6 border-t border-white/10 text-center">
             <p class="text-xs text-gray-500">Todos os Direitos Reservados &copy; 2025</p>
             <a href="https://www.plenaaplicativos.com.br" target="_blank"
-                class="text-[10px] text-gray-600 hover:text-plena-cyan transition-colors mt-1 block decoration-0">Plena
-                Apps</a>
+                class="text-[10px] text-gray-600 hover:text-plena-cyan transition-colors mt-1 block decoration-0">
+                Plena Soluções Digitais LTDA
+            </a>
         </div>
     </aside>
 
+    <!-- Main Content -->
     <main class="main-content min-h-screen flex flex-col">
+        <!-- Header -->
         <header
             class="bg-white h-20 flex items-center justify-between px-4 lg:px-8 sticky top-0 z-30 shadow-sm border-b border-gray-100">
             <div class="flex items-center gap-4">
-                <button onclick="toggleSidebar()" class="lg:hidden p-2 hover:bg-gray-100 rounded-lg text-gray-600"><i
-                        data-lucide="menu" class="w-6 h-6"></i></button>
-                <div class="flex flex-col">
-                    <h2 id="page-title" class="text-xl font-bold text-gray-800">Dashboard</h2>
-                    <p id="page-subtitle" class="text-xs text-gray-500 hidden"></p>
-                </div>
+                <button onclick="toggleSidebar()" class="lg:hidden p-2 hover:bg-gray-100 rounded-lg text-gray-600">
+                    <i data-lucide="menu" class="w-6 h-6"></i>
+                </button>
+                <h2 id="page-title" class="text-xl font-bold text-gray-800 hidden sm:block">Dashboard</h2>
             </div>
-            <div class="flex items-center gap-2">
-                <div id="header-actions">
+
+            <div class="flex items-center gap-2 sm:gap-3">
+                <div class="relative group">
+                    <div
+                        class="absolute -inset-1 bg-plena-cyan/20 rounded-lg blur opacity-0 group-hover:opacity-100 transition duration-300">
+                    </div>
                     <button onclick="openProductModal()"
-                        class="flex items-center px-3 py-2 bg-plena-cyan text-white rounded-lg text-sm font-bold hover:bg-plena-dark transition-all shadow-lg active:scale-95">
-                        <i data-lucide="plus" class="w-5 h-5 sm:mr-2"></i> <span class="hidden sm:inline">Novo
-                            Item</span> <span class="sm:hidden">Novo</span>
+                        class="relative flex items-center px-4 py-2.5 bg-plena-cyan text-white rounded-lg text-sm font-bold hover:bg-plena-dark transition-all shadow-lg shadow-cyan-200 active:scale-95">
+                        <i data-lucide="plus" class="w-5 h-5 sm:mr-2"></i>
+                        <span class="hidden sm:inline">Novo Item</span>
+                        <span class="sm:hidden">Novo</span>
                     </button>
                 </div>
             </div>
         </header>
 
+        <!-- Content Area -->
         <div class="p-4 lg:p-8 flex-1 overflow-y-auto">
-            <!-- DASHBOARD -->
+
+            <!-- Dashboard View -->
             <section id="view-dashboard" class="view-section fade-in">
+                <!-- Stats Cards -->
                 <div class="grid grid-cols-1 md:grid-cols-3 gap-6 mb-8">
-                    <div class="bg-white p-6 rounded-2xl shadow-sm border border-gray-100">
-                        <p class="text-xs font-bold text-gray-400 uppercase tracking-wider mb-1">Itens Cadastrados</p>
-                        <h3 id="dash-total-items" class="text-3xl font-bold text-gray-800">0</h3>
+                    <div class="bg-white p-6 rounded-2xl shadow-sm border border-gray-100 card-hover">
+                        <div class="flex items-center justify-between">
+                            <div>
+                                <p class="text-xs font-bold text-gray-400 uppercase tracking-wider mb-1">Itens
+                                    Cadastrados</p>
+                                <h3 id="dash-total-items" class="text-3xl font-bold text-gray-900">0</h3>
+                                <p class="text-xs text-gray-500 mt-1">Total em estoque</p>
+                            </div>
+                            <div class="w-12 h-12 rounded-full bg-plena-cyan/10 flex items-center justify-center">
+                                <i data-lucide="package" class="w-6 h-6 text-plena-cyan"></i>
+                            </div>
+                        </div>
                     </div>
-                    <div class="bg-white p-6 rounded-2xl shadow-sm border border-gray-100 relative overflow-hidden">
-                        <div class="absolute right-0 top-0 h-full w-1.5 bg-red-500"></div>
-                        <p class="text-xs font-bold text-gray-400 uppercase tracking-wider mb-1">Estoque Crítico (Falta)
-                        </p>
-                        <h3 id="dash-low-stock" class="text-3xl font-bold text-red-500">0</h3>
+
+                    <div
+                        class="bg-white p-6 rounded-2xl shadow-sm border border-gray-100 card-hover relative overflow-hidden">
+                        <div class="absolute right-0 top-0 h-full w-1 bg-red-500"></div>
+                        <div class="flex items-center justify-between">
+                            <div>
+                                <p class="text-xs font-bold text-gray-400 uppercase tracking-wider mb-1">Estoque Crítico
+                                </p>
+                                <h3 id="dash-low-stock" class="text-3xl font-bold text-red-500">0</h3>
+                                <p class="text-xs text-gray-500 mt-1">Abaixo do mínimo</p>
+                            </div>
+                            <div class="w-12 h-12 rounded-full bg-red-100 flex items-center justify-center">
+                                <i data-lucide="alert-circle" class="w-6 h-6 text-red-600"></i>
+                            </div>
+                        </div>
                     </div>
-                    <div class="bg-white p-6 rounded-2xl shadow-sm border border-gray-100 relative overflow-hidden">
-                        <div class="absolute right-0 top-0 h-full w-1.5 bg-yellow-400"></div>
-                        <p class="text-xs font-bold text-gray-400 uppercase tracking-wider mb-1">Vencendo em 30 dias</p>
-                        <h3 id="dash-expiring" class="text-3xl font-bold text-yellow-600">0</h3>
+
+                    <div
+                        class="bg-white p-6 rounded-2xl shadow-sm border border-gray-100 card-hover relative overflow-hidden">
+                        <div class="absolute right-0 top-0 h-full w-1 bg-yellow-400"></div>
+                        <div class="flex items-center justify-between">
+                            <div>
+                                <p class="text-xs font-bold text-gray-400 uppercase tracking-wider mb-1">Vencendo em 30
+                                    dias</p>
+                                <h3 id="dash-expiring" class="text-3xl font-bold text-yellow-600">0</h3>
+                                <p class="text-xs text-gray-500 mt-1">Atenção requerida</p>
+                            </div>
+                            <div class="w-12 h-12 rounded-full bg-yellow-100 flex items-center justify-center">
+                                <i data-lucide="calendar-clock" class="w-6 h-6 text-yellow-600"></i>
+                            </div>
+                        </div>
                     </div>
                 </div>
 
-                <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+                <div class="grid grid-cols-1 lg:grid-cols-2 gap-6">
+                    <!-- Expiring List -->
                     <div class="bg-white p-6 rounded-2xl shadow-sm border border-gray-100">
-                        <h3 class="font-bold text-gray-800 mb-4 flex items-center text-red-600"><i
-                                data-lucide="alert-triangle" class="w-4 h-4 mr-2"></i> Atenção: Vencimento Próximo</h3>
-                        <div id="expiring-list" class="space-y-3"></div>
+                        <h3 class="font-bold text-gray-800 mb-4 flex items-center text-red-600">
+                            <i data-lucide="alert-triangle" class="w-4 h-4 mr-2"></i>
+                            Atenção: Vencimento Próximo
+                        </h3>
+                        <div id="expiring-list" class="space-y-3">
+                            <!-- Dynamic Content -->
+                        </div>
                     </div>
 
+                    <!-- Recent History -->
                     <div class="bg-white p-6 rounded-2xl shadow-sm border border-gray-100">
-                        <h3 class="font-bold text-gray-800 mb-4 flex items-center text-plena-cyan"><i
-                                data-lucide="history" class="w-4 h-4 mr-2"></i> Últimas Movimentações</h3>
-                        <div id="recent-history-list" class="space-y-3"></div>
+                        <h3 class="font-bold text-gray-800 mb-4 flex items-center text-plena-cyan">
+                            <i data-lucide="history" class="w-4 h-4 mr-2"></i>
+                            Últimas Movimentações
+                        </h3>
+                        <div id="recent-history-list" class="space-y-3">
+                            <!-- Dynamic Content -->
+                        </div>
                     </div>
                 </div>
             </section>
 
-            <!-- INVENTORY -->
+            <!-- Inventory View -->
             <section id="view-inventory" class="view-section hide fade-in">
-                <div class="bg-white p-4 rounded-xl border border-gray-100 mb-6 flex gap-2">
+                <div class="bg-white p-4 rounded-xl border border-gray-100 mb-6 flex gap-3 shadow-sm">
                     <i data-lucide="search" class="text-gray-400"></i>
-                    <input type="text" id="inv-search" onkeyup="renderInventory()" placeholder="Buscar item..."
-                        class="w-full outline-none">
+                    <input type="text" id="inv-search" onkeyup="renderInventory()"
+                        placeholder="Buscar por nome, categoria ou código..."
+                        class="w-full outline-none text-sm bg-transparent">
                 </div>
-                <div id="inventory-list" class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6"></div>
+                <div id="inventory-list" class="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 gap-6">
+                    <!-- Dynamic Content -->
+                </div>
             </section>
 
-            <!-- SHOPPING LIST -->
+            <!-- Shopping View -->
             <section id="view-shopping" class="view-section hide fade-in">
-                <div class="flex justify-between items-center mb-6">
+                <div class="flex flex-col sm:flex-row justify-between items-center mb-6 gap-4">
                     <div>
                         <h3 class="text-xl font-bold text-gray-800">Sugestão de Compra</h3>
-                        <p class="text-sm text-gray-500">Itens com quantidade abaixo do mínimo definido.</p>
+                        <p class="text-sm text-gray-500">Itens com quantidade abaixo do estoque mínimo.</p>
                     </div>
                     <button onclick="copyShoppingList()"
-                        class="bg-green-600 text-white px-4 py-2 rounded-lg font-bold hover:bg-green-700 flex items-center"><i
-                            data-lucide="copy" class="w-4 h-4 mr-2"></i> Copiar Lista</button>
+                        class="w-full sm:w-auto bg-green-600 text-white px-6 py-2.5 rounded-lg font-bold hover:bg-green-700 flex items-center justify-center transition-colors shadow-sm">
+                        <i data-lucide="copy" class="w-4 h-4 mr-2"></i> Copiar Lista
+                    </button>
                 </div>
                 <div id="shopping-list-container"
-                    class="bg-white rounded-2xl shadow-sm border border-gray-100 overflow-hidden"></div>
+                    class="bg-white rounded-2xl shadow-sm border border-gray-100 overflow-hidden">
+                    <!-- Dynamic Content -->
+                </div>
             </section>
 
-            <!-- HISTORY -->
+            <!-- History View -->
             <section id="view-history" class="view-section hide fade-in">
                 <div class="bg-white rounded-2xl shadow-sm border border-gray-100 overflow-hidden">
+                    <div class="p-4 border-b border-gray-100 bg-gray-50">
+                        <h3 class="font-bold text-gray-800">Histórico Completo</h3>
+                    </div>
                     <div class="overflow-x-auto">
                         <table class="w-full text-left">
                             <thead class="bg-gray-50 text-gray-500 text-xs uppercase">
@@ -239,237 +368,243 @@
                                     <th class="px-6 py-3 text-right">Qtd</th>
                                 </tr>
                             </thead>
-                            <tbody id="full-history-list" class="divide-y divide-gray-100 text-sm"></tbody>
+                            <tbody id="full-history-list" class="divide-y divide-gray-100 text-sm">
+                                <!-- Dynamic Content -->
+                            </tbody>
                         </table>
                     </div>
                 </div>
             </section>
 
-            <!-- SETTINGS -->
+            <!-- Settings View -->
             <section id="view-settings" class="view-section hide fade-in">
-                <div class="bg-white p-6 rounded-2xl shadow-sm border border-gray-100">
-                    <h3 class="font-bold text-gray-800 mb-4 flex items-center"><i data-lucide="shield-alert"
-                            class="w-4 h-4 mr-2"></i> Segurança de Dados</h3>
-                    <div class="bg-blue-50 border border-blue-200 p-3 rounded-lg text-sm text-blue-800 mb-4">
-                        <strong>Importante:</strong> Dados 100% locais. <strong>Faça backups!</strong>
+                <div class="max-w-2xl mx-auto space-y-6">
+                    <div class="bg-white p-6 rounded-2xl shadow-sm border border-gray-100">
+                        <h3 class="font-bold text-gray-800 mb-4 flex items-center">
+                            <i data-lucide="shield-alert" class="w-5 h-5 mr-2 text-plena-cyan"></i>
+                            Segurança de Dados
+                        </h3>
+
+                        <div class="bg-blue-50 border border-blue-200 p-4 rounded-lg text-sm text-blue-800 mb-6">
+                            <p class="font-bold mb-1">⚠️ Sistema Local-First</p>
+                            <p>Seus dados são salvos apenas neste dispositivo. Faça backups regulares!</p>
+                        </div>
+
+                        <div class="space-y-3">
+                            <button onclick="downloadBackup()"
+                                class="w-full border border-gray-300 py-3 rounded-lg text-sm font-medium hover:bg-gray-50 flex justify-center items-center gap-2 transition-colors">
+                                <i data-lucide="download" class="w-4 h-4"></i> Baixar Backup (.json)
+                            </button>
+
+                            <div class="relative">
+                                <button
+                                    class="w-full bg-gray-800 text-white py-3 rounded-lg text-sm font-medium flex justify-center items-center gap-2 hover:bg-gray-900 transition-colors">
+                                    <i data-lucide="upload" class="w-4 h-4"></i> Restaurar Backup
+                                </button>
+                                <input type="file" onchange="restoreBackup(this)"
+                                    class="absolute inset-0 opacity-0 cursor-pointer">
+                            </div>
+                        </div>
                     </div>
-                    <button onclick="downloadBackup()"
-                        class="w-full border border-gray-300 py-3 rounded-lg text-sm font-medium hover:bg-gray-50 mb-3 flex justify-center gap-2"><i
-                            data-lucide="download" class="w-4 h-4"></i> Baixar Backup (.json)</button>
-                    <div class="relative mb-6">
-                        <button
-                            class="w-full bg-gray-800 text-white py-3 rounded-lg text-sm font-medium flex justify-center gap-2"><i
-                                data-lucide="upload" class="w-4 h-4"></i> Restaurar Backup</button>
-                        <input type="file" onchange="restoreBackup(this)"
-                            class="absolute inset-0 opacity-0 cursor-pointer">
-                    </div>
-                    <div class="border-t pt-4">
+
+                    <div class="bg-white p-6 rounded-2xl shadow-sm border border-gray-100">
+                        <h3 class="font-bold text-gray-800 mb-4 flex items-center text-red-600">
+                            <i data-lucide="alert-triangle" class="w-5 h-5 mr-2"></i>
+                            Zona de Perigo
+                        </h3>
                         <button onclick="factoryReset()"
-                            class="text-red-500 text-sm hover:underline w-full text-center">Resetar Sistema de
-                            Fábrica</button>
+                            class="w-full py-2.5 border border-red-200 text-red-600 rounded-lg text-sm hover:bg-red-50 transition-colors font-medium">
+                            Resetar Sistema de Fábrica
+                        </button>
                     </div>
                 </div>
             </section>
 
-            <!-- ABOUT -->
+            </section>
+
+            <!-- Instructions View -->
             <section id="view-instructions" class="view-section hide fade-in">
-                <div class="max-w-3xl mx-auto space-y-6">
-                    <div class="bg-white p-8 rounded-2xl shadow-sm border border-gray-100">
-                        <div class="text-center mb-8">
-                            <h2 class="text-2xl font-bold text-gray-800">Manual de Estoque e Validade</h2>
-                            <p class="text-gray-500">Evite prejuízos com mercadorias vencidas.</p>
-                        </div>
+                <div class="max-w-3xl mx-auto">
+                    <div class="text-center mb-8">
+                        <h2 class="text-2xl font-bold text-gray-800 mb-2">Manual de Estoque</h2>
+                        <p class="text-gray-600">Aprenda a otimizar sua gestão de produtos.</p>
+                    </div>
 
-                        <div class="space-y-4">
-                            <!-- ITEM 1: BACKUP -->
-                            <details
-                                class="group bg-blue-50 border border-blue-100 rounded-xl overflow-hidden transition-all duration-300 open:shadow-md">
-                                <summary
-                                    class="flex items-center justify-between p-4 cursor-pointer select-none text-blue-900 font-bold">
-                                    <div class="flex items-center gap-3">
-                                        <div
-                                            class="w-8 h-8 rounded-full bg-blue-200 flex items-center justify-center text-blue-700">
-                                            <i data-lucide="shield-check" class="w-4 h-4"></i>
-                                        </div>
-                                        1. Segurança: Seu Estoque Vale Dinheiro (Backup)
+                    <div class="space-y-4">
+                        <details
+                            class="group bg-white border border-gray-200 rounded-xl overflow-hidden open:shadow-md">
+                            <summary
+                                class="flex items-center justify-between p-4 cursor-pointer select-none text-gray-800 font-bold hover:bg-gray-50">
+                                <div class="flex items-center gap-3">
+                                    <div
+                                        class="w-8 h-8 rounded-full bg-cyan-100 flex items-center justify-center text-plena-cyan">
+                                        <i data-lucide="shield-check" class="w-4 h-4"></i>
                                     </div>
-                                    <i data-lucide="chevron-down"
-                                        class="w-5 h-5 transition-transform group-open:rotate-180 text-blue-400"></i>
-                                </summary>
-                                <div
-                                    class="p-4 pt-0 text-sm text-gray-600 bg-blue-50 leading-relaxed border-t border-blue-100/50">
-                                    <p class="mb-2">Não corra o risco de perder seu inventário. Faça backup
-                                        regularmente:</p>
-                                    <ol class="list-decimal pl-5 space-y-2 mt-2 font-medium text-gray-700">
-                                        <li>Vá em <strong>Configurações</strong> no menu.</li>
-                                        <li>Clique em <span class="text-blue-600"><i data-lucide="download"
-                                                    class="w-3 h-3 inline"></i> Baixar Backup</span>.</li>
-                                        <li>Salve no seu Google Drive, E-mail ou WhatsApp.</li>
-                                        <li>Faça isso após cada contagem de estoque!</li>
-                                    </ol>
+                                    1. Segurança: Seu Estoque Vale Dinheiro
                                 </div>
-                            </details>
+                                <i data-lucide="chevron-down"
+                                    class="w-5 h-5 transition-transform group-open:rotate-180 text-gray-400"></i>
+                            </summary>
+                            <div class="p-4 pt-0 text-sm text-gray-600 leading-relaxed border-t border-gray-100">
+                                <p class="mb-3">Não corra o risco de perder seu inventário. Faça backup regularmente:
+                                </p>
+                                <ol class="list-decimal pl-5 space-y-2 mb-3">
+                                    <li>Vá em <strong>Configurações</strong></li>
+                                    <li>Clique em <strong>Baixar Backup</strong></li>
+                                    <li>Salve no Google Drive ou envie para seu próprio WhatsApp</li>
+                                </ol>
+                            </div>
+                        </details>
 
-                            <!-- ITEM 2: EXPIRY -->
-                            <details
-                                class="group bg-white border border-gray-200 rounded-xl overflow-hidden transition-all duration-300 open:shadow-md hover:border-plena-cyan">
-                                <summary
-                                    class="flex items-center justify-between p-4 cursor-pointer select-none text-gray-800 font-bold">
-                                    <div class="flex items-center gap-3">
-                                        <div
-                                            class="w-8 h-8 rounded-full bg-cyan-100 flex items-center justify-center text-plena-cyan">
-                                            <i data-lucide="calendar-off" class="w-4 h-4"></i>
-                                        </div>
-                                        2. Controle de Validade
+                        <details
+                            class="group bg-white border border-gray-200 rounded-xl overflow-hidden open:shadow-md">
+                            <summary
+                                class="flex items-center justify-between p-4 cursor-pointer select-none text-gray-800 font-bold hover:bg-gray-50">
+                                <div class="flex items-center gap-3">
+                                    <div
+                                        class="w-8 h-8 rounded-full bg-yellow-100 flex items-center justify-center text-yellow-600">
+                                        <i data-lucide="calendar-off" class="w-4 h-4"></i>
                                     </div>
-                                    <i data-lucide="chevron-down"
-                                        class="w-5 h-5 transition-transform group-open:rotate-180 text-gray-400"></i>
-                                </summary>
-                                <div class="p-4 pt-0 text-sm text-gray-600 leading-relaxed">
-                                    <p>O sistema te avisa antes do produto estragar:</p>
-                                    <ul class="list-disc pl-5 space-y-2 mt-2">
-                                        <li><strong>Cadastro:</strong> Sempre informe a "Data de Validade" ao adicionar
-                                            um item.</li>
-                                        <li><strong>Dashboard:</strong> Fique de olho no bloco "<span
-                                                class="text-yellow-600 font-bold">Vencendo em 30 dias</span>".</li>
-                                        <li>Crie promoções para esses produtos e evite o descarte!</li>
-                                    </ul>
+                                    2. Controle de Validade
                                 </div>
-                            </details>
+                                <i data-lucide="chevron-down"
+                                    class="w-5 h-5 transition-transform group-open:rotate-180 text-gray-400"></i>
+                            </summary>
+                            <div class="p-4 pt-0 text-sm text-gray-600 leading-relaxed border-t border-gray-100">
+                                <p>Cadastre sempre a validade dos produtos perecíveis. O sistema avisa automaticamente
+                                    no Dashboard quando um item vai vencer nos próximos 30 dias na cor Amarela, e quando
+                                    já venceu na cor Vermelha.</p>
+                            </div>
+                        </details>
+                    </div>
 
-                            <!-- ITEM 3: ALERTS -->
-                            <details
-                                class="group bg-white border border-gray-200 rounded-xl overflow-hidden transition-all duration-300 open:shadow-md hover:border-gray-300">
-                                <summary
-                                    class="flex items-center justify-between p-4 cursor-pointer select-none text-gray-800 font-bold">
-                                    <div class="flex items-center gap-3">
-                                        <div
-                                            class="w-8 h-8 rounded-full bg-gray-100 flex items-center justify-center text-gray-600">
-                                            <i data-lucide="alert-triangle" class="w-4 h-4"></i>
-                                        </div>
-                                        3. Alertas de Falta (Estoque Mínimo)
-                                    </div>
-                                    <i data-lucide="chevron-down"
-                                        class="w-5 h-5 transition-transform group-open:rotate-180 text-gray-400"></i>
-                                </summary>
-                                <div class="p-4 pt-0 text-sm text-gray-600 leading-relaxed">
-                                    <p>Nunca deixe faltar mercadoria para seu cliente:</p>
-                                    <ul class="list-disc pl-5 space-y-1 mt-2">
-                                        <li>Defina o <strong>Estoque Mínimo</strong> no cadastro do produto.</li>
-                                        <li>Se a quantidade atual for menor que o mínimo, o item aparecerá na lista de
-                                            "<span class="text-red-500 font-bold">Estoque Crítico</span>".</li>
-                                        <li>Use essa lista para fazer suas compras de reposição.</li>
-                                    </ul>
-                                </div>
-                            </details>
-
-                            <!-- ITEM 4: APP INSTALL -->
-                            <details
-                                class="group bg-white border border-gray-200 rounded-xl overflow-hidden transition-all duration-300 open:shadow-md hover:border-gray-300">
-                                <summary
-                                    class="flex items-center justify-between p-4 cursor-pointer select-none text-gray-800 font-bold">
-                                    <div class="flex items-center gap-3">
-                                        <div
-                                            class="w-8 h-8 rounded-full bg-gray-100 flex items-center justify-center text-gray-600">
-                                            <i data-lucide="smartphone" class="w-4 h-4"></i>
-                                        </div>
-                                        4. Instalar no Celular
-                                    </div>
-                                    <i data-lucide="chevron-down"
-                                        class="w-5 h-5 transition-transform group-open:rotate-180 text-gray-400"></i>
-                                </summary>
-                                <div class="p-4 pt-0 text-sm text-gray-600 leading-relaxed">
-                                    <p>Tenha seu estoque na palma da mão, mesmo sem internet:</p>
-                                    <div class="grid grid-cols-1 md:grid-cols-2 gap-4 mt-3">
-                                        <div class="bg-gray-50 p-3 rounded-lg">
-                                            <strong>Android:</strong> Menu do Chrome > "Adicionar à Tela Inicial".
-                                        </div>
-                                        <div class="bg-gray-50 p-3 rounded-lg">
-                                            <strong>iPhone:</strong> Safari > Compartilhar > "Adicionar à Tela de
-                                            Início".
-                                        </div>
-                                    </div>
-                                </div>
-                            </details>
-                        </div>
-
-                        <!-- SUPPORT -->
-                        <div class="mt-8 pt-6 border-t border-gray-100 text-center">
-                            <p class="text-sm text-gray-500 mb-2">Dúvidas?</p>
-                            <a href="mailto:suporte@plenainformatica.com.br"
-                                class="text-plena-cyan font-bold hover:underline text-sm">Fale com o Suporte</a>
+                    <!-- Support Section -->
+                    <div class="mt-8 bg-gradient-to-r from-plena-cyan to-plena-dark p-6 rounded-2xl text-white">
+                        <div class="flex flex-col md:flex-row items-center justify-between gap-6">
+                            <div>
+                                <h3 class="text-xl font-bold mb-2">Precisa de Ajuda?</h3>
+                                <p class="text-white/90">Nossa equipe está pronta para te auxiliar</p>
+                            </div>
+                            <div class="flex flex-col sm:flex-row gap-3">
+                                <a href="mailto:tecnologia@plenainformatica.com.br"
+                                    class="bg-white text-plena-cyan px-6 py-3 rounded-lg font-bold hover:bg-gray-100 transition-colors text-center w-full sm:w-auto">
+                                    <i data-lucide="mail" class="w-4 h-4 inline mr-2"></i> Tecnologia / Suporte
+                                </a>
+                            </div>
                         </div>
                     </div>
                 </div>
             </section>
 
+            <!-- About View -->
             <section id="view-about" class="view-section hide fade-in">
-                <div class="max-w-3xl mx-auto space-y-6">
+                <div class="max-w-4xl mx-auto">
                     <div class="bg-white p-8 rounded-2xl shadow-sm border border-gray-100">
-                        <h2 class="text-2xl font-bold text-gray-800 mb-6">Sobre a Plena</h2>
+                        <!-- Company Header -->
+                        <div class="text-center mb-8">
+                            <div
+                                class="w-20 h-20 rounded-full bg-gradient-to-r from-plena-cyan to-plena-dark flex items-center justify-center mx-auto mb-4">
+                                <i data-lucide="rocket" class="w-10 h-10 text-white"></i>
+                            </div>
+                            <h2 class="text-2xl font-bold text-gray-800 mb-2">Plena Soluções Digitais</h2>
+                            <p class="text-gray-600">Democratizando a tecnologia para pequenos negócios</p>
+                        </div>
 
-                        <!-- DISCLAIMER / LEGAL -->
+                        <!-- Legal Notice -->
                         <div class="bg-red-50 border-l-4 border-red-500 p-4 mb-8">
-                            <div class="flex items-start">
+                            <div class="flex">
                                 <div class="flex-shrink-0">
                                     <i data-lucide="alert-triangle" class="h-5 w-5 text-red-600"></i>
                                 </div>
                                 <div class="ml-3">
-                                    <h3 class="text-sm font-bold text-red-800 uppercase tracking-wide">Registro e
-                                        Distribuição</h3>
-                                    <div class="mt-2 text-sm text-red-700 space-y-2">
-                                        <p>Este software é um produto original desenvolvido pela <strong>Plena Soluções
-                                                Digitais</strong>. Sua comercialização é exclusiva através de canais
-                                            oficiais (Loja Oficial no Mercado Livre).</p>
-                                        <p>A revenda não autorizada, engenharia reversa, cópia parcial do código-fonte
-                                            ou distribuição em pacotes "piratas" constitui <strong>violação de
-                                                propriedade intelectual (Lei 9.610/98)</strong>. O infrator está sujeito
-                                            a sanções cíveis e criminais. Valorize o desenvolvimento nacional.</p>
+                                    <h3 class="text-sm font-bold text-red-800 uppercase">Aviso Legal</h3>
+                                    <div class="mt-2 text-sm text-red-700">
+                                        <p>Este software é protegido pela Lei de Direitos Autorais (9.610/98). A
+                                            reprodução, distribuição ou modificação não autorizada constitui violação de
+                                            propriedade intelectual.</p>
                                     </div>
                                 </div>
                             </div>
                         </div>
 
-                        <div class="space-y-8 text-sm text-gray-600">
-                            <!-- MISSION -->
+                        <!-- Mission & Values -->
+                        <div class="grid grid-cols-1 md:grid-cols-2 gap-8 mb-8">
                             <div>
-                                <h3 class="flex items-center text-lg font-bold text-gray-900 mb-2">
-                                    <i data-lucide="heart" class="w-5 h-5 mr-2 text-plena-cyan"></i> Nossa Missão:
-                                    Tecnologia e Acessibilidade
+                                <h3 class="font-bold text-gray-800 mb-4 flex items-center">
+                                    <i data-lucide="target" class="w-5 h-5 mr-2 text-plena-cyan"></i>
+                                    Nossa Missão
                                 </h3>
-                                <p class="leading-relaxed">A Plena acredita que a tecnologia deve ser um direito, não um
-                                    privilégio exclusivo de grandes corporações. Nossa missão é democratizar ferramentas
-                                    de gestão de alta performance, simples e acessíveis.</p>
-                                <p class="mt-2 leading-relaxed">Desenvolvemos soluções <strong>Local-First</strong>
-                                    (seus dados ficam com você), garantindo que pequenos empreendedores, autônomos e
-                                    famílias brasileiras tenham controle total sobre suas informações, sem mensalidades
-                                    abusivas e sem depender de conexão constante com a internet.</p>
-                            </div>
-
-                            <!-- PRIVACY -->
-                            <div class="border-t border-gray-100 pt-6">
-                                <h3 class="font-bold text-gray-900 mb-2">Política de Privacidade</h3>
-                                <p>Ao utilizar este sistema, você concorda que:</p>
-                                <ul class="list-disc pl-5 mt-2 space-y-1">
-                                    <li><strong>100% Offline:</strong> Seus dados financeiros não saem deste
-                                        dispositivo.</li>
-                                    <li><strong>Responsabilidade:</strong> O backup (cópia de segurança) é
-                                        responsabilidade exclusiva do usuário.</li>
-                                    <li><strong>Isenção:</strong> A Plena não tem acesso aos seus dados e não pode
-                                        recuperá-los em caso de perda do equipamento.</li>
+                                <p class="text-gray-600 mb-4">
+                                    Criar ferramentas digitais profissionais, acessíveis e simples que substituam o
+                                    papel e as planilhas complexas na gestão de pequenos negócios.
+                                </p>
+                                <ul class="space-y-2">
+                                    <li class="flex items-center text-sm text-gray-600">
+                                        <i data-lucide="check" class="w-4 h-4 mr-2 text-green-500"></i>
+                                        Tecnologia Local-First (seus dados são seus)
+                                    </li>
+                                    <li class="flex items-center text-sm text-gray-600">
+                                        <i data-lucide="check" class="w-4 h-4 mr-2 text-green-500"></i>
+                                        Sem mensalidades abusivas
+                                    </li>
+                                    <li class="flex items-center text-sm text-gray-600">
+                                        <i data-lucide="check" class="w-4 h-4 mr-2 text-green-500"></i>
+                                        Funciona 100% offline
+                                    </li>
                                 </ul>
+                            </div>
+                            <div>
+                                <h3 class="font-bold text-gray-800 mb-4 flex items-center">
+                                    <i data-lucide="users" class="w-5 h-5 mr-2 text-plena-cyan"></i>
+                                    Para Quem Desenvolvemos
+                                </h3>
+                                <div class="space-y-3">
+                                    <div class="flex items-center p-3 bg-gray-50 rounded-lg">
+                                        <div
+                                            class="w-8 h-8 rounded-full bg-blue-100 flex items-center justify-center mr-3">
+                                            <i data-lucide="wrench" class="w-4 h-4 text-blue-600"></i>
+                                        </div>
+                                        <span class="text-sm font-medium">Autônomos e Prestadores</span>
+                                    </div>
+                                    <div class="flex items-center p-3 bg-gray-50 rounded-lg">
+                                        <div
+                                            class="w-8 h-8 rounded-full bg-green-100 flex items-center justify-center mr-3">
+                                            <i data-lucide="store" class="w-4 h-4 text-green-600"></i>
+                                        </div>
+                                        <span class="text-sm font-medium">Comércios Locais</span>
+                                    </div>
+                                    <div class="flex items-center p-3 bg-gray-50 rounded-lg">
+                                        <div
+                                            class="w-8 h-8 rounded-full bg-purple-100 flex items-center justify-center mr-3">
+                                            <i data-lucide="scissors" class="w-4 h-4 text-purple-600"></i>
+                                        </div>
+                                        <span class="text-sm font-medium">Salões e Barbearias</span>
+                                    </div>
+                                </div>
                             </div>
                         </div>
 
-                        <!-- CONTACT -->
-                        <div class="mt-8 bg-gray-50 p-6 rounded-xl border border-gray-200">
-                            <h3 class="font-bold text-gray-900 mb-2">Precisa de Suporte ou Personalização?</h3>
-                            <p class="text-sm text-gray-600 mb-4">Tem uma ideia de app ou precisa adaptar este sistema
-                                para seu negócio?</p>
-                            <a href="mailto:tecnologia@plenainformatica.com.br"
-                                class="inline-flex items-center text-plena-cyan font-bold hover:underline">
-                                <i data-lucide="mail" class="w-4 h-4 mr-2"></i> tecnologia@plenainformatica.com.br
-                            </a>
+                        <!-- Contact -->
+                        <div class="bg-gray-50 p-6 rounded-xl border border-gray-200">
+                            <h3 class="font-bold text-gray-800 mb-4">Fale Conosco</h3>
+                            <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+                                <div>
+                                    <p class="text-sm text-gray-600 mb-3">Para suporte técnico ou parcerias:</p>
+                                    <a href="mailto:tecnologia@plenainformatica.com.br"
+                                        class="inline-flex items-center text-plena-cyan font-bold hover:underline">
+                                        <i data-lucide="mail" class="w-4 h-4 mr-2"></i>
+                                        tecnologia@plenainformatica.com.br
+                                    </a>
+                                </div>
+                                <div>
+                                    <p class="text-sm text-gray-600 mb-3">Conheça nossos outros produtos:</p>
+                                    <a href="https://www.plenaaplicativos.com.br" target="_blank"
+                                        class="inline-flex items-center text-plena-cyan font-bold hover:underline">
+                                        <i data-lucide="globe" class="w-4 h-4 mr-2"></i>
+                                        www.plenaaplicativos.com.br
+                                    </a>
+                                </div>
+                            </div>
                         </div>
                     </div>
                 </div>
@@ -477,122 +612,200 @@
         </div>
     </main>
 
-    <!-- PRODUCT MODAL -->
+    <!-- Product Modal -->
     <div id="productModal" class="fixed inset-0 modal-backdrop hidden z-50 flex items-center justify-center p-4">
-        <div class="bg-white rounded-2xl shadow-2xl w-full max-w-lg p-6">
+        <div class="bg-white rounded-2xl shadow-2xl w-full max-w-lg transform transition-all p-6">
             <div class="flex justify-between items-center mb-6">
                 <h3 class="text-lg font-bold text-gray-800" id="prod-modal-title">Novo Item</h3>
-                <button onclick="closeModal('productModal')" class="text-gray-400"><i data-lucide="x"></i></button>
+                <button onclick="closeModal('productModal')" class="text-gray-400 hover:text-gray-600">
+                    <i data-lucide="x"></i>
+                </button>
             </div>
             <form onsubmit="submitProduct(event)" class="space-y-4">
                 <input type="hidden" id="pd-id">
-                <input type="text" id="pd-name" required placeholder="Nome do Produto (Ex: Arroz 5kg)"
-                    class="w-full border p-2 rounded-lg">
-                <input type="text" id="pd-cat" placeholder="Categoria (Ex: Grãos)" class="w-full border p-2 rounded-lg"
-                    list="cat-suggestions">
-                <datalist id="cat-suggestions"></datalist>
+
+                <div>
+                    <label class="text-xs font-bold text-gray-500 uppercase">Nome do Produto</label>
+                    <input type="text" id="pd-name" required placeholder="Ex: Arroz 5kg"
+                        class="w-full border-2 border-gray-200 p-3 rounded-xl text-lg font-bold focus:border-plena-cyan outline-none mt-1">
+                </div>
+
+                <div>
+                    <label class="text-xs font-bold text-gray-500 uppercase">Categoria</label>
+                    <input type="text" id="pd-cat" placeholder="Ex: Grãos"
+                        class="w-full border p-2 rounded-lg mt-1 outline-none focus:border-plena-cyan"
+                        list="cat-suggestions">
+                    <datalist id="cat-suggestions"></datalist>
+                </div>
 
                 <div class="grid grid-cols-2 gap-4">
                     <div>
                         <label class="text-xs font-bold text-gray-500 uppercase">Estoque Atual</label>
-                        <input type="number" id="pd-qty" required class="w-full border p-2 rounded-lg" placeholder="10">
+                        <input type="number" id="pd-qty" required
+                            class="w-full border-2 border-gray-200 p-2 rounded-lg font-bold text-center mt-1 focus:border-plena-cyan outline-none"
+                            placeholder="0">
                     </div>
                     <div>
                         <label class="text-xs font-bold text-gray-500 uppercase">Estoque Mínimo</label>
-                        <input type="number" id="pd-min" required class="w-full border p-2 rounded-lg"
-                            placeholder="Avise-me quando chegar em..." value="5">
+                        <input type="number" id="pd-min" required
+                            class="w-full border p-2 rounded-lg text-center mt-1 focus:border-plena-cyan outline-none"
+                            placeholder="5" value="5">
                     </div>
                 </div>
 
                 <div>
                     <label class="text-xs font-bold text-gray-500 uppercase">Validade (Opcional)</label>
-                    <input type="date" id="pd-exp" class="w-full border p-2 rounded-lg text-gray-700">
+                    <input type="date" id="pd-exp"
+                        class="w-full border p-2 rounded-lg text-gray-700 mt-1 focus:border-plena-cyan outline-none">
                 </div>
 
-                <div class="flex gap-2 pt-2">
+                <div class="flex gap-2 pt-4">
                     <button type="button" onclick="deleteProduct()" id="btn-delete-prod"
-                        class="hidden px-4 py-3 text-red-500 hover:bg-red-50 rounded-xl font-bold border border-red-200">Excluir</button>
+                        class="hidden px-4 py-3 text-red-500 hover:bg-red-50 rounded-xl font-bold border border-red-200 transition-colors">
+                        Excluir
+                    </button>
                     <button type="submit"
-                        class="flex-1 bg-plena-cyan text-white py-3 rounded-xl font-bold hover:bg-plena-dark">Salvar
-                        Item</button>
+                        class="flex-1 bg-plena-cyan text-white py-3 rounded-xl font-bold hover:bg-plena-dark shadow-lg shadow-cyan-200 transition-all">
+                        Salvar Item
+                    </button>
                 </div>
             </form>
         </div>
     </div>
 
-    <!-- MOVEMENT MODAL -->
+    <!-- Movement Modal -->
     <div id="moveModal" class="fixed inset-0 modal-backdrop hidden z-50 flex items-center justify-center p-4">
-        <div class="bg-white rounded-2xl shadow-2xl w-full max-w-sm p-6">
-            <h3 class="text-lg font-bold text-gray-800 mb-1" id="mv-title">Registrar Movimentação</h3>
-            <p class="text-sm text-gray-500 mb-4" id="mv-subtitle">Produto...</p>
-            <form onsubmit="submitMove(event)" class="space-y-4">
+        <div class="bg-white rounded-2xl shadow-2xl w-full max-w-sm p-6 transform transition-all">
+            <div class="text-center mb-6">
+                <h3 class="text-lg font-bold text-gray-800 mb-1" id="mv-title">Registrar Movimentação</h3>
+                <p class="text-sm text-gray-500" id="mv-subtitle">Produto...</p>
+            </div>
+
+            <form onsubmit="submitMove(event)" class="space-y-6">
                 <input type="hidden" id="mv-pid">
-                <div class="flex gap-2">
-                    <label
-                        class="flex-1 cursor-pointer bg-green-50 border border-green-200 p-2 rounded text-center"><input
-                            type="radio" name="mv-type" value="in" class="hidden"> <span
-                            class="text-green-700 font-bold">Entrada (+)</span></label>
-                    <label class="flex-1 cursor-pointer bg-red-50 border border-red-200 p-2 rounded text-center"><input
-                            type="radio" name="mv-type" value="out" class="hidden" checked> <span
-                            class="text-red-700 font-bold">Saída (-)</span></label>
+
+                <div class="flex gap-3">
+                    <label class="flex-1 cursor-pointer">
+                        <input type="radio" name="mv-type" value="in" class="peer hidden">
+                        <div
+                            class="p-3 rounded-xl border-2 border-gray-200 text-center peer-checked:border-green-500 peer-checked:bg-green-50 peer-checked:text-green-700 transition-all">
+                            <span class="block font-bold">Entrada</span>
+                            <span class="text-xs text-green-600">(Compra/Devolução)</span>
+                        </div>
+                    </label>
+                    <label class="flex-1 cursor-pointer">
+                        <input type="radio" name="mv-type" value="out" class="peer hidden" checked>
+                        <div
+                            class="p-3 rounded-xl border-2 border-gray-200 text-center peer-checked:border-red-500 peer-checked:bg-red-50 peer-checked:text-red-700 transition-all">
+                            <span class="block font-bold">Saída</span>
+                            <span class="text-xs text-red-600">(Venda/Perda)</span>
+                        </div>
+                    </label>
                 </div>
-                <input type="number" id="mv-qty" required placeholder="Quantidade"
-                    class="w-full border p-2 rounded-lg text-center text-lg font-bold">
-                <button type="submit" class="w-full bg-gray-900 text-white py-3 rounded-lg font-bold">Atualizar
-                    Estoque</button>
+
+                <div>
+                    <label class="text-xs font-bold text-gray-500 uppercase text-center block mb-2">Quantidade</label>
+                    <input type="number" id="mv-qty" required placeholder="0" min="1"
+                        class="w-full border-2 border-gray-200 p-4 rounded-xl text-center text-3xl font-bold focus:border-plena-cyan outline-none">
+                </div>
+
+                <div class="flex gap-2">
+                    <button type="button" onclick="closeModal('moveModal')"
+                        class="flex-1 py-3 bg-gray-100 text-gray-600 rounded-xl font-bold hover:bg-gray-200">Cancelar</button>
+                    <button type="submit"
+                        class="flex-[2] bg-gray-800 text-white py-3 rounded-xl font-bold hover:bg-black shadow-lg">Confirmar</button>
+                </div>
             </form>
         </div>
     </div>
 
+    <!-- JavaScript -->
     <script>
+        // GLOBAL STATE
         const DB_KEY = 'plena_estoque_v1';
         let db = JSON.parse(localStorage.getItem(DB_KEY)) || { products: [], movements: [] };
 
-        const save = () => localStorage.setItem(DB_KEY, JSON.stringify(db));
-        const fmtDate = (d) => { if (!d) return '--/--/-'; const p = d.split('-'); return `${p[2]}/${p[1]}`; }; // Simple format
+        // UTILS
+        const save = () => { localStorage.setItem(DB_KEY, JSON.stringify(db)); updateDataStatus(); };
+        const fmtDate = (d) => { if (!d) return '--/--/-'; const p = d.split('-'); return `${p[2]}/${p[1]}/${p[0]}`; };
         const getID = () => Date.now().toString(36) + Math.random().toString(36).substr(2);
 
+        // INIT
         function init() {
             lucide.createIcons();
             router('dashboard');
             populateCats();
+
+            // Auto layout checks
+            if (window.innerWidth < 1024) document.getElementById('sidebar').classList.remove('open');
         }
 
         function router(view) {
+            // Hide all views
             document.querySelectorAll('.view-section').forEach(el => el.classList.add('hide'));
-            document.querySelectorAll('.nav-item').forEach(el => { el.classList.remove('bg-white/10', 'text-white'); el.classList.add('text-gray-400'); });
 
-            document.getElementById(`view-${view}`).classList.remove('hide');
-            document.getElementById(`nav-${view}`).classList.add('bg-white/10', 'text-white');
-            document.getElementById(`nav-${view}`).classList.remove('text-gray-400');
+            // Deactivate nav items
+            document.querySelectorAll('.nav-item').forEach(el => {
+                el.classList.remove('bg-white/10', 'text-white');
+                el.classList.add('text-gray-400');
+            });
 
-            const titles = { dashboard: 'Visão Geral', inventory: 'Meu Estoque', shopping: 'Lista de Compras', history: 'Histórico', settings: 'Configurações', about: 'Sobre' };
+            // Show selected view
+            const viewEl = document.getElementById(`view-${view}`);
+            if (viewEl) {
+                viewEl.classList.remove('hide');
+                viewEl.classList.add('fade-in');
+            }
+
+            // Activate nav item
+            const navEl = document.getElementById(`nav-${view}`);
+            if (navEl) {
+                navEl.classList.add('bg-white/10', 'text-white');
+                navEl.classList.remove('text-gray-400');
+            }
+
+            // Update Title
+            const titles = {
+                dashboard: 'Visão Geral',
+                inventory: 'Meu Estoque',
+                shopping: 'Lista de Compras',
+                history: 'Movimentações',
+                settings: 'Configurações',
+                instructions: 'Manual de Uso',
+                about: 'Sobre'
+            };
             document.getElementById('page-title').innerText = titles[view] || 'Plena Estoque';
 
-            document.getElementById('header-actions').innerHTML = '';
+            // Mobile Sidebar Close
+            if (window.innerWidth < 1024) {
+                document.getElementById('sidebar').classList.remove('open');
+                document.getElementById('overlay').classList.add('hidden');
+                document.body.style.overflow = '';
+            }
 
-            if (view === 'dashboard') {
-                document.getElementById('header-actions').innerHTML = `<button onclick="openProductModal()" class="flex items-center px-3 py-2 bg-plena-cyan text-white rounded-lg text-sm font-bold hover:bg-plena-dark transition-all shadow-lg active:scale-95"><i data-lucide="plus" class="w-5 h-5 sm:mr-2"></i> <span class="hidden sm:inline">Novo Item</span> <span class="sm:hidden">Novo</span></button>`;
-                renderDashboard();
-            }
-            if (view === 'inventory') {
-                document.getElementById('header-actions').innerHTML = `<button onclick="openProductModal()" class="flex items-center px-3 py-2 bg-plena-cyan text-white rounded-lg text-sm font-bold hover:bg-plena-dark transition-all shadow-lg active:scale-95"><i data-lucide="plus" class="w-5 h-5 sm:mr-2"></i> <span class="hidden sm:inline">Novo Item</span> <span class="sm:hidden">Novo</span></button>`;
-                renderInventory();
-            }
+            // Render Logic
+            if (view === 'dashboard') renderDashboard();
+            if (view === 'inventory') renderInventory();
             if (view === 'shopping') renderShopping();
             if (view === 'history') renderHistory();
-
-            if (window.innerWidth < 1024) toggleSidebar();
         }
 
-        function toggleSidebar() { document.getElementById('sidebar').classList.toggle('open'); document.getElementById('overlay').classList.toggle('hidden'); }
+        function toggleSidebar() {
+            const sidebar = document.getElementById('sidebar');
+            const overlay = document.getElementById('overlay');
+            sidebar.classList.toggle('open');
+            overlay.classList.toggle('hidden');
+            document.body.style.overflow = sidebar.classList.contains('open') ? 'hidden' : '';
+        }
+
         function closeModal(id) { document.getElementById(id).classList.add('hidden'); }
 
         function populateCats() {
-            const cats = [...new Set(db.products.map(p => p.cat).filter(Boolean))];
+            const cats = [...new Set(db.products.map(p => p.cat).filter(Boolean))].sort();
             document.getElementById('cat-suggestions').innerHTML = cats.map(c => `<option value="${c}">`).join('');
         }
 
+        // MODALS
         function openProductModal(id = null) {
             document.querySelector('#productModal form').reset();
             document.getElementById('btn-delete-prod').classList.add('hidden');
@@ -615,6 +828,7 @@
                 document.getElementById('prod-modal-title').innerText = 'Novo Item';
             }
             document.getElementById('productModal').classList.remove('hidden');
+            document.getElementById('pd-name').focus();
         }
 
         function openMoveModal(pid) {
@@ -624,15 +838,20 @@
             document.getElementById('mv-pid').value = pid;
             document.getElementById('mv-subtitle').innerText = `${p.name} (Atual: ${p.qty})`;
             document.getElementById('moveModal').classList.remove('hidden');
+            document.getElementById('mv-qty').focus();
         }
 
+        // ACTIONS
         function submitProduct(e) {
             e.preventDefault();
             const id = document.getElementById('pd-id').value;
+            const name = document.getElementById('pd-name').value.trim();
+            if (!name) return alert('Nome do produto é obrigatório');
+
             const data = {
                 id: id || getID(),
-                name: document.getElementById('pd-name').value,
-                cat: document.getElementById('pd-cat').value,
+                name: name,
+                cat: document.getElementById('pd-cat').value.trim(),
                 qty: parseFloat(document.getElementById('pd-qty').value) || 0,
                 min: parseFloat(document.getElementById('pd-min').value) || 0,
                 exp: document.getElementById('pd-exp').value || null
@@ -646,18 +865,21 @@
             }
             save(); closeModal('productModal'); populateCats();
 
-            // Intelligence: Decide where to go back
+            // Refresh current view
             if (!document.getElementById('view-inventory').classList.contains('hide')) renderInventory();
             else renderDashboard();
+
+            showNotification('Produto salvo com sucesso!', 'success');
         }
 
         function deleteProduct() {
             const id = document.getElementById('pd-id').value;
-            if (confirm('Excluir item do estoque?')) {
+            if (confirm('Tem certeza que deseja excluir este item do estoque?')) {
                 db.products = db.products.filter(x => x.id !== id);
                 save(); closeModal('productModal');
                 if (!document.getElementById('view-inventory').classList.contains('hide')) renderInventory();
                 else renderDashboard();
+                showNotification('Item excluído.', 'success');
             }
         }
 
@@ -665,7 +887,9 @@
             e.preventDefault();
             const pid = document.getElementById('mv-pid').value;
             const type = document.querySelector('input[name="mv-type"]:checked').value;
-            const qty = parseFloat(document.getElementById('mv-qty').value) || 0;
+            const qty = parseFloat(document.getElementById('mv-qty').value);
+
+            if (!qty || qty <= 0) return alert('Quantidade inválida');
 
             const idx = db.products.findIndex(x => x.id === pid);
             if (idx === -1) return;
@@ -685,79 +909,109 @@
             save(); closeModal('moveModal');
             if (!document.getElementById('view-inventory').classList.contains('hide')) renderInventory();
             else renderDashboard();
+
+            showNotification('Estoque atualizado!', 'success');
         }
 
+        // RENDERS
         function renderDashboard() {
-            // Stats
+            // Stats logic
             const lowStock = db.products.filter(p => p.qty < p.min).length;
             const today = new Date();
             const warningDate = new Date(); warningDate.setDate(today.getDate() + 30);
 
-            const expiring = db.products.filter(p => {
+            const expiringArr = db.products.filter(p => {
                 if (!p.exp) return false;
                 const d = new Date(p.exp);
                 return d >= today && d <= warningDate;
             });
-            const expired = db.products.filter(p => p.exp && new Date(p.exp) < today);
+            const expiredArr = db.products.filter(p => p.exp && new Date(p.exp) < today);
 
             document.getElementById('dash-total-items').innerText = db.products.length;
             document.getElementById('dash-low-stock').innerText = lowStock;
-            document.getElementById('dash-expiring').innerText = expiring.length + expired.length;
+            document.getElementById('dash-expiring').innerText = expiringArr.length + expiredArr.length;
 
-            // Render Expiring List
-            const expiryList = [...expired, ...expiring].sort((a, b) => new Date(a.exp) - new Date(b.exp)).slice(0, 5);
+            // Render Lists
+            const combinedExp = [...expiredArr, ...expiringArr].sort((a, b) => new Date(a.exp) - new Date(b.exp)).slice(0, 5);
 
-            document.getElementById('expiring-list').innerHTML = expiryList.map(p => {
-                const isEp = new Date(p.exp) < today;
-                return `
-                <div class="flex justify-between items-center bg-gray-50 p-3 rounded-lg border ${isEp ? 'border-red-200 bg-red-50' : 'border-yellow-200 bg-yellow-50'}">
-                    <div>
-                        <h4 class="font-bold text-gray-800">${p.name}</h4>
-                        <p class="text-xs text-gray-600">Validade: ${fmtDate(p.exp)}</p>
-                    </div>
-                    <span class="text-xs font-bold uppercase rounded px-2 py-1 ${isEp ? 'bg-red-200 text-red-800' : 'bg-yellow-200 text-yellow-800'}">${isEp ? 'VENCIDO' : 'VENCE LOGO'}</span>
-                </div>`;
-            }).join('') || '<p class="text-gray-400 text-sm">Nenhum item em alerta de validade.</p>';
+            const expContainer = document.getElementById('expiring-list');
+            if (combinedExp.length === 0) {
+                expContainer.innerHTML = '<p class="text-gray-400 text-sm text-center">Nenhum alerta de validade.</p>';
+            } else {
+                expContainer.innerHTML = combinedExp.map(p => {
+                    const isEp = new Date(p.exp) < today;
+                    return `
+                    <div class="flex justify-between items-center bg-gray-50 p-3 rounded-lg border ${isEp ? 'border-red-200 bg-red-50' : 'border-yellow-200 bg-yellow-50'}">
+                        <div>
+                            <h4 class="font-bold text-gray-800 text-sm">${p.name}</h4>
+                            <p class="text-xs text-gray-600">Validade: ${fmtDate(p.exp)}</p>
+                        </div>
+                        <span class="text-[10px] font-bold uppercase rounded px-2 py-1 ${isEp ? 'bg-red-200 text-red-800' : 'bg-yellow-200 text-yellow-800'}">
+                            ${isEp ? 'VENCIDO' : 'VENCE LOGO'}
+                        </span>
+                    </div>`;
+                }).join('');
+            }
 
-            // Recent History
             const hist = db.movements.slice(-5).reverse();
-            document.getElementById('recent-history-list').innerHTML = hist.map(m => `
-                 <div class="flex justify-between items-center bg-white border-b py-2">
-                    <span class="text-sm font-medium text-gray-800">${m.prodName}</span>
-                    <span class="text-sm font-bold ${m.type === 'in' ? 'text-green-600' : 'text-red-600'}">${m.type === 'in' ? '+' : '-'} ${m.qty}</span>
-                </div>
-            `).join('') || '<p class="text-gray-400 text-sm">Sem movimentações recentes.</p>';
+            const histContainer = document.getElementById('recent-history-list');
+            if (hist.length === 0) {
+                histContainer.innerHTML = '<p class="text-gray-400 text-sm text-center">Nenhuma movimentação recente.</p>';
+            } else {
+                histContainer.innerHTML = hist.map(m => `
+                     <div class="flex justify-between items-center bg-gray-50 p-3 rounded-lg border border-gray-100">
+                        <span class="text-sm font-medium text-gray-800">${m.prodName}</span>
+                        <span class="text-sm font-bold ${m.type === 'in' ? 'text-green-600' : 'text-red-600'}">
+                            ${m.type === 'in' ? '+' : '-'} ${m.qty}
+                        </span>
+                    </div>
+                `).join('');
+            }
 
             lucide.createIcons();
         }
 
         function renderInventory() {
             const term = document.getElementById('inv-search').value.toLowerCase();
-            const list = db.products.filter(p => p.name.toLowerCase().includes(term));
+            const list = db.products.filter(p => p.name.toLowerCase().includes(term) || (p.cat && p.cat.toLowerCase().includes(term)));
 
-            document.getElementById('inventory-list').innerHTML = list.map(p => {
+            const container = document.getElementById('inventory-list');
+            if (list.length === 0) {
+                container.innerHTML = '<div class="col-span-full text-center text-gray-400 py-8">Nenhum item encontrado.</div>';
+                return;
+            }
+
+            container.innerHTML = list.map(p => {
                 const isLow = p.qty < p.min;
+                const isExpired = p.exp && new Date(p.exp) < new Date();
+
                 return `
-                <div class="bg-white p-5 rounded-xl border ${isLow ? 'border-red-300 shadow-red-100' : 'border-gray-100'} shadow-sm relative group transition-all hover:border-plena-cyan">
-                    <div class="flex justify-between items-start mb-2">
-                        <span class="text-xs font-bold uppercase text-gray-400 bg-gray-100 px-2 py-1 rounded">${p.cat || 'Geral'}</span>
-                         <button onclick="openProductModal('${p.id}')" class="text-gray-400 hover:text-plena-cyan"><i data-lucide="edit-2" class="w-4 h-4"></i></button>
+                <div class="bg-white p-5 rounded-xl border ${isLow ? 'border-red-300 shadow-lg shadow-red-50' : 'border-gray-100'} shadow-sm relative group transition-all hover:border-plena-cyan hover:-translate-y-1">
+                    <div class="flex justify-between items-start mb-3">
+                        <span class="text-[10px] font-bold uppercase text-gray-500 bg-gray-100 px-2 py-1 rounded tracking-wide">${p.cat || 'GERAL'}</span>
+                         <button onclick="openProductModal('${p.id}')" class="text-gray-400 hover:text-plena-cyan p-1 bg-transparent hover:bg-cyan-50 rounded transition-colors"><i data-lucide="edit-2" class="w-4 h-4"></i></button>
                     </div>
-                    <h3 class="font-bold text-lg text-gray-800 leading-tight mb-4">${p.name}</h3>
                     
-                    <div class="flex justify-between items-center mb-4">
-                        <div class="text-center">
-                            <p class="text-xs text-gray-500 uppercase">Qtd Atual</p>
-                            <p class="text-2xl font-bold ${isLow ? 'text-red-500' : 'text-gray-800'}">${p.qty}</p>
+                    <h3 class="font-bold text-lg text-gray-800 leading-tight mb-4 truncate" title="${p.name}">${p.name}</h3>
+                    
+                    <div class="flex justify-between items-end mb-4 bg-gray-50 p-3 rounded-lg">
+                        <div class="text-center w-1/2 border-r border-gray-200">
+                            <p class="text-[10px] text-gray-400 uppercase font-bold">Atual</p>
+                            <p class="text-2xl font-bold ${isLow ? 'text-red-500' : 'text-gray-900'}">${p.qty}</p>
                         </div>
-                        <div class="text-center">
-                            <p class="text-xs text-gray-500 uppercase">Mínimo</p>
-                            <p class="text-lg font-bold text-gray-400">${p.min}</p>
+                        <div class="text-center w-1/2">
+                            <p class="text-[10px] text-gray-400 uppercase font-bold">Mínimo</p>
+                            <p class="text-xl font-bold text-gray-400">${p.min}</p>
                         </div>
                     </div>
 
-                    <button onclick="openMoveModal('${p.id}')" class="w-full bg-gray-50 hover:bg-gray-100 text-gray-700 font-bold py-2 rounded-lg border border-gray-200 text-sm">Movimentar (+/-)</button>
-                    ${isLow ? '<span class="absolute top-2 right-10 flex h-3 w-3"><span class="animate-ping absolute inline-flex h-full w-full rounded-full bg-red-400 opacity-75"></span><span class="relative inline-flex rounded-full h-3 w-3 bg-red-500"></span></span>' : ''}
+                    ${isExpired ? '<div class="mb-3 text-center"><span class="text-xs bg-red-100 text-red-700 px-2 py-1 rounded font-bold">Item Vencido!</span></div>' : ''}
+
+                    <button onclick="openMoveModal('${p.id}')" class="w-full bg-white hover:bg-gray-50 text-gray-700 font-bold py-2.5 rounded-lg border border-gray-200 text-sm flex items-center justify-center gap-2 transition-colors">
+                        <i data-lucide="arrow-right-left" class="w-4 h-4 text-gray-400"></i> Movimentar
+                    </button>
+                    
+                    ${isLow ? '<span class="absolute top-3 right-12 flex h-3 w-3"><span class="animate-ping absolute inline-flex h-full w-full rounded-full bg-red-400 opacity-75"></span><span class="relative inline-flex rounded-full h-3 w-3 bg-red-500"></span></span>' : ''}
                 </div>
             `;
             }).join('');
@@ -766,25 +1020,26 @@
 
         function renderShopping() {
             const toBuy = db.products.filter(p => p.qty < p.min);
+            const container = document.getElementById('shopping-list-container');
 
             if (toBuy.length === 0) {
-                document.getElementById('shopping-list-container').innerHTML = '<div class="p-8 text-center text-gray-500"><i data-lucide="check-circle" class="w-12 h-12 mx-auto mb-4 text-green-500"></i><p>Tudo certo! Estoque abastecido.</p></div>';
+                container.innerHTML = '<div class="p-12 text-center text-gray-500"><div class="w-16 h-16 bg-green-100 rounded-full flex items-center justify-center mx-auto mb-4"><i data-lucide="check-circle" class="w-8 h-8 text-green-500"></i></div><p class="font-medium">Tudo certo! Seu estoque está abastecido.</p></div>';
             } else {
-                document.getElementById('shopping-list-container').innerHTML = `
+                container.innerHTML = `
                     <table class="w-full text-left">
                         <thead class="bg-gray-50 text-gray-500 text-xs uppercase">
                             <tr>
-                                <th class="px-6 py-3">Produto</th>
-                                <th class="px-6 py-3">Estoque Atual</th>
-                                <th class="px-6 py-3 text-right">Comprar (+/-)</th>
+                                <th class="px-6 py-4">Produto</th>
+                                <th class="px-6 py-4">Estoque</th>
+                                <th class="px-6 py-4 text-right">Comprar</th>
                             </tr>
                         </thead>
                         <tbody class="divide-y divide-gray-100 text-sm">
                             ${toBuy.map(p => `
-                                <tr>
+                                <tr class="hover:bg-gray-50">
                                     <td class="px-6 py-4 font-bold text-gray-800">${p.name}</td>
-                                    <td class="px-6 py-4 text-red-500 font-bold">${p.qty} / ${p.min}</td>
-                                    <td class="px-6 py-4 text-right">${p.min - p.qty} un</td>
+                                    <td class="px-6 py-4 text-red-500 font-bold">${p.qty} / <span class="text-gray-400">${p.min}</span></td>
+                                    <td class="px-6 py-4 text-right font-bold text-gray-900">+${p.min - p.qty} un</td>
                                 </tr>
                             `).join('')}
                         </tbody>
@@ -794,37 +1049,95 @@
             lucide.createIcons();
         }
 
+        function renderHistory() {
+            const hist = [...db.movements].sort((a, b) => new Date(b.date) - new Date(a.date));
+            const container = document.getElementById('full-history-list');
+
+            if (hist.length === 0) {
+                container.innerHTML = '<tr><td colspan="4" class="px-6 py-8 text-center text-gray-400">Nenhum registro encontrado.</td></tr>';
+                return;
+            }
+
+            container.innerHTML = hist.map(m => `
+                <tr class="hover:bg-gray-50 border-b border-gray-100">
+                    <td class="px-6 py-4 text-gray-500">${new Date(m.date).toLocaleString('pt-BR')}</td>
+                    <td class="px-6 py-4 font-medium text-gray-800">${m.prodName}</td>
+                    <td class="px-6 py-4">
+                        <span class="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium ${m.type === 'in' ? 'bg-green-100 text-green-800' : 'bg-red-100 text-red-800'}">
+                            ${m.type === 'in' ? 'Entrada' : 'Saída'}
+                        </span>
+                    </td>
+                    <td class="px-6 py-4 text-right font-bold ${m.type === 'in' ? 'text-green-600' : 'text-red-600'}">
+                         ${m.type === 'in' ? '+' : '-'} ${m.qty}
+                    </td>
+                </tr>
+            `).join('');
+            lucide.createIcons();
+        }
+
         function copyShoppingList() {
             const toBuy = db.products.filter(p => p.qty < p.min);
-            if (!toBuy.length) return alert('Lista vazia!');
+            if (!toBuy.length) return showNotification('Lista vazia!', 'warning');
 
-            const text = "*LISTA DE COMPRAS - PLENA ESTOQUE* 🛒\n\n" + toBuy.map(p => `- [ ] ${p.name} (Faltam ${p.min - p.qty})`).join('\n');
-            navigator.clipboard.writeText(text).then(() => alert('Lista copiada para a área de transferência!'));
+            const text = "*🛒 LISTA DE COMPRAS - PLENA ESTOQUE*\n\n" +
+                toBuy.map(p => `• ${p.name}: Comprar ${p.min - p.qty} (Atual: ${p.qty})`).join('\n') +
+                "\n\n_Gerado em " + new Date().toLocaleString() + "_";
+
+            navigator.clipboard.writeText(text).then(() => showNotification('Copiado para área de transferência!', 'success'));
         }
 
-        function renderHistory() {
-            const list = db.movements.slice().reverse();
-            document.getElementById('full-history-list').innerHTML = list.map(m => `
-                <tr>
-                    <td class="px-6 py-4 text-gray-500">${new Date(m.date).toLocaleDateString('pt-BR')} ${new Date(m.date).toLocaleTimeString('pt-BR', { hour: '2-digit', minute: '2-digit' })}</td>
-                    <td class="px-6 py-4 font-bold">${m.prodName}</td>
-                    <td class="px-6 py-4"><span class="px-2 py-1 rounded text-[10px] font-bold uppercase ${m.type === 'in' ? 'bg-green-100 text-green-700' : 'bg-red-100 text-red-700'}">${m.type === 'in' ? 'Entrada' : 'Saída'}</span></td>
-                    <td class="px-6 py-4 text-right font-bold">${m.qty}</td>
-                </tr>
-             `).join('');
+        function downloadBackup() {
+            const dataStr = "data:text/json;charset=utf-8," + encodeURIComponent(JSON.stringify(db));
+            const dlAnchorElem = document.createElement('a');
+            dlAnchorElem.setAttribute("href", dataStr);
+            dlAnchorElem.setAttribute("download", "backup_estoque_" + new Date().toISOString().slice(0, 10) + ".json");
+            dlAnchorElem.click();
+            showNotification('Backup baixado com sucesso!', 'success');
         }
 
-        function downloadBackup() { const a = document.createElement('a'); a.href = "data:text/json;charset=utf-8," + encodeURIComponent(JSON.stringify(db)); a.download = `plena_estoque.json`; a.click(); }
-        function restoreBackup(input) { const reader = new FileReader(); reader.onload = (e) => { try { db = JSON.parse(e.target.result); save(); location.reload(); } catch (e) { alert('Erro no arquivo'); } }; reader.readAsText(input.files[0]); }
-        function factoryReset() { if (confirm('Apagar tudo?')) { localStorage.removeItem(DB_KEY); location.reload(); } }
+        function restoreBackup(input) {
+            const file = input.files[0];
+            if (!file) return;
+            const reader = new FileReader();
+            reader.onload = function (e) {
+                try {
+                    const data = JSON.parse(e.target.result);
+                    if (data.products) {
+                        db = data;
+                        save();
+                        location.reload();
+                    }
+                } catch (e) { alert('Erro no arquivo de backup'); }
+            };
+            reader.readAsText(file);
+        }
 
-        // SECURITY LOCK
-        setInterval(() => {
-            const footer = document.querySelector('.sidebar .border-t');
-            if (footer && !footer.innerText.includes('Plena')) { document.body.innerHTML = '<div style="background:#111;color:red;height:100vh;display:flex;align-items:center;justify-content:center;"><h1>VIOLAÇÃO DE SEGURANÇA</h1></div>'; throw new Error("Piracy"); }
-        }, 8000);
+        function factoryReset() {
+            if (confirm('Tem certeza? Isso apagará TODO o estoque.')) {
+                localStorage.removeItem(DB_KEY);
+                location.reload();
+            }
+        }
 
-        init();
+        function updateDataStatus() { console.log('Dados salvos.'); }
+
+        function showNotification(message, type = 'info') {
+            const notification = document.createElement('div');
+            notification.className = `fixed top-4 right-4 z-50 px-4 py-3 rounded-lg shadow-lg transform transition-all duration-300 translate-x-full ${type === 'success' ? 'bg-green-500 text-white' :
+                type === 'warning' ? 'bg-yellow-500 text-white' :
+                    'bg-blue-500 text-white'}`;
+            notification.innerHTML = `<div class="flex items-center"><i data-lucide="${type === 'success' ? 'check-circle' : 'info'}" class="w-5 h-5 mr-2"></i><span>${message}</span></div>`;
+            document.body.appendChild(notification);
+            lucide.createIcons();
+
+            setTimeout(() => notification.classList.remove('translate-x-full'), 100);
+            setTimeout(() => {
+                notification.classList.add('translate-x-full');
+                setTimeout(() => notification.remove(), 300);
+            }, 3000);
+        }
+
+        document.addEventListener('DOMContentLoaded', init);
     </script>
 </body>
 

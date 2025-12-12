@@ -1,0 +1,826 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>Plena Obras - Gestão de Construção</title>
+
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script>
+        tailwind.config = {
+            theme: {
+                extend: {
+                    colors: {
+                        plena: { orange: '#F97316', dark: '#C2410C', black: '#1a1a1a' }, // Orange Theme for Construction
+                        success: '#10B981', danger: '#EF4444', warning: '#F59E0B'
+                    }
+                }
+            }
+        }
+    </script>
+    <script src="https://unpkg.com/lucide@latest"></script>
+
+    <style>
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+            background-color: #FFF7ED;
+            -webkit-tap-highlight-color: transparent;
+        }
+
+        .hide {
+            display: none !important;
+        }
+
+        .fade-in {
+            animation: fadeIn 0.3s ease-out;
+        }
+
+        @keyframes fadeIn {
+            from {
+                opacity: 0;
+                transform: translateY(5px);
+            }
+
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+
+        .modal-backdrop {
+            background-color: rgba(0, 0, 0, 0.6);
+            backdrop-filter: blur(2px);
+        }
+
+        @media (max-width: 1024px) {
+            .sidebar {
+                transform: translateX(-100%);
+                position: fixed;
+                z-index: 50;
+                height: 100vh;
+                width: 280px;
+            }
+
+            .sidebar.open {
+                transform: translateX(0);
+            }
+        }
+
+        @media (min-width: 1025px) {
+            .sidebar {
+                width: 280px;
+                position: fixed;
+                height: 100vh;
+            }
+
+            .main-content {
+                margin-left: 280px;
+            }
+        }
+    </style>
+</head>
+
+<body class="text-gray-800 antialiased">
+
+    <div id="overlay" class="fixed inset-0 bg-black/50 hidden z-40 transition-opacity" onclick="toggleSidebar()"></div>
+
+    <aside id="sidebar"
+        class="sidebar bg-plena-black text-white transition-transform duration-300 flex flex-col shadow-2xl">
+        <div class="h-20 flex items-center px-6 bg-plena-orange">
+            <i data-lucide="hard-hat" class="w-8 h-8 mr-3"></i>
+            <div>
+                <h1 class="text-xl font-bold tracking-tight">PLENA</h1>
+                <p class="text-xs text-white/90 font-medium">Gestão de Obras</p>
+            </div>
+        </div>
+
+        <nav class="p-4 space-y-2 flex-1 overflow-y-auto">
+            <button onclick="router('dashboard')"
+                class="nav-item w-full flex items-center px-4 py-3 rounded-xl hover:bg-white/10 transition-all group active-nav"
+                id="nav-dashboard">
+                <i data-lucide="layout-dashboard" class="w-5 h-5 mr-3 text-gray-400 group-hover:text-white"></i> Visão
+                Geral
+            </button>
+            <button onclick="router('projects')"
+                class="nav-item w-full flex items-center px-4 py-3 rounded-xl hover:bg-white/10 transition-all group"
+                id="nav-projects">
+                <i data-lucide="hammer" class="w-5 h-5 mr-3 text-gray-400 group-hover:text-white"></i> Minhas Obras
+            </button>
+            <button onclick="router('suppliers')"
+                class="nav-item w-full flex items-center px-4 py-3 rounded-xl hover:bg-white/10 transition-all group"
+                id="nav-suppliers">
+                <i data-lucide="truck" class="w-5 h-5 mr-3 text-gray-400 group-hover:text-white"></i> Fornecedores
+            </button>
+            <button onclick="router('finance')"
+                class="nav-item w-full flex items-center px-4 py-3 rounded-xl hover:bg-white/10 transition-all group"
+                id="nav-finance">
+                <i data-lucide="wallet" class="w-5 h-5 mr-3 text-gray-400 group-hover:text-white"></i> Caixa Geral
+            </button>
+            <button onclick="router('settings')"
+                class="nav-item w-full flex items-center px-4 py-3 rounded-xl hover:bg-white/10 transition-all group"
+                id="nav-settings">
+                <i data-lucide="settings" class="w-5 h-5 mr-3 text-gray-400 group-hover:text-white"></i> Configurações
+            </button>
+            <button onclick="router('instructions')"
+                class="nav-item w-full flex items-center px-4 py-3 rounded-xl hover:bg-white/10 transition-all group"
+                id="nav-instructions">
+                <i data-lucide="book-open" class="w-5 h-5 mr-3 text-gray-400 group-hover:text-white"></i> Manual de Uso
+            </button>
+            <button onclick="router('about')"
+                class="nav-item w-full flex items-center px-4 py-3 rounded-xl hover:bg-white/10 transition-all group"
+                id="nav-about">
+                <i data-lucide="info" class="w-5 h-5 mr-3 text-gray-400 group-hover:text-white"></i> Saiba Mais
+            </button>
+        </nav>
+
+        <div class="p-6 border-t border-white/10 text-center">
+            <p class="text-xs text-gray-500">Todos os Direitos Reservados &copy; 2025</p>
+            <a href="https://www.plenaaplicativos.com.br" target="_blank"
+                class="text-[10px] text-gray-600 hover:text-plena-orange transition-colors mt-1 block decoration-0">Plena
+                Apps</a>
+        </div>
+    </aside>
+
+    <main class="main-content min-h-screen flex flex-col">
+        <header
+            class="bg-white h-20 flex items-center justify-between px-4 lg:px-8 sticky top-0 z-30 shadow-sm border-b border-gray-100">
+            <div class="flex items-center gap-4">
+                <button onclick="toggleSidebar()" class="lg:hidden p-2 hover:bg-gray-100 rounded-lg text-gray-600"><i
+                        data-lucide="menu" class="w-6 h-6"></i></button>
+                <div class="flex flex-col">
+                    <h2 id="page-title" class="text-xl font-bold text-gray-800">Dashboard</h2>
+                    <p id="page-subtitle" class="text-xs text-gray-500 hidden"></p>
+                </div>
+            </div>
+            <div class="flex items-center gap-2">
+                <div id="header-actions">
+                    <button onclick="openProjectModal()"
+                        class="flex items-center px-3 py-2 bg-plena-orange text-white rounded-lg text-sm font-bold hover:bg-plena-dark transition-all shadow-lg active:scale-95">
+                        <i data-lucide="plus" class="w-5 h-5 sm:mr-2"></i> <span class="hidden sm:inline">Nova
+                            Obra</span> <span class="sm:hidden">Nova</span>
+                    </button>
+                </div>
+            </div>
+        </header>
+
+        <div class="p-4 lg:p-8 flex-1 overflow-y-auto">
+            <!-- DASHBOARD -->
+            <section id="view-dashboard" class="view-section fade-in">
+                <div class="grid grid-cols-1 md:grid-cols-3 gap-6 mb-8">
+                    <div class="bg-white p-6 rounded-2xl shadow-sm border border-gray-100 relative overflow-hidden">
+                        <div class="absolute right-0 top-0 h-full w-1.5 bg-plena-orange"></div>
+                        <p class="text-xs font-bold text-gray-400 uppercase tracking-wider mb-1">Obras Ativas</p>
+                        <h3 id="dash-active-projects" class="text-3xl font-bold text-gray-800">0</h3>
+                    </div>
+                    <div class="bg-white p-6 rounded-2xl shadow-sm border border-gray-100 relative overflow-hidden">
+                        <div class="absolute right-0 top-0 h-full w-1.5 bg-green-500"></div>
+                        <p class="text-xs font-bold text-gray-400 uppercase tracking-wider mb-1">Recebido (Geral)</p>
+                        <h3 id="dash-total-received" class="text-3xl font-bold text-green-600">R$ 0,00</h3>
+                    </div>
+                    <div class="bg-white p-6 rounded-2xl shadow-sm border border-gray-100 relative overflow-hidden">
+                        <div class="absolute right-0 top-0 h-full w-1.5 bg-red-400"></div>
+                        <p class="text-xs font-bold text-gray-400 uppercase tracking-wider mb-1">Gasto (Geral)</p>
+                        <h3 id="dash-total-spent" class="text-3xl font-bold text-red-500">R$ 0,00</h3>
+                    </div>
+                </div>
+
+                <h3 class="font-bold text-gray-800 mb-4">Obras em Andamento</h3>
+                <div id="projects-dashboard-list" class="space-y-4"></div>
+            </section>
+
+            <!-- PROJECTS LIST -->
+            <section id="view-projects" class="view-section hide fade-in">
+                <div id="projects-list-full" class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6"></div>
+            </section>
+
+            <!-- PROJECT DETAIL (Drill-down) -->
+            <section id="view-project-detail" class="view-section hide fade-in">
+                <div class="flex items-center gap-2 mb-6">
+                    <button onclick="router('projects')" class="p-2 hover:bg-gray-100 rounded-full"><i
+                            data-lucide="arrow-left" class="w-5 h-5 text-gray-500"></i></button>
+                    <div>
+                        <h2 id="pd-title" class="text-2xl font-bold text-gray-800">Nome da Obra</h2>
+                        <p id="pd-client" class="text-sm text-gray-500">Cliente: ...</p>
+                    </div>
+                    <span id="pd-status"
+                        class="ml-auto px-3 py-1 rounded-full text-xs font-bold uppercase bg-blue-100 text-blue-800">Em
+                        Andamento</span>
+                </div>
+
+                <div class="grid grid-cols-1 md:grid-cols-3 gap-6 mb-8">
+                    <div class="bg-white p-6 rounded-2xl shadow-sm border border-gray-100">
+                        <p class="text-xs font-bold text-gray-400 uppercase tracking-wider mb-1">Orçamento Total</p>
+                        <h3 id="pd-budget" class="text-2xl font-bold text-gray-800">R$ 0,00</h3>
+                    </div>
+                    <div class="bg-white p-6 rounded-2xl shadow-sm border border-gray-100">
+                        <p class="text-xs font-bold text-gray-400 uppercase tracking-wider mb-1">Gastos (Mat + Mão de
+                            Obra)</p>
+                        <h3 id="pd-spent" class="text-2xl font-bold text-red-500">R$ 0,00</h3>
+                    </div>
+                    <div class="bg-white p-6 rounded-2xl shadow-sm border border-gray-100">
+                        <p class="text-xs font-bold text-gray-400 uppercase tracking-wider mb-1">Lucro Atual (Previsto)
+                        </p>
+                        <h3 id="pd-profit" class="text-2xl font-bold text-green-600">R$ 0,00</h3>
+                    </div>
+                </div>
+
+                <div class="grid grid-cols-1 gap-6">
+                    <div class="bg-white p-6 rounded-2xl shadow-sm border border-gray-100">
+                        <div class="flex justify-between items-center mb-6">
+                            <h3 class="font-bold text-gray-800">Lançamentos da Obra</h3>
+                            <button onclick="openProjectTransModal()"
+                                class="bg-gray-800 text-white px-4 py-2 rounded-lg text-sm font-bold hover:bg-black">+
+                                Lançar Gasto/Recebimento</button>
+                        </div>
+                        <div class="overflow-x-auto">
+                            <table class="w-full text-left font-sm">
+                                <thead class="bg-gray-50 text-gray-500 text-xs uppercase">
+                                    <tr>
+                                        <th class="px-4 py-3">Data</th>
+                                        <th class="px-4 py-3">Tipo</th>
+                                        <th class="px-4 py-3">Descrição</th>
+                                        <th class="px-4 py-3 text-right">Valor</th>
+                                        <th></th>
+                                    </tr>
+                                </thead>
+                                <tbody id="pd-trans-list" class="divide-y divide-gray-100 text-sm"></tbody>
+                            </table>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="mt-8 text-center">
+                    <button onclick="finishProject()"
+                        class="text-red-500 font-bold text-sm border border-red-200 px-4 py-2 rounded hover:bg-red-50">Encerrar
+                        ou Excluir Obra</button>
+                </div>
+            </section>
+
+            <!-- SUPPLIERS -->
+            <section id="view-suppliers" class="view-section hide fade-in">
+                <div class="bg-white p-8 rounded-2xl text-center border border-gray-100">
+                    <i data-lucide="truck" class="w-12 h-12 text-gray-300 mx-auto mb-4"></i>
+                    <h3 class="text-lg font-bold text-gray-800">Agenda de Fornecedores</h3>
+                    <p class="text-gray-500 mb-4">Cadastre seus contatos de material de construção e mão de obra
+                        terceirizada.</p>
+                    <button class="bg-gray-100 text-gray-400 px-4 py-2 rounded-lg cursor-not-allowed">Em Breve</button>
+                </div>
+            </section>
+
+            <!-- FINANCEIRO GERAL -->
+            <section id="view-finance" class="view-section hide fade-in">
+                <div
+                    class="bg-white p-6 rounded-2xl shadow-sm border border-gray-100 mb-4 flex justify-between items-center">
+                    <h3 class="font-bold text-gray-800">Caixa Geral da Empresa</h3>
+                    <button onclick="openTransModal()"
+                        class="text-sm bg-gray-800 text-white px-3 py-2 rounded-lg hover:bg-black">Lançamento Avulso
+                        (Sem Obra)</button>
+                </div>
+                <div class="bg-white rounded-2xl shadow-sm border border-gray-100 overflow-hidden">
+                    <div class="overflow-x-auto">
+                        <table class="w-full text-left">
+                            <thead class="bg-gray-50 text-gray-500 text-xs uppercase">
+                                <tr>
+                                    <th class="px-6 py-3">Data</th>
+                                    <th class="px-6 py-3">Obra?</th>
+                                    <th class="px-6 py-3">Descrição</th>
+                                    <th class="px-6 py-3 text-right">Valor</th>
+                                </tr>
+                            </thead>
+                            <tbody id="trans-list" class="divide-y divide-gray-100 text-sm"></tbody>
+                        </table>
+                    </div>
+                </div>
+            </section>
+
+            <!-- SETTINGS -->
+            <section id="view-settings" class="view-section hide fade-in">
+                <div class="bg-white p-6 rounded-2xl shadow-sm border border-gray-100">
+                    <h3 class="font-bold text-gray-800 mb-4 flex items-center"><i data-lucide="shield-alert"
+                            class="w-4 h-4 mr-2"></i> Segurança de Dados</h3>
+                    <div class="bg-blue-50 border border-blue-200 p-3 rounded-lg text-sm text-blue-800 mb-4">
+                        <strong>Importante:</strong> Dados 100% locais. <strong>Faça backups!</strong>
+                    </div>
+                    <button onclick="downloadBackup()"
+                        class="w-full border border-gray-300 py-3 rounded-lg text-sm font-medium hover:bg-gray-50 mb-3 flex justify-center gap-2"><i
+                            data-lucide="download" class="w-4 h-4"></i> Baixar Backup (.json)</button>
+                    <div class="relative mb-6">
+                        <button
+                            class="w-full bg-gray-800 text-white py-3 rounded-lg text-sm font-medium flex justify-center gap-2"><i
+                                data-lucide="upload" class="w-4 h-4"></i> Restaurar Backup</button>
+                        <input type="file" onchange="restoreBackup(this)"
+                            class="absolute inset-0 opacity-0 cursor-pointer">
+                    </div>
+                    <div class="border-t pt-4">
+                        <button onclick="factoryReset()"
+                            class="text-red-500 text-sm hover:underline w-full text-center">Resetar Sistema de
+                            Fábrica</button>
+                    </div>
+                </div>
+            </section>
+
+            <!-- ABOUT -->
+            <section id="view-instructions" class="view-section hide fade-in">
+                <div class="max-w-3xl mx-auto space-y-6">
+                    <div class="bg-white p-8 rounded-2xl shadow-sm border border-gray-100">
+                        <div class="text-center mb-8">
+                            <h2 class="text-2xl font-bold text-gray-800">Manual de Gestão de Obras</h2>
+                            <p class="text-gray-500">Controle custos, prazos e materiais da sua construção.</p>
+                        </div>
+
+                        <div class="space-y-4">
+                            <!-- ITEM 1: BACKUP -->
+                            <details
+                                class="group bg-blue-50 border border-blue-100 rounded-xl overflow-hidden transition-all duration-300 open:shadow-md">
+                                <summary
+                                    class="flex items-center justify-between p-4 cursor-pointer select-none text-blue-900 font-bold">
+                                    <div class="flex items-center gap-3">
+                                        <div
+                                            class="w-8 h-8 rounded-full bg-blue-200 flex items-center justify-center text-blue-700">
+                                            <i data-lucide="shield-check" class="w-4 h-4"></i>
+                                        </div>
+                                        1. Segurança: Como não perder dados da obra?
+                                    </div>
+                                    <i data-lucide="chevron-down"
+                                        class="w-5 h-5 transition-transform group-open:rotate-180 text-blue-400"></i>
+                                </summary>
+                                <div
+                                    class="p-4 pt-0 text-sm text-gray-600 bg-blue-50 leading-relaxed border-t border-blue-100/50">
+                                    <p class="mb-2">Os dados da obra são preciosos. Garanta que você tenha uma cópia:
+                                    </p>
+                                    <ol class="list-decimal pl-5 space-y-2 mt-2 font-medium text-gray-700">
+                                        <li>Vá em <strong>Configurações</strong> no menu.</li>
+                                        <li>Clique em <span class="text-blue-600"><i data-lucide="download"
+                                                    class="w-3 h-3 inline"></i> Baixar Backup</span>.</li>
+                                        <li>Salve o arquivo com segurança.</li>
+                                        <li>Recomendamos backup semanal ou após lançar muitas notas fiscais!</li>
+                                    </ol>
+                                </div>
+                            </details>
+
+                            <!-- ITEM 2: PROJECTS -->
+                            <details
+                                class="group bg-white border border-gray-200 rounded-xl overflow-hidden transition-all duration-300 open:shadow-md hover:border-plena-orange">
+                                <summary
+                                    class="flex items-center justify-between p-4 cursor-pointer select-none text-gray-800 font-bold">
+                                    <div class="flex items-center gap-3">
+                                        <div
+                                            class="w-8 h-8 rounded-full bg-orange-100 flex items-center justify-center text-plena-orange">
+                                            <i data-lucide="hard-hat" class="w-4 h-4"></i>
+                                        </div>
+                                        2. Criando uma Obra e Fases
+                                    </div>
+                                    <i data-lucide="chevron-down"
+                                        class="w-5 h-5 transition-transform group-open:rotate-180 text-gray-400"></i>
+                                </summary>
+                                <div class="p-4 pt-0 text-sm text-gray-600 leading-relaxed">
+                                    <p>Organize suas reformas por projetos:</p>
+                                    <ul class="list-disc pl-5 space-y-2 mt-2">
+                                        <li><strong>Nova Obra:</strong> Crie um projeto para cada cliente ou endereço.
+                                        </li>
+                                        <li><strong>Fases:</strong> Ao lançar um gasto, informe a etapa (Fundação,
+                                            Acabamento, Elétrica).</li>
+                                        <li><strong>Relatórios:</strong> Assim você saberá exatamente quanto gastou só
+                                            com "Pintura", por exemplo.</li>
+                                    </ul>
+                                </div>
+                            </details>
+
+                            <!-- ITEM 3: BUDGET -->
+                            <details
+                                class="group bg-white border border-gray-200 rounded-xl overflow-hidden transition-all duration-300 open:shadow-md hover:border-gray-300">
+                                <summary
+                                    class="flex items-center justify-between p-4 cursor-pointer select-none text-gray-800 font-bold">
+                                    <div class="flex items-center gap-3">
+                                        <div
+                                            class="w-8 h-8 rounded-full bg-gray-100 flex items-center justify-center text-gray-600">
+                                            <i data-lucide="trending-down" class="w-4 h-4"></i>
+                                        </div>
+                                        3. Orçado vs Realizado
+                                    </div>
+                                    <i data-lucide="chevron-down"
+                                        class="w-5 h-5 transition-transform group-open:rotate-180 text-gray-400"></i>
+                                </summary>
+                                <div class="p-4 pt-0 text-sm text-gray-600 leading-relaxed">
+                                    <p>No Dashboard, fique atento ao bloco <strong>Gasto (Geral)</strong>:</p>
+                                    <ul class="list-disc pl-5 space-y-1 mt-2">
+                                        <li>Compare sempre o que você recebeu do cliente com o que já gastou de
+                                            material/mão de obra.</li>
+                                        <li>Se a margem estiver baixa, negocie aditivos antes de continuar a obra.</li>
+                                    </ul>
+                                </div>
+                            </details>
+
+                            <!-- ITEM 4: APP INSTALL -->
+                            <details
+                                class="group bg-white border border-gray-200 rounded-xl overflow-hidden transition-all duration-300 open:shadow-md hover:border-gray-300">
+                                <summary
+                                    class="flex items-center justify-between p-4 cursor-pointer select-none text-gray-800 font-bold">
+                                    <div class="flex items-center gap-3">
+                                        <div
+                                            class="w-8 h-8 rounded-full bg-gray-100 flex items-center justify-center text-gray-600">
+                                            <i data-lucide="smartphone" class="w-4 h-4"></i>
+                                        </div>
+                                        4. Instalar no Celular
+                                    </div>
+                                    <i data-lucide="chevron-down"
+                                        class="w-5 h-5 transition-transform group-open:rotate-180 text-gray-400"></i>
+                                </summary>
+                                <div class="p-4 pt-0 text-sm text-gray-600 leading-relaxed">
+                                    <div class="grid grid-cols-1 md:grid-cols-2 gap-4 mt-3">
+                                        <div class="bg-gray-50 p-3 rounded-lg">
+                                            <strong>Android:</strong> Menu do Chrome > "Instalar Aplicativo".
+                                        </div>
+                                        <div class="bg-gray-50 p-3 rounded-lg">
+                                            <strong>iPhone:</strong> Safari > Compartilhar > "Adicionar à Tela de
+                                            Início".
+                                        </div>
+                                    </div>
+                                </div>
+                            </details>
+                        </div>
+
+                        <!-- SUPPORT -->
+                        <div class="mt-8 pt-6 border-t border-gray-100 text-center">
+                            <p class="text-sm text-gray-500 mb-2">Dúvidas?</p>
+                            <a href="mailto:suporte@plenainformatica.com.br"
+                                class="text-plena-orange font-bold hover:underline text-sm">Fale com o Suporte</a>
+                        </div>
+                    </div>
+                </div>
+            </section>
+
+            <section id="view-about" class="view-section hide fade-in">
+                <div class="max-w-3xl mx-auto space-y-6">
+                    <div class="bg-white p-8 rounded-2xl shadow-sm border border-gray-100">
+                        <h2 class="text-2xl font-bold text-gray-800 mb-6">Sobre a Plena</h2>
+
+                        <!-- DISCLAIMER / LEGAL -->
+                        <div class="bg-red-50 border-l-4 border-red-500 p-4 mb-8">
+                            <div class="flex items-start">
+                                <div class="flex-shrink-0">
+                                    <i data-lucide="alert-triangle" class="h-5 w-5 text-red-600"></i>
+                                </div>
+                                <div class="ml-3">
+                                    <h3 class="text-sm font-bold text-red-800 uppercase tracking-wide">Registro e
+                                        Distribuição</h3>
+                                    <div class="mt-2 text-sm text-red-700 space-y-2">
+                                        <p>Este software é um produto original desenvolvido pela <strong>Plena Soluções
+                                                Digitais</strong>. Sua comercialização é exclusiva através de canais
+                                            oficiais (Loja Oficial no Mercado Livre).</p>
+                                        <p>A revenda não autorizada, engenharia reversa, cópia parcial do código-fonte
+                                            ou distribuição em pacotes "piratas" constitui <strong>violação de
+                                                propriedade intelectual (Lei 9.610/98)</strong>. O infrator está sujeito
+                                            a sanções cíveis e criminais. Valorize o desenvolvimento nacional.</p>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+
+                        <div class="space-y-8 text-sm text-gray-600">
+                            <!-- MISSION -->
+                            <div>
+                                <h3 class="flex items-center text-lg font-bold text-gray-900 mb-2">
+                                    <i data-lucide="heart" class="w-5 h-5 mr-2 text-plena-orange"></i> Nossa Missão:
+                                    Tecnologia e Acessibilidade
+                                </h3>
+                                <p class="leading-relaxed">A Plena acredita que a tecnologia deve ser um direito, não um
+                                    privilégio exclusivo de grandes corporações. Nossa missão é democratizar ferramentas
+                                    de gestão de alta performance, simples e acessíveis.</p>
+                                <p class="mt-2 leading-relaxed">Desenvolvemos soluções <strong>Local-First</strong>
+                                    (seus dados ficam com você), garantindo que pequenos empreendedores, autônomos e
+                                    famílias brasileiras tenham controle total sobre suas informações, sem mensalidades
+                                    abusivas e sem depender de conexão constante com a internet.</p>
+                            </div>
+
+                            <!-- PRIVACY -->
+                            <div class="border-t border-gray-100 pt-6">
+                                <h3 class="font-bold text-gray-900 mb-2">Política de Privacidade</h3>
+                                <p>Ao utilizar este sistema, você concorda que:</p>
+                                <ul class="list-disc pl-5 mt-2 space-y-1">
+                                    <li><strong>100% Offline:</strong> Seus dados financeiros não saem deste
+                                        dispositivo.</li>
+                                    <li><strong>Responsabilidade:</strong> O backup (cópia de segurança) é
+                                        responsabilidade exclusiva do usuário.</li>
+                                    <li><strong>Isenção:</strong> A Plena não tem acesso aos seus dados e não pode
+                                        recuperá-los em caso de perda do equipamento.</li>
+                                </ul>
+                            </div>
+                        </div>
+
+                        <!-- CONTACT -->
+                        <div class="mt-8 bg-gray-50 p-6 rounded-xl border border-gray-200">
+                            <h3 class="font-bold text-gray-900 mb-2">Precisa de Suporte ou Personalização?</h3>
+                            <p class="text-sm text-gray-600 mb-4">Tem uma ideia de app ou precisa adaptar este sistema
+                                para seu negócio?</p>
+                            <a href="mailto:tecnologia@plenainformatica.com.br"
+                                class="inline-flex items-center text-plena-orange font-bold hover:underline">
+                                <i data-lucide="mail" class="w-4 h-4 mr-2"></i> tecnologia@plenainformatica.com.br
+                            </a>
+                        </div>
+                    </div>
+                </div>
+            </section>
+        </div>
+    </main>
+
+    <!-- NEW PROJECT MODAL -->
+    <div id="projectModal" class="fixed inset-0 modal-backdrop hidden z-50 flex items-center justify-center p-4">
+        <div class="bg-white rounded-2xl shadow-2xl w-full max-w-lg p-6">
+            <div class="flex justify-between items-center mb-6">
+                <h3 class="text-lg font-bold text-gray-800">Nova Obra</h3>
+                <button onclick="closeModal('projectModal')" class="text-gray-400"><i data-lucide="x"></i></button>
+            </div>
+            <form onsubmit="submitProject(event)" class="space-y-4">
+                <input type="text" id="pj-name" required placeholder="Nome da Obra (Ex: Reforma Banheiro)"
+                    class="w-full border p-2 rounded-lg">
+                <input type="text" id="pj-client" required placeholder="Nome do Cliente"
+                    class="w-full border p-2 rounded-lg">
+                <div>
+                    <label class="text-xs font-bold text-gray-500 uppercase">Orçamento Total (Valor Cobrado)</label>
+                    <input type="number" step="0.01" id="pj-budget" required class="w-full border p-2 rounded-lg"
+                        placeholder="R$ 0,00">
+                </div>
+                <div>
+                    <label class="text-xs font-bold text-gray-500 uppercase">Previsão Entrega</label>
+                    <input type="date" id="pj-deadline" class="w-full border p-2 rounded-lg">
+                </div>
+                <button type="submit"
+                    class="w-full bg-plena-orange text-white py-3 rounded-xl font-bold hover:bg-plena-dark">Criar
+                    Obra</button>
+            </form>
+        </div>
+    </div>
+
+    <!-- TRANSACTION MODAL (GENERIC & PROJECT SPECIFIC) -->
+    <div id="transModal" class="fixed inset-0 modal-backdrop hidden z-50 flex items-center justify-center p-4">
+        <div class="bg-white rounded-2xl shadow-2xl w-full max-w-sm p-6">
+            <h3 class="text-lg font-bold text-gray-800 mb-4" id="tm-title">Lançar Financeiro</h3>
+            <form onsubmit="submitTrans(event)" class="space-y-4">
+                <input type="hidden" id="tr-project-id">
+                <div class="flex gap-2">
+                    <label class="flex-1 cursor-pointer bg-red-50 border border-red-200 p-2 rounded text-center"><input
+                            type="radio" name="tr-type" value="expense" class="hidden" checked
+                            onchange="toggleCategory()"> <span class="text-red-700 font-bold">Gasto</span></label>
+                    <label
+                        class="flex-1 cursor-pointer bg-green-50 border border-green-200 p-2 rounded text-center"><input
+                            type="radio" name="tr-type" value="income" class="hidden" onchange="toggleCategory()"> <span
+                            class="text-green-700 font-bold">Recebido</span></label>
+                </div>
+
+                <div id="cat-selector" class="grid grid-cols-2 gap-2">
+                    <label class="cursor-pointer border p-2 rounded text-center text-xs font-bold"><input type="radio"
+                            name="tr-cat" value="material" checked> Material</label>
+                    <label class="cursor-pointer border p-2 rounded text-center text-xs font-bold"><input type="radio"
+                            name="tr-cat" value="labor"> Mão de Obra</label>
+                </div>
+
+                <input type="text" id="tr-desc" required placeholder="Descrição" class="w-full border p-2 rounded-lg">
+                <input type="number" step="0.01" id="tr-amount" required placeholder="Valor R$"
+                    class="w-full border p-2 rounded-lg">
+                <input type="date" id="tr-date" required class="w-full border p-2 rounded-lg">
+                <button type="submit" class="w-full bg-gray-900 text-white py-3 rounded-lg font-bold">Salvar</button>
+            </form>
+        </div>
+    </div>
+
+    <script>
+        const DB_KEY = 'plena_obras_v1';
+        let db = JSON.parse(localStorage.getItem(DB_KEY)) || { projects: [], transactions: [] };
+        let currentProjectId = null;
+
+        const save = () => localStorage.setItem(DB_KEY, JSON.stringify(db));
+        const fmtMoney = (v) => v.toLocaleString('pt-BR', { style: 'currency', currency: 'BRL' });
+        const fmtDate = (d) => { if (!d) return '--/--/-'; const p = d.split('-'); return `${p[2]}/${p[1]}`; };
+        const getID = () => Date.now().toString(36) + Math.random().toString(36).substr(2);
+
+        function init() {
+            lucide.createIcons();
+            document.getElementById('tr-date').value = new Date().toISOString().split('T')[0];
+            router('dashboard');
+        }
+
+        function router(view, param = null) {
+            document.querySelectorAll('.view-section').forEach(el => el.classList.add('hide'));
+            document.querySelectorAll('.nav-item').forEach(el => { el.classList.remove('bg-white/10', 'text-white'); el.classList.add('text-gray-400'); });
+
+            // Handle Sidebar Active State
+            const navId = (view === 'project-detail') ? 'nav-projects' : `nav-${view}`;
+            if (document.getElementById(navId)) {
+                document.getElementById(navId).classList.add('bg-white/10', 'text-white');
+                document.getElementById(navId).classList.remove('text-gray-400');
+            }
+
+            document.getElementById(`view-${view}`).classList.remove('hide');
+
+            // Header Logic
+            const titles = { dashboard: 'Visão Geral', projects: 'Obras', finance: 'Caixa Geral', settings: 'Configurações', suppliers: 'Fornecedores', about: 'Sobre' };
+            document.getElementById('page-title').innerText = titles[view] || 'Plena Obras';
+            document.getElementById('page-subtitle').innerText = '';
+            document.getElementById('header-actions').innerHTML = ''; // Clear actions by default
+
+            if (view === 'projects') {
+                document.getElementById('header-actions').innerHTML = `<button onclick="openProjectModal()" class="flex items-center px-3 py-2 bg-plena-orange text-white rounded-lg text-sm font-bold hover:bg-plena-dark transition-all shadow-lg active:scale-95"><i data-lucide="plus" class="w-5 h-5 sm:mr-2"></i> <span class="hidden sm:inline">Nova Obra</span> <span class="sm:hidden">Nova</span></button>`;
+                renderProjectsList();
+            }
+
+            if (view === 'dashboard') renderDashboard();
+            if (view === 'finance') renderGeneralFinance();
+
+            if (view === 'project-detail' && param) {
+                currentProjectId = param;
+                loadProjectDetail(param);
+            } else {
+                currentProjectId = null;
+            }
+
+            if (window.innerWidth < 1024) toggleSidebar();
+            lucide.createIcons();
+        }
+
+        function toggleSidebar() { document.getElementById('sidebar').classList.toggle('open'); document.getElementById('overlay').classList.toggle('hidden'); }
+        function closeModal(id) { document.getElementById(id).classList.add('hidden'); }
+
+        function openProjectModal() {
+            document.querySelector('#projectModal form').reset();
+            document.getElementById('projectModal').classList.remove('hidden');
+        }
+
+        function openTransModal() {
+            document.querySelector('#transModal form').reset();
+            document.getElementById('tr-project-id').value = '';
+            document.getElementById('tm-title').innerText = 'Lançamento Avulso (Geral)';
+            document.getElementById('transModal').classList.remove('hidden');
+            toggleCategory();
+        }
+
+        function openProjectTransModal() {
+            if (!currentProjectId) return;
+            document.querySelector('#transModal form').reset();
+            document.getElementById('tr-project-id').value = currentProjectId;
+            document.getElementById('tm-title').innerText = 'Lançar nesta Obra';
+            document.getElementById('transModal').classList.remove('hidden');
+            toggleCategory();
+        }
+
+        function toggleCategory() {
+            const type = document.querySelector('input[name="tr-type"]:checked').value;
+            // Income in project usually doesn't have categories like 'labor' vs 'material' in simple view, but Expense does.
+            // For simplicity, we keep categories visible for expenses
+            if (type === 'expense') document.getElementById('cat-selector').classList.remove('hidden');
+            else document.getElementById('cat-selector').classList.add('hidden');
+        }
+
+        function submitProject(e) {
+            e.preventDefault();
+            const p = {
+                id: getID(),
+                name: document.getElementById('pj-name').value,
+                client: document.getElementById('pj-client').value,
+                budget: parseFloat(document.getElementById('pj-budget').value) || 0,
+                deadline: document.getElementById('pj-deadline').value,
+                status: 'active',
+                created: new Date().toISOString()
+            };
+            db.projects.push(p);
+            save(); closeModal('projectModal');
+            router('project-detail', p.id);
+        }
+
+        function submitTrans(e) {
+            e.preventDefault();
+            const pid = document.getElementById('tr-project-id').value || null;
+            const type = document.querySelector('input[name="tr-type"]:checked').value;
+            const cat = document.querySelector('input[name="tr-cat"]:checked').value;
+
+            const t = {
+                id: getID(),
+                projectId: pid,
+                type,
+                category: (type === 'expense') ? cat : 'income',
+                desc: document.getElementById('tr-desc').value,
+                val: parseFloat(document.getElementById('tr-amount').value),
+                date: document.getElementById('tr-date').value
+            };
+            db.transactions.push(t);
+            save(); closeModal('transModal');
+
+            if (currentProjectId) loadProjectDetail(currentProjectId);
+            else if (document.getElementById('view-finance').classList.contains('hide') === false) renderGeneralFinance();
+            else renderDashboard();
+        }
+
+        function renderDashboard() {
+            const active = db.projects.filter(p => p.status === 'active');
+            const totalRec = db.transactions.filter(t => t.type === 'income').reduce((a, b) => a + b.val, 0);
+            const totalSpent = db.transactions.filter(t => t.type === 'expense').reduce((a, b) => a + b.val, 0);
+
+            document.getElementById('dash-active-projects').innerText = active.length;
+            document.getElementById('dash-total-received').innerText = fmtMoney(totalRec);
+            document.getElementById('dash-total-spent').innerText = fmtMoney(totalSpent);
+
+            document.getElementById('projects-dashboard-list').innerHTML = active.map(p => `
+                <div class="bg-white p-4 rounded-xl border border-gray-100 flex justify-between items-center cursor-pointer hover:border-plena-orange shadow-sm" onclick="router('project-detail', '${p.id}')">
+                    <div>
+                        <h4 class="font-bold text-gray-800">${p.name}</h4>
+                        <p class="text-xs text-gray-500">${p.client}</p>
+                    </div>
+                    <i data-lucide="chevron-right" class="text-gray-400"></i>
+                </div>
+            `).join('') || '<p class="text-sm text-gray-400">Nenhuma obra ativa.</p>';
+
+            lucide.createIcons();
+        }
+
+        function renderProjectsList() {
+            document.getElementById('projects-list-full').innerHTML = db.projects.map(p => `
+                 <div class="bg-white p-6 rounded-xl border border-gray-100 shadow-sm hover:border-plena-orange transition-all cursor-pointer relative group" onclick="router('project-detail', '${p.id}')">
+                    <div class="absolute top-4 right-4 text-xs font-bold px-2 py-1 rounded bg-gray-100 text-gray-600 uppercase">${p.status}</div>
+                    <h3 class="font-bold text-gray-800 text-lg mb-1">${p.name}</h3>
+                    <p class="text-xs text-gray-500 mb-4">${p.client}</p>
+                    <div class="flex justify-between items-end border-t pt-4">
+                        <span class="text-xs font-bold text-gray-400 uppercase">Orçamento</span>
+                        <span class="font-bold text-plena-orange">${fmtMoney(p.budget)}</span>
+                    </div>
+                </div>
+            `).join('');
+            lucide.createIcons();
+        }
+
+        function loadProjectDetail(id) {
+            const p = db.projects.find(x => x.id === id);
+            if (!p) return router('projects');
+
+            // Calc
+            const trans = db.transactions.filter(t => t.projectId === id);
+            const spent = trans.filter(t => t.type === 'expense').reduce((a, b) => a + b.val, 0);
+            // Profit is (Budget - Spent) assuming Budget is what they charge. Or we track Income. 
+            // Better: Profit = Income - Spent. But usually small contractors act on budget. 
+            // Let's assume Project Profit = Budget - Spent (if fixed price) or we just track cash flow. 
+            // Let's go with "Previsto": Budget - Spent.
+
+            document.getElementById('pd-title').innerText = p.name;
+            document.getElementById('pd-client').innerText = `Cliente: ${p.client}`;
+            document.getElementById('pd-status').innerText = p.status === 'active' ? 'Em Andamento' : 'Concluído';
+            document.getElementById('pd-status').className = `ml-auto px-3 py-1 rounded-full text-xs font-bold uppercase ${p.status === 'active' ? 'bg-blue-100 text-blue-800' : 'bg-gray-200 text-gray-600'}`;
+
+            document.getElementById('pd-budget').innerText = fmtMoney(p.budget);
+            document.getElementById('pd-spent').innerText = fmtMoney(spent);
+            document.getElementById('pd-profit').innerText = fmtMoney(p.budget - spent);
+
+            document.getElementById('pd-trans-list').innerHTML = trans.slice().reverse().map(t => `
+                 <tr>
+                    <td class="px-4 py-3 text-gray-500">${fmtDate(t.date)}</td>
+                    <td class="px-4 py-3"><span class="px-2 py-1 rounded text-[10px] font-bold uppercase ${t.category === 'labor' ? 'bg-purple-100 text-purple-700' : (t.type === 'income' ? 'bg-green-100 text-green-700' : 'bg-orange-100 text-orange-700')}">${t.category === 'labor' ? 'Mão de Obra' : (t.type === 'income' ? 'Entrada' : 'Material')}</span></td>
+                    <td class="px-4 py-3">${t.desc}</td>
+                    <td class="px-4 py-3 text-right font-bold ${t.type === 'income' ? 'text-green-600' : 'text-red-600'}">${t.type === 'income' ? '+' : '-'} ${fmtMoney(t.val)}</td>
+                    <td class="px-4 py-3 text-center"><button onclick="delTrans('${t.id}')" class="text-gray-300 hover:text-red-500">×</button></td>
+                </tr>
+            `).join('');
+
+            lucide.createIcons();
+        }
+
+        function renderGeneralFinance() {
+            const list = db.transactions.slice().reverse();
+            document.getElementById('trans-list').innerHTML = list.map(t => {
+                const projName = t.projectId ? (db.projects.find(x => x.id === t.projectId)?.name || 'Obra Excluída') : '-';
+                return `
+                <tr>
+                    <td class="px-6 py-4 text-gray-500">${fmtDate(t.date)}</td>
+                    <td class="px-6 py-4 text-xs text-gray-500">${projName}</td>
+                    <td class="px-6 py-4">${t.desc}</td>
+                    <td class="px-6 py-4 text-right font-bold ${t.type === 'income' ? 'text-green-600' : 'text-red-600'}">${t.type === 'income' ? '+' : '-'} ${fmtMoney(t.val)}</td>
+                </tr>`;
+            }).join('');
+        }
+
+        function finishProject() {
+            if (!currentProjectId) return;
+            if (confirm('Deseja encerrar/arquivar esta obra? Ela sairá do dashboard principal.')) {
+                const idx = db.projects.findIndex(x => x.id === currentProjectId);
+                db.projects[idx].status = 'finished';
+                save(); router('projects');
+            }
+        }
+
+        function delTrans(id) {
+            if (confirm('Apagar?')) { db.transactions = db.transactions.filter(x => x.id !== id); save(); if (currentProjectId) loadProjectDetail(currentProjectId); else renderDashboard(); }
+        }
+
+        function downloadBackup() { const a = document.createElement('a'); a.href = "data:text/json;charset=utf-8," + encodeURIComponent(JSON.stringify(db)); a.download = `plena_obras.json`; a.click(); }
+        function restoreBackup(input) { const reader = new FileReader(); reader.onload = (e) => { try { db = JSON.parse(e.target.result); save(); location.reload(); } catch (e) { alert('Erro no arquivo'); } }; reader.readAsText(input.files[0]); }
+        function factoryReset() { if (confirm('Apagar tudo?')) { localStorage.removeItem(DB_KEY); location.reload(); } }
+
+        // SECURITY LOCK
+        setInterval(() => {
+            const footer = document.querySelector('.sidebar .border-t');
+            if (footer && !footer.innerText.includes('Plena')) { document.body.innerHTML = '<div style="background:#111;color:red;height:100vh;display:flex;align-items:center;justify-content:center;"><h1>VIOLAÇÃO DE SEGURANÇA</h1></div>'; throw new Error("Piracy"); }
+        }, 8000);
+
+        init();
+    </script>
+</body>
+
+</html>

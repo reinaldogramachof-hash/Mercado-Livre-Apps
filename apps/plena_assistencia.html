@@ -1,0 +1,974 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>Plena Assistência - Gestão de Ordens de Serviço</title>
+
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script>
+        tailwind.config = {
+            theme: {
+                extend: {
+                    colors: {
+                        plena: { blue: '#2563EB', dark: '#1e40af', black: '#1a1a1a' }, // Tech Blue Theme
+                        success: '#10B981', danger: '#EF4444', warning: '#F59E0B'
+                    }
+                }
+            }
+        }
+    </script>
+
+    <script src="https://unpkg.com/lucide@latest"></script>
+
+    <style>
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+            background-color: #F3F4F6;
+            -webkit-tap-highlight-color: transparent;
+        }
+
+        .hide {
+            display: none !important;
+        }
+
+        .fade-in {
+            animation: fadeIn 0.3s ease-out;
+        }
+
+        @keyframes fadeIn {
+            from {
+                opacity: 0;
+                transform: translateY(5px);
+            }
+
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+
+        .modal-backdrop {
+            background-color: rgba(0, 0, 0, 0.6);
+            backdrop-filter: blur(2px);
+        }
+
+        /* Sidebar Responsive */
+        @media (max-width: 1024px) {
+            .sidebar {
+                transform: translateX(-100%);
+                position: fixed;
+                z-index: 50;
+                height: 100vh;
+                width: 280px;
+            }
+
+            .sidebar.open {
+                transform: translateX(0);
+            }
+        }
+
+        @media (min-width: 1025px) {
+            .sidebar {
+                width: 280px;
+                position: fixed;
+                height: 100vh;
+            }
+
+            .main-content {
+                margin-left: 280px;
+            }
+        }
+
+        /* Print Styles */
+        @media print {
+            body * {
+                visibility: hidden;
+            }
+
+            #invoice-print,
+            #invoice-print * {
+                visibility: visible;
+            }
+
+            #invoice-print {
+                position: absolute;
+                left: 0;
+                top: 0;
+                width: 100%;
+                background: white;
+                padding: 0;
+            }
+
+            @page {
+                margin: 0;
+            }
+        }
+    </style>
+</head>
+
+<body class="text-gray-800 antialiased">
+
+    <div id="overlay" class="fixed inset-0 bg-black/50 hidden z-40 transition-opacity" onclick="toggleSidebar()"></div>
+
+    <aside id="sidebar"
+        class="sidebar bg-plena-black text-white transition-transform duration-300 flex flex-col shadow-2xl">
+        <div class="h-20 flex items-center px-6 bg-plena-blue">
+            <i data-lucide="wrench" class="w-8 h-8 mr-3"></i>
+            <div>
+                <h1 class="text-xl font-bold tracking-tight">PLENA</h1>
+                <p class="text-xs text-white/90 font-medium">Assistência Técnica</p>
+            </div>
+        </div>
+
+        <nav class="p-4 space-y-2 flex-1 overflow-y-auto">
+            <button onclick="router('dashboard')"
+                class="nav-item w-full flex items-center px-4 py-3 rounded-xl hover:bg-white/10 transition-all group active-nav"
+                id="nav-dashboard">
+                <i data-lucide="layout-dashboard" class="w-5 h-5 mr-3 text-gray-400 group-hover:text-white"></i> Visão
+                Geral
+            </button>
+            <button onclick="router('orders')"
+                class="nav-item w-full flex items-center px-4 py-3 rounded-xl hover:bg-white/10 transition-all group"
+                id="nav-orders">
+                <i data-lucide="clipboard-list" class="w-5 h-5 mr-3 text-gray-400 group-hover:text-white"></i> Ordens de
+                Serviço
+            </button>
+            <button onclick="router('transactions')"
+                class="nav-item w-full flex items-center px-4 py-3 rounded-xl hover:bg-white/10 transition-all group"
+                id="nav-transactions">
+                <i data-lucide="wallet" class="w-5 h-5 mr-3 text-gray-400 group-hover:text-white"></i> Fluxo de Caixa
+            </button>
+            <button onclick="router('settings')"
+                class="nav-item w-full flex items-center px-4 py-3 rounded-xl hover:bg-white/10 transition-all group"
+                id="nav-settings">
+                <i data-lucide="settings" class="w-5 h-5 mr-3 text-gray-400 group-hover:text-white"></i> Configurações
+            </button>
+            <button onclick="router('instructions')"
+                class="nav-item w-full flex items-center px-4 py-3 rounded-xl hover:bg-white/10 transition-all group"
+                id="nav-instructions">
+                <i data-lucide="book-open" class="w-5 h-5 mr-3 text-gray-400 group-hover:text-white"></i> Manual de Uso
+            </button>
+            <button onclick="router('about')"
+                class="nav-item w-full flex items-center px-4 py-3 rounded-xl hover:bg-white/10 transition-all group"
+                id="nav-about">
+                <i data-lucide="info" class="w-5 h-5 mr-3 text-gray-400 group-hover:text-white"></i> Saiba Mais
+            </button>
+        </nav>
+
+        <div class="p-6 border-t border-white/10 text-center">
+            <p class="text-xs text-gray-500">Todos os Direitos Reservados &copy; 2025</p>
+            <a href="https://www.plenaaplicativos.com.br" target="_blank"
+                class="text-[10px] text-gray-600 hover:text-plena-blue transition-colors mt-1 block decoration-0">Plena
+                Apps</a>
+        </div>
+    </aside>
+
+    <main class="main-content min-h-screen flex flex-col">
+        <header
+            class="bg-white h-20 flex items-center justify-between px-4 lg:px-8 sticky top-0 z-30 shadow-sm border-b border-gray-100">
+            <div class="flex items-center gap-4">
+                <button onclick="toggleSidebar()" class="lg:hidden p-2 hover:bg-gray-100 rounded-lg text-gray-600"><i
+                        data-lucide="menu" class="w-6 h-6"></i></button>
+                <div class="flex flex-col">
+                    <h2 id="page-title" class="text-xl font-bold text-gray-800">Dashboard</h2>
+                </div>
+            </div>
+            <div class="flex items-center gap-2">
+                <button onclick="openOrderModal()"
+                    class="flex items-center px-3 py-2 bg-plena-blue text-white rounded-lg text-sm font-bold hover:bg-plena-dark transition-all shadow-lg shadow-blue-200 active:scale-95">
+                    <i data-lucide="plus" class="w-5 h-5 sm:mr-2"></i> <span class="hidden sm:inline">Nova O.S.</span>
+                    <span class="sm:hidden">Nova</span>
+                </button>
+            </div>
+        </header>
+
+        <div class="p-4 lg:p-8 flex-1 overflow-y-auto">
+            <!-- DASHBOARD -->
+            <section id="view-dashboard" class="view-section fade-in">
+                <div class="grid grid-cols-1 md:grid-cols-3 gap-6 mb-8">
+                    <div class="bg-white p-6 rounded-2xl shadow-sm border border-gray-100 relative overflow-hidden">
+                        <div class="absolute right-0 top-0 h-full w-1.5 bg-yellow-400"></div>
+                        <p class="text-xs font-bold text-gray-400 uppercase tracking-wider mb-1">Na Oficina</p>
+                        <h3 id="dash-workshop" class="text-3xl font-bold text-yellow-500">0</h3>
+                        <p class="text-xs text-gray-400 mt-1">Aparelhos em manutenção</p>
+                    </div>
+                    <div class="bg-white p-6 rounded-2xl shadow-sm border border-gray-100 relative overflow-hidden">
+                        <div class="absolute right-0 top-0 h-full w-1.5 bg-green-500"></div>
+                        <p class="text-xs font-bold text-gray-400 uppercase tracking-wider mb-1">Prontos</p>
+                        <h3 id="dash-ready" class="text-3xl font-bold text-green-600">0</h3>
+                        <p class="text-xs text-gray-400 mt-1">Aguardando retirada</p>
+                    </div>
+                </div>
+
+                <div class="bg-white p-6 rounded-2xl shadow-sm border border-gray-100 mb-8">
+                    <h3 class="font-bold text-gray-800 mb-6">Últimas Ordens de Serviço</h3>
+                    <div id="latest-orders" class="space-y-4"></div>
+                </div>
+            </section>
+
+            <!-- ORDERS LIST -->
+            <section id="view-orders" class="view-section hide fade-in">
+                <div class="bg-white rounded-2xl shadow-sm border border-gray-100 overflow-hidden">
+                    <div class="p-4 bg-gray-50 flex gap-3 border-b border-gray-200">
+                        <input type="text" id="order-search" onkeyup="renderOrders()"
+                            placeholder="Buscar por cliente, aparelho ou Nº OS..."
+                            class="w-full px-4 py-2 rounded-lg border border-gray-300 outline-none">
+                    </div>
+                    <div id="orders-list" class="divide-y divide-gray-100"></div>
+                </div>
+            </section>
+
+            <!-- TRANSACTIONS -->
+            <section id="view-transactions" class="view-section hide fade-in">
+                <div
+                    class="bg-white p-6 rounded-2xl shadow-sm border border-gray-100 mb-4 flex justify-between items-center">
+                    <h3 class="font-bold text-gray-800">Caixa da Loja</h3>
+                    <button onclick="openTransModal()"
+                        class="text-sm bg-gray-800 text-white px-3 py-2 rounded-lg hover:bg-black">Novo
+                        Lançamento</button>
+                </div>
+                <!-- Reuse Transaction Table Logic -->
+                <div class="bg-white rounded-2xl shadow-sm border border-gray-100 overflow-hidden">
+                    <div class="overflow-x-auto">
+                        <table class="w-full text-left">
+                            <thead class="bg-gray-50 text-gray-500 text-xs uppercase">
+                                <tr>
+                                    <th class="px-6 py-3">Data</th>
+                                    <th class="px-6 py-3">Descrição</th>
+                                    <th class="px-6 py-3 text-right">Valor</th>
+                                    <th class="px-6 py-3"></th>
+                                </tr>
+                            </thead>
+                            <tbody id="trans-list" class="divide-y divide-gray-100 text-sm"></tbody>
+                        </table>
+                    </div>
+                </div>
+            </section>
+
+            <!-- SETTINGS -->
+            <section id="view-settings" class="view-section hide fade-in">
+                <div class="bg-white p-6 rounded-2xl shadow-sm border border-gray-100">
+                    <h3 class="font-bold text-gray-800 mb-4 flex items-center"><i data-lucide="shield-alert"
+                            class="w-4 h-4 mr-2"></i> Backup de Dados</h3>
+                    <div class="bg-blue-50 border border-blue-200 p-3 rounded-lg text-sm text-blue-800 mb-4">
+                        Os dados do seu sistema (clientes e OS) ficam salvos <strong>apenas neste computador</strong>.
+                        Faça backup regularmente!
+                    </div>
+                    <button onclick="downloadBackup()"
+                        class="w-full border border-gray-300 py-3 rounded-lg text-sm font-medium hover:bg-gray-50 mb-3 flex justify-center gap-2">
+                        <i data-lucide="download" class="w-4 h-4"></i> Baixar Backup (.json)
+                    </button>
+                    <div class="relative mb-6">
+                        <button
+                            class="w-full bg-gray-800 text-white py-3 rounded-lg text-sm font-medium flex justify-center gap-2">
+                            <i data-lucide="upload" class="w-4 h-4"></i> Restaurar Backup
+                        </button>
+                        <input type="file" onchange="restoreBackup(this)"
+                            class="absolute inset-0 opacity-0 cursor-pointer">
+                    </div>
+                    <div class="border-t pt-4">
+                        <button onclick="factoryReset()"
+                            class="text-red-500 text-sm hover:underline w-full text-center">Resetar Sistema (Apagar
+                            Tudo)</button>
+                    </div>
+                </div>
+            </section>
+
+            <!-- MANUAL INSTRUCTIONS -->
+            <section id="view-instructions" class="view-section hide fade-in">
+                <div class="max-w-3xl mx-auto space-y-6">
+                    <div class="bg-white p-8 rounded-2xl shadow-sm border border-gray-100">
+                        <div class="text-center mb-8">
+                            <h2 class="text-2xl font-bold text-gray-800">Manual da Assistência</h2>
+                            <p class="text-gray-500">Organize sua bancada e profissionalize o atendimento.</p>
+                        </div>
+
+                        <div class="space-y-4">
+                            <!-- ITEM 1: BACKUP (STANDARD) -->
+                            <details
+                                class="group bg-blue-50 border border-blue-100 rounded-xl overflow-hidden transition-all duration-300 open:shadow-md">
+                                <summary
+                                    class="flex items-center justify-between p-4 cursor-pointer select-none text-blue-900 font-bold">
+                                    <div class="flex items-center gap-3">
+                                        <div
+                                            class="w-8 h-8 rounded-full bg-blue-200 flex items-center justify-center text-blue-700">
+                                            <i data-lucide="shield-check" class="w-4 h-4"></i>
+                                        </div>
+                                        1. Segurança: Como salvar seus dados?
+                                    </div>
+                                    <i data-lucide="chevron-down"
+                                        class="w-5 h-5 transition-transform group-open:rotate-180 text-blue-400"></i>
+                                </summary>
+                                <div
+                                    class="p-4 pt-0 text-sm text-gray-600 bg-blue-50 leading-relaxed border-t border-blue-100/50">
+                                    <p class="mb-2">Seus dados ficam 100% no seu dispositivo. Para não perder o cadastro
+                                        de clientes e OS:</p>
+                                    <ol class="list-decimal pl-5 space-y-2 mt-2 font-medium text-gray-700">
+                                        <li>Vá em <strong>Configurações</strong> no menu lateral.</li>
+                                        <li>Clique em <span class="text-plena-blue"><i data-lucide="download"
+                                                    class="w-3 h-3 inline"></i> Baixar Backup</span>.</li>
+                                        <li>Salve o arquivo no Google Drive ou envie por e-mail para você mesmo.</li>
+                                        <li>Faça isso <strong>toda semana</strong>!</li>
+                                    </ol>
+                                </div>
+                            </details>
+
+                            <!-- ITEM 2: STATUS WORKFLOW (SPECIFIC) -->
+                            <details
+                                class="group bg-white border border-gray-200 rounded-xl overflow-hidden transition-all duration-300 open:shadow-md hover:border-plena-blue">
+                                <summary
+                                    class="flex items-center justify-between p-4 cursor-pointer select-none text-gray-800 font-bold">
+                                    <div class="flex items-center gap-3">
+                                        <div
+                                            class="w-8 h-8 rounded-full bg-blue-100 flex items-center justify-center text-plena-blue">
+                                            <i data-lucide="layers" class="w-4 h-4"></i>
+                                        </div>
+                                        2. Workflow: Entendendo os Status
+                                    </div>
+                                    <i data-lucide="chevron-down"
+                                        class="w-5 h-5 transition-transform group-open:rotate-180 text-gray-400"></i>
+                                </summary>
+                                <div class="p-4 pt-0 text-sm text-gray-600 leading-relaxed">
+                                    <p>Siga o fluxo para manter o cliente informado:</p>
+                                    <ul class="list-disc pl-5 space-y-2 mt-2">
+                                        <li><strong>Recebido:</strong> Aparelho deu entrada, aguardando triagem.</li>
+                                        <li><strong>Em Análise:</strong> Técnico está mexendo agora.</li>
+                                        <li><strong>Aguardando Peça:</strong> Diagnóstico feito, mas falta material.
+                                        </li>
+                                        <li><strong>Pronto:</strong> Serviço finalizado. Cliente deve ser avisado!</li>
+                                        <li><strong>Entregue:</strong> Cliente pagou e retirou (Gera termo de garantia).
+                                        </li>
+                                    </ul>
+                                </div>
+                            </details>
+
+                            <!-- ITEM 3: PRINTING (SPECIFIC) -->
+                            <details
+                                class="group bg-white border border-gray-200 rounded-xl overflow-hidden transition-all duration-300 open:shadow-md hover:border-gray-300">
+                                <summary
+                                    class="flex items-center justify-between p-4 cursor-pointer select-none text-gray-800 font-bold">
+                                    <div class="flex items-center gap-3">
+                                        <div
+                                            class="w-8 h-8 rounded-full bg-gray-100 flex items-center justify-center text-gray-600">
+                                            <i data-lucide="printer" class="w-4 h-4"></i>
+                                        </div>
+                                        3. Recibos e Garantia
+                                    </div>
+                                    <i data-lucide="chevron-down"
+                                        class="w-5 h-5 transition-transform group-open:rotate-180 text-gray-400"></i>
+                                </summary>
+                                <div class="p-4 pt-0 text-sm text-gray-600 leading-relaxed">
+                                    <p>Profissionalize sua entrega:</p>
+                                    <ul class="list-disc pl-5 space-y-1 mt-2">
+                                        <li>Ao criar a OS, imprima e dê ao cliente como <strong>Recibo de
+                                                Entrada</strong>.</li>
+                                        <li>Ao entregar, imprima novamente: o sistema gera automaticamente o
+                                            <strong>Termo de Garantia (90 dias)</strong>.</li>
+                                        <li>O documento já inclui aviso legal sobre abandono de equipamento.</li>
+                                    </ul>
+                                </div>
+                            </details>
+
+                            <!-- ITEM 4: INSTALL (STANDARD) -->
+                            <details
+                                class="group bg-white border border-gray-200 rounded-xl overflow-hidden transition-all duration-300 open:shadow-md hover:border-gray-300">
+                                <summary
+                                    class="flex items-center justify-between p-4 cursor-pointer select-none text-gray-800 font-bold">
+                                    <div class="flex items-center gap-3">
+                                        <div
+                                            class="w-8 h-8 rounded-full bg-gray-100 flex items-center justify-center text-gray-600">
+                                            <i data-lucide="smartphone" class="w-4 h-4"></i>
+                                        </div>
+                                        4. Instalar no Celular
+                                    </div>
+                                    <i data-lucide="chevron-down"
+                                        class="w-5 h-5 transition-transform group-open:rotate-180 text-gray-400"></i>
+                                </summary>
+                                <div class="p-4 pt-0 text-sm text-gray-600 leading-relaxed">
+                                    <p>Este sistema funciona offline como um app:</p>
+                                    <div class="grid grid-cols-1 md:grid-cols-2 gap-4 mt-3">
+                                        <div class="bg-gray-50 p-3 rounded-lg">
+                                            <strong>Android:</strong> Chrome > 3 pontinhos > "Adicionar à Tela Inicial".
+                                        </div>
+                                        <div class="bg-gray-50 p-3 rounded-lg">
+                                            <strong>iPhone:</strong> Safari > Compartilhar > "Adicionar à Tela de
+                                            Início".
+                                        </div>
+                                    </div>
+                                </div>
+                            </details>
+                        </div>
+
+                        <!-- SUPPORT -->
+                        <div class="mt-8 pt-6 border-t border-gray-100 text-center">
+                            <p class="text-sm text-gray-500 mb-2">Dúvidas?</p>
+                            <a href="mailto:suporte@plenainformatica.com.br"
+                                class="text-plena-blue font-bold hover:underline text-sm">Fale com o Suporte</a>
+                        </div>
+                    </div>
+                </div>
+            </section>
+
+            <section id="view-about" class="view-section hide fade-in">
+                <div class="max-w-3xl mx-auto space-y-6">
+                    <div class="bg-white p-8 rounded-2xl shadow-sm border border-gray-100">
+                        <h2 class="text-2xl font-bold text-gray-800 mb-6">Sobre a Plena</h2>
+
+                        <!-- DISCLAIMER / LEGAL (STANDARD) -->
+                        <div class="bg-red-50 border-l-4 border-red-500 p-4 mb-8">
+                            <div class="flex items-start">
+                                <div class="flex-shrink-0">
+                                    <i data-lucide="alert-triangle" class="h-5 w-5 text-red-600"></i>
+                                </div>
+                                <div class="ml-3">
+                                    <h3 class="text-sm font-bold text-red-800 uppercase tracking-wide">Registro e
+                                        Distribuição</h3>
+                                    <div class="mt-2 text-sm text-red-700 space-y-2">
+                                        <p>Este software é um produto original desenvolvido pela <strong>Plena Soluções
+                                                Digitais</strong>. Sua comercialização é exclusiva através de canais
+                                            oficiais (Loja Oficial no Mercado Livre).</p>
+                                        <p>A revenda não autorizada, engenharia reversa, cópia parcial do código-fonte
+                                            ou distribuição em pacotes "piratas" constitui <strong>violação de
+                                                propriedade intelectual (Lei 9.610/98)</strong>. O infrator está sujeito
+                                            a sanções cíveis e criminais. Valorize o desenvolvimento nacional.</p>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- LGPD FOR TECH ASSISTANCE (SPECIFIC EXTRA) -->
+                        <div class="bg-blue-50 border border-blue-200 p-4 rounded-lg mb-8">
+                            <h3 class="text-sm font-bold text-plena-blue uppercase mb-2 flex items-center"><i
+                                    data-lucide="lock" class="w-4 h-4 mr-2"></i> Aviso Importante: LGPD</h3>
+                            <p class="text-sm text-blue-900">Ao receber aparelhos de clientes, sua assistência técnica
+                                se torna <strong>Controladora de Dados</strong> sob a Lei Geral de Proteção de Dados. É
+                                sua responsabilidade garantir que fotos, mensagens e arquivos dos clientes não sejam
+                                vazados ou acessados indevidamente pelos técnicos.</p>
+                        </div>
+
+                        <div class="space-y-8 text-sm text-gray-600">
+                            <!-- MISSION (STANDARD) -->
+                            <div>
+                                <h3 class="flex items-center text-lg font-bold text-gray-900 mb-2">
+                                    <i data-lucide="heart" class="w-5 h-5 mr-2 text-plena-blue"></i> Nossa Missão:
+                                    Tecnologia e Acessibilidade
+                                </h3>
+                                <p class="leading-relaxed">A Plena acredita que a tecnologia deve ser um direito, não um
+                                    privilégio exclusivo de grandes corporações. Nossa missão é democratizar ferramentas
+                                    de gestão de alta performance, simples e acessíveis.</p>
+                                <p class="mt-2 leading-relaxed">Desenvolvemos soluções <strong>Local-First</strong>
+                                    (seus dados ficam com você), garantindo que pequenos empreendedores, autônomos e
+                                    famílias brasileiras tenham controle total sobre suas informações, sem mensalidades
+                                    abusivas e sem depender de conexão constante com a internet.</p>
+                            </div>
+
+                            <!-- PRIVACY (STANDARD) -->
+                            <div class="border-t border-gray-100 pt-6">
+                                <h3 class="font-bold text-gray-900 mb-2">Política de Privacidade</h3>
+                                <p>Ao utilizar este sistema, você concorda que:</p>
+                                <ul class="list-disc pl-5 mt-2 space-y-1">
+                                    <li><strong>100% Offline:</strong> Seus dados financeiros e de clientes não saem
+                                        deste
+                                        dispositivo.</li>
+                                    <li><strong>Responsabilidade:</strong> O backup (cópia de segurança) é
+                                        responsabilidade exclusiva do usuário.</li>
+                                    <li><strong>Isenção:</strong> A Plena não tem acesso aos seus dados e não pode
+                                        recuperá-los em caso de perda do equipamento.</li>
+                                </ul>
+                            </div>
+                        </div>
+
+                        <!-- CONTACT (STANDARD) -->
+                        <div class="mt-8 bg-gray-50 p-6 rounded-xl border border-gray-200">
+                            <h3 class="font-bold text-gray-900 mb-2">Precisa de Suporte ou Personalização?</h3>
+                            <p class="text-sm text-gray-600 mb-4">Tem uma ideia de app ou precisa adaptar este sistema
+                                para seu negócio?</p>
+                            <a href="mailto:tecnologia@plenainformatica.com.br"
+                                class="inline-flex items-center text-plena-blue font-bold hover:underline">
+                                <i data-lucide="mail" class="w-4 h-4 mr-2"></i> tecnologia@plenainformatica.com.br
+                            </a>
+                        </div>
+                    </div>
+                </div>
+            </section>
+        </div>
+    </main>
+
+    <!-- OS MODAL (Create/Edit) -->
+    <div id="orderModal" class="fixed inset-0 modal-backdrop hidden z-50 flex items-center justify-center p-2 sm:p-4">
+        <div class="bg-white rounded-2xl shadow-2xl w-full max-w-2xl max-h-[95vh] overflow-y-auto">
+            <div class="flex justify-between items-center p-6 border-b sticky top-0 bg-white z-10">
+                <h3 class="text-lg font-bold text-gray-800" id="modal-title">Nova Ordem de Serviço</h3>
+                <button onclick="closeModal('orderModal')" class="text-gray-400 hover:text-red-500"><i
+                        data-lucide="x"></i></button>
+            </div>
+            <form onsubmit="submitOrder(event)" class="p-6 space-y-4">
+                <input type="hidden" id="os-id">
+
+                <!-- Client Info -->
+                <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+                    <div>
+                        <label class="text-xs font-bold text-gray-500 uppercase">Cliente</label>
+                        <input type="text" id="os-client" required class="w-full border p-2 rounded-lg bg-gray-50"
+                            placeholder="Nome Completo">
+                    </div>
+                    <div>
+                        <label class="text-xs font-bold text-gray-500 uppercase">WhatsApp/Contato</label>
+                        <input type="text" id="os-contact" class="w-full border p-2 rounded-lg bg-gray-50"
+                            placeholder="(00) 00000-0000">
+                    </div>
+                </div>
+
+                <!-- Device Info -->
+                <div class="bg-blue-50 p-4 rounded-xl border border-blue-100">
+                    <h4 class="text-sm font-bold text-plena-blue mb-3 flex items-center"><i data-lucide="smartphone"
+                            class="w-4 h-4 mr-2"></i> Dados do Aparelho</h4>
+                    <div class="grid grid-cols-2 gap-3 mb-3">
+                        <input type="text" id="os-device" required placeholder="Equipamento (ex: iPhone 11)"
+                            class="w-full border p-2 rounded-lg text-sm">
+                        <input type="text" id="os-brand" placeholder="Marca (ex: Apple)"
+                            class="w-full border p-2 rounded-lg text-sm">
+                    </div>
+                    <div class="grid grid-cols-2 gap-3">
+                        <input type="text" id="os-serial" placeholder="IMEI / Serial"
+                            class="w-full border p-2 rounded-lg text-sm font-mono">
+                        <input type="text" id="os-pass" placeholder="Senha / Padrão"
+                            class="w-full border p-2 rounded-lg text-sm bg-yellow-50">
+                    </div>
+                </div>
+
+                <!-- Problem & Diagnosis -->
+                <div>
+                    <label class="text-xs font-bold text-gray-500 uppercase">Defeito Relatado</label>
+                    <textarea id="os-defect" required rows="2" class="w-full border p-2 rounded-lg"
+                        placeholder="O que está acontecendo?"></textarea>
+                </div>
+                <div>
+                    <label class="text-xs font-bold text-gray-500 uppercase">Laudo Técnico / Serviço Realizado</label>
+                    <textarea id="os-diagnosis" rows="2" class="w-full border p-2 rounded-lg"
+                        placeholder="Diagnóstico técnico..."></textarea>
+                </div>
+
+                <!-- Values -->
+                <div class="grid grid-cols-3 gap-4 bg-gray-50 p-4 rounded-xl">
+                    <div>
+                        <label class="text-xs font-bold text-gray-500 uppercase">Peças R$</label>
+                        <input type="number" step="0.01" id="os-parts"
+                            class="w-full border p-2 rounded-lg font-bold text-gray-700" placeholder="0.00">
+                    </div>
+                    <div>
+                        <label class="text-xs font-bold text-gray-500 uppercase">Mão de Obra R$</label>
+                        <input type="number" step="0.01" id="os-labor"
+                            class="w-full border p-2 rounded-lg font-bold text-gray-700" placeholder="0.00">
+                    </div>
+                    <div>
+                        <label class="text-xs font-bold text-gray-500 uppercase">Desconto R$</label>
+                        <input type="number" step="0.01" id="os-discount"
+                            class="w-full border p-2 rounded-lg font-bold text-red-500" placeholder="0.00">
+                    </div>
+                </div>
+
+                <!-- Accessories Checklist -->
+                <div>
+                    <label class="text-xs font-bold text-gray-500 uppercase mb-2 block">Acessórios Deixados</label>
+                    <div class="flex gap-4 flex-wrap">
+                        <label class="flex items-center gap-2 cursor-pointer"><input type="checkbox" id="chk-charger">
+                            Carregador</label>
+                        <label class="flex items-center gap-2 cursor-pointer"><input type="checkbox" id="chk-case">
+                            Capa</label>
+                        <label class="flex items-center gap-2 cursor-pointer"><input type="checkbox" id="chk-chip">
+                            Chip/SD</label>
+                        <label class="flex items-center gap-2 cursor-pointer"><input type="checkbox" id="chk-box">
+                            Caixa</label>
+                    </div>
+                </div>
+
+                <div class="pt-4 sticky bottom-0 bg-white border-t mt-4">
+                    <button type="submit"
+                        class="w-full bg-plena-blue text-white py-4 rounded-xl font-bold hover:bg-plena-dark text-lg shadow-lg">Salvar
+                        O.S.</button>
+                </div>
+            </form>
+        </div>
+    </div>
+
+    <!-- OS VIEW (PRINT) -->
+    <div id="orderViewModal"
+        class="fixed inset-0 modal-backdrop hidden z-50 flex items-center justify-center p-4 z-[60]">
+        <div class="bg-white rounded-xl shadow-2xl w-full max-w-2xl max-h-[95vh] overflow-y-auto relative">
+            <button onclick="closeModal('orderViewModal')"
+                class="absolute right-4 top-4 text-gray-400 hover:text-black print:hidden"><i
+                    data-lucide="x"></i></button>
+
+            <div id="invoice-print" class="p-8 text-sm">
+                <!-- Header -->
+                <div class="flex justify-between items-start border-b pb-6 mb-6">
+                    <div>
+                        <h1 class="text-2xl font-bold text-plena-blue tracking-tight">ORDEM DE SERVIÇO</h1>
+                        <p class="font-mono text-gray-500 text-lg mt-1" id="v-os-id">#0000</p>
+                    </div>
+                    <div class="text-right">
+                        <h2 class="font-bold text-gray-800 text-lg">ASSISTÊNCIA TÉCNICA</h2>
+                        <p class="text-gray-500" id="v-date">Data: --/--/----</p>
+                    </div>
+                </div>
+
+                <!-- Client & Device -->
+                <div class="grid grid-cols-2 gap-8 mb-6">
+                    <div>
+                        <h3 class="text-xs font-bold text-gray-400 uppercase mb-1">Cliente</h3>
+                        <p class="font-bold text-lg text-gray-800" id="v-client">Nome do Cliente</p>
+                        <p class="text-gray-600" id="v-contact">Tel: --</p>
+                    </div>
+                    <div>
+                        <h3 class="text-xs font-bold text-gray-400 uppercase mb-1">Equipamento</h3>
+                        <p class="font-bold text-gray-800" id="v-device">Modelo</p>
+                        <p class="text-gray-600 text-xs mt-1">S/N: <span id="v-serial" class="font-mono">--</span></p>
+                        <p class="text-gray-600 text-xs">Acessórios: <span id="v-accessories">Nenhum</span></p>
+                    </div>
+                </div>
+
+                <!-- Defect & Diagnosis -->
+                <div class="bg-gray-50 rounded-lg p-4 mb-6 border border-gray-100">
+                    <div class="mb-4">
+                        <span class="block text-xs font-bold text-gray-400 uppercase">Defeito Relatado</span>
+                        <p class="text-gray-800 italic" id="v-defect">...</p>
+                    </div>
+                    <div>
+                        <span class="block text-xs font-bold text-gray-400 uppercase">Laudo / Serviço</span>
+                        <p class="text-gray-800 font-medium" id="v-diagnosis">...</p>
+                    </div>
+                </div>
+
+                <!-- Totals -->
+                <div class="flex justify-end mb-8">
+                    <div class="w-48 space-y-2">
+                        <div class="flex justify-between text-gray-600"><span>Peças</span> <span
+                                id="v-parts-val">0,00</span></div>
+                        <div class="flex justify-between text-gray-600"><span>Mão de Obra</span> <span
+                                id="v-labor-val">0,00</span></div>
+                        <div class="flex justify-between text-red-500 text-xs"><span>Desconto</span> <span
+                                id="v-disc-val">-0,00</span></div>
+                        <div class="flex justify-between font-bold text-xl text-plena-blue border-t pt-2 mt-2">
+                            <span>TOTAL</span> <span id="v-total-val">0,00</span>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Legal Terms -->
+                <div class="text-[10px] text-gray-500 text-justify border-t pt-4">
+                    <p class="mb-2"><strong>TERMOS DE GARANTIA:</strong> Garantia de 90 dias úteis apenas para os
+                        serviços prestados e peças substituídas, não cobrindo mau uso, quedas, contato com líquidos ou
+                        violação do selo de garantia.</p>
+                    <p><strong>ABANDONO:</strong> Equipamentos não retirados em até 90 dias após a comunicação de
+                        conclusão serão considerados abandonados e poderão ser vendidos para custeio das despesas (Art.
+                        1.275 do Código Civil).</p>
+                    <div class="mt-8 flex justify-between pt-8">
+                        <div class="text-center w-1/3 border-t border-gray-300 pt-2">Assinatura do Técnico</div>
+                        <div class="text-center w-1/3 border-t border-gray-300 pt-2">Assinatura do Cliente</div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Action Buttons -->
+            <div class="bg-gray-100 p-4 space-y-3 print:hidden">
+                <div class="flex gap-3 items-center bg-white p-2 rounded-lg border border-gray-200">
+                    <span class="text-xs font-bold uppercase text-gray-500 ml-2">Status:</span>
+                    <select id="v-status-select" onchange="updateStatus(this.value)"
+                        class="flex-1 border-none bg-transparent font-bold text-gray-800 outline-none cursor-pointer">
+                        <option value="received">📥 Recebido</option>
+                        <option value="analyzing">🔍 Em Análise</option>
+                        <option value="waiting_parts">⚙️ Aguardando Peça</option>
+                        <option value="ready">✅ Pronto</option>
+                        <option value="delivered">🚀 Entregue</option>
+                    </select>
+                </div>
+                <div class="flex gap-3">
+                    <button onclick="editOrder()"
+                        class="flex-1 bg-white border border-gray-300 py-3 rounded-lg font-bold hover:bg-gray-50 flex justify-center gap-2"><i
+                            data-lucide="edit-3" class="w-4 h-4"></i> Editar</button>
+                    <button onclick="shareWA()"
+                        class="flex-1 bg-[#25D366] text-white py-3 rounded-lg font-bold hover:bg-[#128C7E] flex justify-center gap-2"><i
+                            data-lucide="message-circle" class="w-4 h-4"></i> WhatsApp</button>
+                    <button onclick="window.print()"
+                        class="px-4 border border-gray-300 bg-white rounded-lg hover:bg-gray-50"><i
+                            data-lucide="printer" class="w-5 h-5"></i></button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- TRANSACTION MODAL (Standard) -->
+    <div id="transModal" class="fixed inset-0 modal-backdrop hidden z-50 flex items-center justify-center p-4">
+        <div class="bg-white rounded-2xl shadow-2xl w-full max-w-sm p-6">
+            <h3 class="text-lg font-bold text-gray-800 mb-4">Lançar no Caixa</h3>
+            <form onsubmit="submitTrans(event)" class="space-y-4">
+                <div class="flex gap-2">
+                    <label
+                        class="flex-1 cursor-pointer bg-green-50 border border-green-200 p-2 rounded text-center"><input
+                            type="radio" name="tr-type" value="income" class="hidden" checked> <span
+                            class="text-green-700 font-bold">Entrada</span></label>
+                    <label class="flex-1 cursor-pointer bg-red-50 border border-red-200 p-2 rounded text-center"><input
+                            type="radio" name="tr-type" value="expense" class="hidden"> <span
+                            class="text-red-700 font-bold">Saída</span></label>
+                </div>
+                <input type="text" id="tr-desc" required placeholder="Descrição" class="w-full border p-2 rounded-lg">
+                <input type="number" step="0.01" id="tr-amount" required placeholder="Valor R$"
+                    class="w-full border p-2 rounded-lg">
+                <input type="date" id="tr-date" required class="w-full border p-2 rounded-lg">
+                <button type="submit" class="w-full bg-gray-900 text-white py-3 rounded-lg font-bold">Salvar</button>
+                <button type="button" onclick="closeModal('transModal')"
+                    class="w-full text-gray-500 py-2">Cancelar</button>
+            </form>
+        </div>
+    </div>
+
+    <script>
+        const DB_KEY = 'plena_assistencia_v1';
+        let db = JSON.parse(localStorage.getItem(DB_KEY)) || { orders: [], transactions: [] };
+        const save = () => localStorage.setItem(DB_KEY, JSON.stringify(db));
+
+        const fmtMoney = (v) => v.toLocaleString('pt-BR', { style: 'currency', currency: 'BRL' });
+        const fmtDate = (d) => { if (!d) return '--/--'; const p = d.split('-'); return `${p[2]}/${p[1]}/${p[0]}`; };
+        const getID = () => Date.now().toString(36).substr(-6).toUpperCase(); // Shorter ID for OS
+
+        function init() {
+            lucide.createIcons();
+            document.getElementById('tr-date').value = new Date().toISOString().split('T')[0];
+            renderDashboard();
+
+            // Security Lock
+            setInterval(() => {
+                const f = document.querySelector('.sidebar .border-t');
+                if (f && !f.innerText.includes('Plena')) { document.body.innerHTML = '<h1>VIOLAÇÃO</h1>'; throw 'Piracy'; }
+            }, 5000);
+        }
+
+        // --- CORE LOGIC ---
+        function submitOrder(e) {
+            e.preventDefault();
+            const id = document.getElementById('os-id').value;
+            const parts = parseFloat(document.getElementById('os-parts').value) || 0;
+            const labor = parseFloat(document.getElementById('os-labor').value) || 0;
+            const disc = parseFloat(document.getElementById('os-discount').value) || 0;
+            const acc = [];
+            ['charger', 'case', 'chip', 'box'].forEach(k => { if (document.getElementById('chk-' + k).checked) acc.push(document.getElementById('chk-' + k).parentNode.innerText.trim()); });
+
+            const data = {
+                id: id || getID(),
+                client: document.getElementById('os-client').value,
+                contact: document.getElementById('os-contact').value,
+                device: document.getElementById('os-device').value,
+                brand: document.getElementById('os-brand').value,
+                serial: document.getElementById('os-serial').value,
+                pass: document.getElementById('os-pass').value,
+                defect: document.getElementById('os-defect').value,
+                diagnosis: document.getElementById('os-diagnosis').value,
+                parts, labor, disc, total: (parts + labor) - disc,
+                accessories: acc,
+                date: id ? db.orders.find(x => x.id === id).date : new Date().toISOString().split('T')[0],
+                status: id ? db.orders.find(x => x.id === id).status : 'received'
+            };
+
+            if (id) {
+                const idx = db.orders.findIndex(x => x.id === id);
+                if (idx !== -1) db.orders[idx] = data;
+            } else {
+                db.orders.unshift(data);
+            }
+            save(); closeModal('orderModal'); renderDashboard(); renderOrders();
+            if (currentOrderId === id) openOrderView(id); // Refresh view if editing open
+        }
+
+        let currentOrderId = null;
+        function openOrderView(id) {
+            const o = db.orders.find(x => x.id === id);
+            if (!o) return;
+            currentOrderId = id;
+
+            // Fill View
+            document.getElementById('v-os-id').innerText = '#' + o.id;
+            document.getElementById('v-date').innerText = fmtDate(o.date);
+            document.getElementById('v-client').innerText = o.client;
+            document.getElementById('v-contact').innerText = o.contact || 'N/A';
+            document.getElementById('v-device').innerText = `${o.device} ${o.brand ? ' - ' + o.brand : ''}`;
+            document.getElementById('v-serial').innerText = o.serial || 'N/D';
+            document.getElementById('v-accessories').innerText = o.accessories.length ? o.accessories.join(', ') : 'Nenhum';
+            document.getElementById('v-defect').innerText = o.defect;
+            document.getElementById('v-diagnosis').innerText = o.diagnosis || 'Ainda sob análise';
+
+            document.getElementById('v-parts-val').innerText = fmtMoney(o.parts);
+            document.getElementById('v-labor-val').innerText = fmtMoney(o.labor);
+            document.getElementById('v-disc-val').innerText = '-' + fmtMoney(o.disc);
+            document.getElementById('v-total-val').innerText = fmtMoney(o.total);
+
+            document.getElementById('v-status-select').value = o.status;
+            document.getElementById('orderViewModal').classList.remove('hidden');
+        }
+
+        function editOrder() {
+            closeModal('orderViewModal');
+            const o = db.orders.find(x => x.id === currentOrderId);
+            if (!o) return;
+
+            document.getElementById('os-id').value = o.id;
+            document.getElementById('os-client').value = o.client;
+            document.getElementById('os-contact').value = o.contact;
+            document.getElementById('os-device').value = o.device;
+            document.getElementById('os-brand').value = o.brand;
+            document.getElementById('os-serial').value = o.serial;
+            document.getElementById('os-pass').value = o.pass;
+            document.getElementById('os-defect').value = o.defect;
+            document.getElementById('os-diagnosis').value = o.diagnosis;
+            document.getElementById('os-parts').value = o.parts;
+            document.getElementById('os-labor').value = o.labor;
+            document.getElementById('os-discount').value = o.disc;
+
+            ['charger', 'case', 'chip', 'box'].forEach(k => {
+                const txt = document.getElementById('chk-' + k).parentNode.innerText.trim();
+                document.getElementById('chk-' + k).checked = o.accessories && o.accessories.includes(txt);
+            });
+
+            document.getElementById('modal-title').innerText = 'Editar O.S. #' + o.id;
+            document.getElementById('orderModal').classList.remove('hidden');
+        }
+
+        function updateStatus(val) {
+            const o = db.orders.find(x => x.id === currentOrderId);
+            if (o) { o.status = val; save(); renderDashboard(); renderOrders(); }
+        }
+
+        function shareWA() {
+            const o = db.orders.find(x => x.id === currentOrderId);
+            let text = `*🔧 Status da OS #${o.id}*\n\nOlá ${o.client.split(' ')[0]},\n`;
+            if (o.status === 'ready') text += `Seu *${o.device}* está PRONTO! ✅\nTotal: *${fmtMoney(o.total)}*.\nPode vir retirar.`;
+            else if (o.status === 'waiting_parts') text += `Precisamos aguardar uma peça para seu ${o.device}.`;
+            else text += `Situação atual do seu aparelho: *${document.getElementById('v-status-select').selectedOptions[0].text.replace(/./, '')}*.`; // Strip icon for simplicity
+
+            window.open(`https://wa.me/55${o.contact.replace(/\D/g, '')}?text=${encodeURIComponent(text)}`);
+        }
+
+        // --- RENDERERS ---
+        function renderDashboard() {
+            const workshop = db.orders.filter(o => ['received', 'analyzing', 'waiting_parts'].includes(o.status)).length;
+            const ready = db.orders.filter(o => o.status === 'ready').length;
+            document.getElementById('dash-workshop').innerText = workshop;
+            document.getElementById('dash-ready').innerText = ready;
+
+            const list = db.orders.slice(0, 4);
+            document.getElementById('latest-orders').innerHTML = list.map(o => renderOrderCard(o)).join('') || '<p class="text-gray-400">Nenhuma OS recente.</p>';
+        }
+
+        function renderOrders() {
+            const term = document.getElementById('order-search').value.toLowerCase();
+            const list = db.orders.filter(o =>
+                o.client.toLowerCase().includes(term) ||
+                o.device.toLowerCase().includes(term) ||
+                o.id.toLowerCase().includes(term)
+            );
+            document.getElementById('orders-list').innerHTML = list.map(o => renderOrderCard(o)).join('') || '<p class="p-4 text-center text-gray-400">Nenhuma O.S. encontrada.</p>';
+        }
+
+        function renderOrderCard(o) {
+            const st = {
+                received: { t: 'Recebido', c: 'text-gray-600', b: 'bg-gray-100' },
+                analyzing: { t: 'Em Análise', c: 'text-blue-600', b: 'bg-blue-100' },
+                waiting_parts: { t: 'Peça', c: 'text-yellow-600', b: 'bg-yellow-100' },
+                ready: { t: 'Pronto', c: 'text-green-600', b: 'bg-green-100' },
+                delivered: { t: 'Entregue', c: 'text-gray-400', b: 'bg-gray-50' }
+            }[o.status] || { t: '?', c: '', b: '' };
+
+            return `<div class="p-4 flex justify-between items-center bg-white border-b border-gray-50 hover:bg-gray-50 cursor-pointer transition-colors" onclick="openOrderView('${o.id}')">
+                <div class="flex items-center gap-3">
+                    <div class="h-10 w-10 rounded-full flex items-center justify-center font-bold text-xs ${st.b} ${st.c}">${o.id.substr(-2)}</div>
+                    <div>
+                        <p class="font-bold text-gray-800">${o.client}</p>
+                        <p class="text-xs text-gray-500">${o.device} • ${fmtDate(o.date)}</p>
+                    </div>
+                </div>
+                <div class="text-right">
+                     <span class="block text-[10px] font-bold uppercase tracking-wider mb-1 ${st.c}">${st.t}</span>
+                     ${o.total > 0 ? `<span class="font-bold text-gray-800">${fmtMoney(o.total)}</span>` : ''}
+                </div>
+            </div>`;
+        }
+
+        // --- TRANSACTIONS REUSE ---
+        function submitTrans(e) {
+            e.preventDefault();
+            const type = document.querySelector('input[name="tr-type"]:checked').value;
+            db.transactions.push({
+                id: Date.now().toString(36),
+                type,
+                desc: document.getElementById('tr-desc').value,
+                val: parseFloat(document.getElementById('tr-amount').value),
+                date: document.getElementById('tr-date').value
+            });
+            save(); closeModal('transModal'); e.target.reset(); renderTransactions();
+        }
+        function renderTransactions() {
+            const list = db.transactions.slice().reverse();
+            document.getElementById('trans-list').innerHTML = list.map(t => `
+                <tr class="border-b border-gray-50 last:border-0 hover:bg-gray-50">
+                    <td class="px-6 py-3 text-gray-500">${fmtDate(t.date)}</td>
+                    <td class="px-6 py-3 font-medium text-gray-700">${t.desc}</td>
+                    <td class="px-6 py-3 text-right font-bold ${t.type === 'income' ? 'text-green-600' : 'text-red-500'}">${t.type === 'income' ? '+' : '-'} ${fmtMoney(t.val)}</td>
+                    <td class="px-6 py-3 text-center"><button onclick="delTrans('${t.id}')" class="text-gray-300 hover:text-red-500">×</button></td>
+                </tr>`).join('');
+        }
+        function delTrans(id) { if (confirm('Apagar?')) { db.transactions = db.transactions.filter(x => x.id !== id); save(); renderTransactions(); } }
+
+        // --- NAVIGATION ---
+        function router(view) {
+            document.querySelectorAll('.view-section').forEach(el => el.classList.add('hide'));
+            document.querySelectorAll('.nav-item').forEach(el => { el.classList.remove('bg-white/10', 'text-white'); el.classList.add('text-gray-400'); });
+
+            document.getElementById(`view-${view}`).classList.remove('hide');
+            document.getElementById(`nav-${view}`).classList.add('bg-white/10', 'text-white');
+            document.getElementById(`nav-${view}`).classList.remove('text-gray-400');
+
+            const titles = {
+                dashboard: 'Visão Geral',
+                orders: 'Ordens de Serviço',
+                transactions: 'Fluxo de Caixa',
+                settings: 'Configurações',
+                instructions: 'Manual de Uso',
+                about: 'Sobre a Plena'
+            };
+            document.getElementById('page-title').innerText = titles[view] || 'Assistência Técnica';
+
+            if (window.innerWidth < 1024) toggleSidebar();
+            if (view === 'dashboard') renderDashboard();
+            if (view === 'orders') renderOrders();
+            if (view === 'transactions') renderTransactions();
+        }
+
+        // --- UTILS ---
+        function toggleSidebar() { document.getElementById('sidebar').classList.toggle('open'); document.getElementById('overlay').classList.toggle('hidden'); }
+        function closeModal(id) { document.getElementById(id).classList.add('hidden'); }
+        function openOrderModal() {
+            document.getElementById('os-id').value = '';
+            document.querySelector('#orderModal form').reset();
+            document.getElementById('modal-title').innerText = 'Nova Ordem de Serviço';
+            document.getElementById('orderModal').classList.remove('hidden');
+        }
+        function openTransModal() { document.getElementById('transModal').classList.remove('hidden'); }
+        function downloadBackup() {
+            const a = document.createElement('a');
+            a.href = "data:text/json;charset=utf-8," + encodeURIComponent(JSON.stringify(db));
+            a.download = `plena_assistencia_${new Date().toISOString().split('T')[0]}.json`; a.click();
+        }
+        function restoreBackup(input) {
+            const reader = new FileReader();
+            reader.onload = (e) => { try { db = JSON.parse(e.target.result); save(); location.reload(); } catch (e) { alert('Erro no arquivo backup.'); } };
+            reader.readAsText(input.files[0]);
+        }
+        function factoryReset() { if (confirm('⚠️ Cuidado! Isso vai apagar TODAS as ordens de serviço e caixa. Continuar?')) { localStorage.removeItem(DB_KEY); location.reload(); } }
+
+        init();
+    </script>
+</body>
+
+</html>

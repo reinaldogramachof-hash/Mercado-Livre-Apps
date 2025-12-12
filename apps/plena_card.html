@@ -1,0 +1,843 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>Plena Card - Gerenciador de Cartões</title>
+
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script>
+        tailwind.config = {
+            theme: {
+                extend: {
+                    colors: {
+                        plena: { indigo: '#4F46E5', dark: '#312E81', black: '#1a1a1a' }, // Indigo Theme for Cards
+                        success: '#10B981', danger: '#EF4444', warning: '#F59E0B'
+                    }
+                }
+            }
+        }
+    </script>
+    <script src="https://unpkg.com/lucide@latest"></script>
+
+    <style>
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+            background-color: #EEF2FF;
+            -webkit-tap-highlight-color: transparent;
+        }
+
+        .hide {
+            display: none !important;
+        }
+
+        .fade-in {
+            animation: fadeIn 0.3s ease-out;
+        }
+
+        @keyframes fadeIn {
+            from {
+                opacity: 0;
+                transform: translateY(5px);
+            }
+
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+
+        .modal-backdrop {
+            background-color: rgba(0, 0, 0, 0.6);
+            backdrop-filter: blur(2px);
+        }
+
+        .card-gradient {
+            background: linear-gradient(135deg, #4F46E5 0%, #312E81 100%);
+        }
+
+        @media (max-width: 1024px) {
+            .sidebar {
+                transform: translateX(-100%);
+                position: fixed;
+                z-index: 50;
+                height: 100vh;
+                width: 280px;
+            }
+
+            .sidebar.open {
+                transform: translateX(0);
+            }
+        }
+
+        @media (min-width: 1025px) {
+            .sidebar {
+                width: 280px;
+                position: fixed;
+                height: 100vh;
+            }
+
+            .main-content {
+                margin-left: 280px;
+            }
+        }
+    </style>
+</head>
+
+<body class="text-gray-800 antialiased">
+
+    <div id="overlay" class="fixed inset-0 bg-black/50 hidden z-40 transition-opacity" onclick="toggleSidebar()"></div>
+
+    <aside id="sidebar"
+        class="sidebar bg-plena-black text-white transition-transform duration-300 flex flex-col shadow-2xl">
+        <div class="h-20 flex items-center px-6 bg-plena-indigo">
+            <i data-lucide="credit-card" class="w-8 h-8 mr-3"></i>
+            <div>
+                <h1 class="text-xl font-bold tracking-tight">PLENA</h1>
+                <p class="text-xs text-white/90 font-medium">Card Manager</p>
+            </div>
+        </div>
+
+        <nav class="p-4 space-y-2 flex-1 overflow-y-auto">
+            <button onclick="router('dashboard')"
+                class="nav-item w-full flex items-center px-4 py-3 rounded-xl hover:bg-white/10 transition-all group active-nav"
+                id="nav-dashboard">
+                <i data-lucide="layout-dashboard" class="w-5 h-5 mr-3 text-gray-400 group-hover:text-white"></i>
+                Dashboard
+            </button>
+            <button onclick="router('cards')"
+                class="nav-item w-full flex items-center px-4 py-3 rounded-xl hover:bg-white/10 transition-all group"
+                id="nav-cards">
+                <i data-lucide="wallet-cards" class="w-5 h-5 mr-3 text-gray-400 group-hover:text-white"></i> Meus
+                Cartões
+            </button>
+            <button onclick="router('invoice')"
+                class="nav-item w-full flex items-center px-4 py-3 rounded-xl hover:bg-white/10 transition-all group"
+                id="nav-invoice">
+                <i data-lucide="file-text" class="w-5 h-5 mr-3 text-gray-400 group-hover:text-white"></i> Faturas
+            </button>
+            <button onclick="router('settings')"
+                class="nav-item w-full flex items-center px-4 py-3 rounded-xl hover:bg-white/10 transition-all group"
+                id="nav-settings">
+                <i data-lucide="settings" class="w-5 h-5 mr-3 text-gray-400 group-hover:text-white"></i> Configurações
+            </button>
+            <button onclick="router('instructions')"
+                class="nav-item w-full flex items-center px-4 py-3 rounded-xl hover:bg-white/10 transition-all group"
+                id="nav-instructions">
+                <i data-lucide="book-open" class="w-5 h-5 mr-3 text-gray-400 group-hover:text-white"></i> Manual de Uso
+            </button>
+            <button onclick="router('about')"
+                class="nav-item w-full flex items-center px-4 py-3 rounded-xl hover:bg-white/10 transition-all group"
+                id="nav-about">
+                <i data-lucide="info" class="w-5 h-5 mr-3 text-gray-400 group-hover:text-white"></i> Saiba Mais
+            </button>
+        </nav>
+
+        <div class="p-6 border-t border-white/10 text-center">
+            <p class="text-xs text-gray-500">Todos os Direitos Reservados &copy; 2025</p>
+            <a href="https://www.plenaaplicativos.com.br" target="_blank"
+                class="text-[10px] text-gray-600 hover:text-plena-indigo transition-colors mt-1 block decoration-0">Plena
+                Apps</a>
+        </div>
+    </aside>
+
+    <main class="main-content min-h-screen flex flex-col">
+        <header
+            class="bg-white h-20 flex items-center justify-between px-4 lg:px-8 sticky top-0 z-30 shadow-sm border-b border-gray-100">
+            <div class="flex items-center gap-4">
+                <button onclick="toggleSidebar()" class="lg:hidden p-2 hover:bg-gray-100 rounded-lg text-gray-600"><i
+                        data-lucide="menu" class="w-6 h-6"></i></button>
+                <div class="flex flex-col">
+                    <h2 id="page-title" class="text-xl font-bold text-gray-800">Dashboard</h2>
+                    <p id="page-subtitle" class="text-xs text-gray-500 hidden"></p>
+                </div>
+            </div>
+            <div class="flex items-center gap-2">
+                <div id="header-actions">
+                    <button onclick="openExpenseModal()"
+                        class="flex items-center px-3 py-2 bg-plena-indigo text-white rounded-lg text-sm font-bold hover:bg-plena-dark transition-all shadow-lg active:scale-95">
+                        <i data-lucide="plus" class="w-5 h-5 sm:mr-2"></i> <span class="hidden sm:inline">Nova
+                            Compra</span> <span class="sm:hidden">Nova</span>
+                    </button>
+                </div>
+            </div>
+        </header>
+
+        <div class="p-4 lg:p-8 flex-1 overflow-y-auto">
+            <!-- DASHBOARD -->
+            <section id="view-dashboard" class="view-section fade-in">
+
+                <!-- Current Month Invoice Summary -->
+                <div class="bg-white p-6 rounded-2xl shadow-sm border border-gray-100 mb-8">
+                    <div class="flex justify-between items-center mb-6">
+                        <h3 class="font-bold text-gray-800 flex items-center text-lg"><i data-lucide="calendar-clock"
+                                class="mr-2 w-5 h-5 text-plena-indigo"></i> Faturas Abertas (Mês Atual)</h3>
+                        <span class="text-xs bg-indigo-100 text-indigo-700 font-bold px-3 py-1 rounded-full uppercase"
+                            id="dash-month-label">JAN/2025</span>
+                    </div>
+
+                    <div id="dash-cards-list" class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4"></div>
+                </div>
+
+                <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+                    <div class="bg-white p-6 rounded-2xl shadow-sm border border-gray-100">
+                        <h3 class="font-bold text-gray-800 mb-4">Limite Disponível</h3>
+                        <div id="limit-list" class="space-y-4"></div>
+                    </div>
+                </div>
+            </section>
+
+            <!-- CARDS -->
+            <section id="view-cards" class="view-section hide fade-in">
+                <div class="flex justify-end mb-4">
+                    <button onclick="openCardModal()"
+                        class="bg-gray-800 text-white px-4 py-2 rounded-lg text-sm font-bold hover:bg-black">+ Adicionar
+                        Cartão</button>
+                </div>
+                <div id="cards-grid" class="grid grid-cols-1 md:grid-cols-2 gap-6"></div>
+            </section>
+
+            <!-- INVOICE DETAIL -->
+            <section id="view-invoice" class="view-section hide fade-in">
+                <div
+                    class="bg-white p-6 rounded-2xl shadow-sm border border-gray-100 mb-6 flex flex-col md:flex-row justify-between items-center gap-4">
+                    <div class="flex items-center gap-4 w-full md:w-auto">
+                        <button onclick="changeMonth(-1)" class="p-2 hover:bg-gray-100 rounded-full"><i
+                                data-lucide="chevron-left"></i></button>
+                        <h3 id="inv-month-display" class="text-xl font-bold text-gray-800 min-w-[150px] text-center">
+                            JANEIRO 2025</h3>
+                        <button onclick="changeMonth(1)" class="p-2 hover:bg-gray-100 rounded-full"><i
+                                data-lucide="chevron-right"></i></button>
+                    </div>
+                    <select id="inv-card-select" onchange="renderInvoiceView()"
+                        class="border p-2 rounded-lg text-sm w-full md:w-auto font-bold text-gray-600">
+                        <option value="all">Todos os Cartões</option>
+                    </select>
+                </div>
+
+                <div class="bg-white rounded-2xl shadow-sm border border-gray-100 overflow-hidden">
+                    <div class="p-6 border-b border-gray-100 flex justify-between items-end bg-gray-50">
+                        <div>
+                            <p class="text-xs text-gray-500 uppercase font-bold tracking-wider">Total da Fatura</p>
+                            <h2 class="text-3xl font-bold text-gray-900" id="inv-total">R$ 0,00</h2>
+                        </div>
+                        <button onclick="payInvoice()"
+                            class="text-sm font-bold text-plena-indigo hover:underline">Marcar como Paga</button>
+                    </div>
+                    <div class="overflow-x-auto">
+                        <table class="w-full text-left">
+                            <thead class="bg-gray-50 text-gray-500 text-xs uppercase">
+                                <tr>
+                                    <th class="px-6 py-3">Dia</th>
+                                    <th class="px-6 py-3">Descrição</th>
+                                    <th class="px-6 py-3">Cartão</th>
+                                    <th class="px-6 py-3">Parc.</th>
+                                    <th class="px-6 py-3 text-right">Valor</th>
+                                    <th class="px-6 py-3"></th>
+                                </tr>
+                            </thead>
+                            <tbody id="inv-items-list" class="divide-y divide-gray-100 text-sm"></tbody>
+                        </table>
+                    </div>
+                </div>
+            </section>
+
+            <!-- SETTINGS -->
+            <section id="view-settings" class="view-section hide fade-in">
+                <div class="bg-white p-6 rounded-2xl shadow-sm border border-gray-100">
+                    <h3 class="font-bold text-gray-800 mb-4 flex items-center"><i data-lucide="shield-alert"
+                            class="w-4 h-4 mr-2"></i> Segurança de Dados</h3>
+                    <div class="bg-blue-50 border border-blue-200 p-3 rounded-lg text-sm text-blue-800 mb-4">
+                        <strong>Importante:</strong> Dados 100% locais. <strong>Faça backups!</strong>
+                    </div>
+                    <button onclick="downloadBackup()"
+                        class="w-full border border-gray-300 py-3 rounded-lg text-sm font-medium hover:bg-gray-50 mb-3 flex justify-center gap-2"><i
+                            data-lucide="download" class="w-4 h-4"></i> Baixar Backup (.json)</button>
+                    <div class="relative mb-6">
+                        <button
+                            class="w-full bg-gray-800 text-white py-3 rounded-lg text-sm font-medium flex justify-center gap-2"><i
+                                data-lucide="upload" class="w-4 h-4"></i> Restaurar Backup</button>
+                        <input type="file" onchange="restoreBackup(this)"
+                            class="absolute inset-0 opacity-0 cursor-pointer">
+                    </div>
+                    <div class="border-t pt-4">
+                        <button onclick="factoryReset()"
+                            class="text-red-500 text-sm hover:underline w-full text-center">Resetar Sistema de
+                            Fábrica</button>
+                    </div>
+                </div>
+            </section>
+
+            <!-- ABOUT -->
+            <section id="view-instructions" class="view-section hide fade-in">
+                <div class="max-w-3xl mx-auto space-y-6">
+                    <div class="bg-white p-8 rounded-2xl shadow-sm border border-gray-100">
+                        <div class="text-center mb-8">
+                            <h2 class="text-2xl font-bold text-gray-800">Manual do Usuário de Cartões</h2>
+                            <p class="text-gray-500">Controle suas faturas e saiba qual o melhor dia para comprar.</p>
+                        </div>
+
+                        <div class="space-y-4">
+                            <!-- ITEM 1: BACKUP -->
+                            <details
+                                class="group bg-blue-50 border border-blue-100 rounded-xl overflow-hidden transition-all duration-300 open:shadow-md">
+                                <summary
+                                    class="flex items-center justify-between p-4 cursor-pointer select-none text-blue-900 font-bold">
+                                    <div class="flex items-center gap-3">
+                                        <div
+                                            class="w-8 h-8 rounded-full bg-blue-200 flex items-center justify-center text-blue-700">
+                                            <i data-lucide="shield-check" class="w-4 h-4"></i>
+                                        </div>
+                                        1. Segurança: Seus dados são seus! (Backup)
+                                    </div>
+                                    <i data-lucide="chevron-down"
+                                        class="w-5 h-5 transition-transform group-open:rotate-180 text-blue-400"></i>
+                                </summary>
+                                <div
+                                    class="p-4 pt-0 text-sm text-gray-600 bg-blue-50 leading-relaxed border-t border-blue-100/50">
+                                    <p class="mb-2">Todas as suas faturas ficam salvas no navegador. Para garantir que
+                                        não perderá nada:</p>
+                                    <ol class="list-decimal pl-5 space-y-2 mt-2 font-medium text-gray-700">
+                                        <li>Vá em <strong>Configurações</strong> no menu.</li>
+                                        <li>Clique em <span class="text-blue-600"><i data-lucide="download"
+                                                    class="w-3 h-3 inline"></i> Baixar Backup</span>.</li>
+                                        <li>Guarde esse arquivo em um local seguro.</li>
+                                        <li>Faça isso mensalmente, após fechar suas faturas!</li>
+                                    </ol>
+                                </div>
+                            </details>
+
+                            <!-- ITEM 2: BEST DAY -->
+                            <details
+                                class="group bg-white border border-gray-200 rounded-xl overflow-hidden transition-all duration-300 open:shadow-md hover:border-plena-indigo">
+                                <summary
+                                    class="flex items-center justify-between p-4 cursor-pointer select-none text-gray-800 font-bold">
+                                    <div class="flex items-center gap-3">
+                                        <div
+                                            class="w-8 h-8 rounded-full bg-indigo-100 flex items-center justify-center text-plena-indigo">
+                                            <i data-lucide="calendar-check-2" class="w-4 h-4"></i>
+                                        </div>
+                                        2. O que é o "Melhor Dia de Compra"?
+                                    </div>
+                                    <i data-lucide="chevron-down"
+                                        class="w-5 h-5 transition-transform group-open:rotate-180 text-gray-400"></i>
+                                </summary>
+                                <div class="p-4 pt-0 text-sm text-gray-600 leading-relaxed">
+                                    <p>É o dia seguinte ao fechamento da fatura. Comprando nesse dia, você ganha até 40
+                                        dias para pagar!</p>
+                                    <ul class="list-disc pl-5 space-y-2 mt-2">
+                                        <li>Cadastre o dia de <strong>Fechamento</strong> do seu cartão corretamente nas
+                                            Configurações.</li>
+                                        <li>O sistema avisará no Dashboard qual cartão é o melhor para usar
+                                            <strong>hoje</strong>.</li>
+                                    </ul>
+                                </div>
+                            </details>
+
+                            <!-- ITEM 3: INSTALLMENTS -->
+                            <details
+                                class="group bg-white border border-gray-200 rounded-xl overflow-hidden transition-all duration-300 open:shadow-md hover:border-gray-300">
+                                <summary
+                                    class="flex items-center justify-between p-4 cursor-pointer select-none text-gray-800 font-bold">
+                                    <div class="flex items-center gap-3">
+                                        <div
+                                            class="w-8 h-8 rounded-full bg-gray-100 flex items-center justify-center text-gray-600">
+                                            <i data-lucide="credit-card" class="w-4 h-4"></i>
+                                        </div>
+                                        3. Compras Parceladas
+                                    </div>
+                                    <i data-lucide="chevron-down"
+                                        class="w-5 h-5 transition-transform group-open:rotate-180 text-gray-400"></i>
+                                </summary>
+                                <div class="p-4 pt-0 text-sm text-gray-600 leading-relaxed">
+                                    <p>O sistema organiza suas parcelas automaticamente:</p>
+                                    <ul class="list-disc pl-5 space-y-1 mt-2">
+                                        <li>Ao lançar uma compra, informe o valor TOTAL e o número de parcelas (ex:
+                                            10x).</li>
+                                        <li>O sistema vai dividir o valor e lançar uma parcela em cada mês futuro (Fev,
+                                            Mar, Abr...).</li>
+                                        <li>Você consegue ver sua dívida futura no Dashboard!</li>
+                                    </ul>
+                                </div>
+                            </details>
+
+                            <!-- ITEM 4: APP INSTALL -->
+                            <details
+                                class="group bg-white border border-gray-200 rounded-xl overflow-hidden transition-all duration-300 open:shadow-md hover:border-gray-300">
+                                <summary
+                                    class="flex items-center justify-between p-4 cursor-pointer select-none text-gray-800 font-bold">
+                                    <div class="flex items-center gap-3">
+                                        <div
+                                            class="w-8 h-8 rounded-full bg-gray-100 flex items-center justify-center text-gray-600">
+                                            <i data-lucide="smartphone" class="w-4 h-4"></i>
+                                        </div>
+                                        4. Instalar no Celular
+                                    </div>
+                                    <i data-lucide="chevron-down"
+                                        class="w-5 h-5 transition-transform group-open:rotate-180 text-gray-400"></i>
+                                </summary>
+                                <div class="p-4 pt-0 text-sm text-gray-600 leading-relaxed">
+                                    <div class="grid grid-cols-1 md:grid-cols-2 gap-4 mt-3">
+                                        <div class="bg-gray-50 p-3 rounded-lg">
+                                            <strong>Android:</strong> Menu do Chrome > "Instalar Aplicativo".
+                                        </div>
+                                        <div class="bg-gray-50 p-3 rounded-lg">
+                                            <strong>iPhone:</strong> Safari > Compartilhar > "Adicionar à Tela de
+                                            Início".
+                                        </div>
+                                    </div>
+                                </div>
+                            </details>
+                        </div>
+
+                        <!-- SUPPORT -->
+                        <div class="mt-8 pt-6 border-t border-gray-100 text-center">
+                            <p class="text-sm text-gray-500 mb-2">Dúvidas?</p>
+                            <a href="mailto:suporte@plenainformatica.com.br"
+                                class="text-plena-indigo font-bold hover:underline text-sm">Fale com o Suporte</a>
+                        </div>
+                    </div>
+                </div>
+            </section>
+
+            <section id="view-about" class="view-section hide fade-in">
+                <div class="max-w-3xl mx-auto space-y-6">
+                    <div class="bg-white p-8 rounded-2xl shadow-sm border border-gray-100">
+                        <h2 class="text-2xl font-bold text-gray-800 mb-6">Sobre a Plena</h2>
+
+                        <!-- DISCLAIMER / LEGAL -->
+                        <div class="bg-red-50 border-l-4 border-red-500 p-4 mb-8">
+                            <div class="flex items-start">
+                                <div class="flex-shrink-0">
+                                    <i data-lucide="alert-triangle" class="h-5 w-5 text-red-600"></i>
+                                </div>
+                                <div class="ml-3">
+                                    <h3 class="text-sm font-bold text-red-800 uppercase tracking-wide">Registro e
+                                        Distribuição</h3>
+                                    <div class="mt-2 text-sm text-red-700 space-y-2">
+                                        <p>Este software é um produto original desenvolvido pela <strong>Plena Soluções
+                                                Digitais</strong>. Sua comercialização é exclusiva através de canais
+                                            oficiais (Loja Oficial no Mercado Livre).</p>
+                                        <p>A revenda não autorizada, engenharia reversa, cópia parcial do código-fonte
+                                            ou distribuição em pacotes "piratas" constitui <strong>violação de
+                                                propriedade intelectual (Lei 9.610/98)</strong>. O infrator está sujeito
+                                            a sanções cíveis e criminais. Valorize o desenvolvimento nacional.</p>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+
+                        <div class="space-y-8 text-sm text-gray-600">
+                            <!-- MISSION -->
+                            <div>
+                                <h3 class="flex items-center text-lg font-bold text-gray-900 mb-2">
+                                    <i data-lucide="heart" class="w-5 h-5 mr-2 text-plena-indigo"></i> Nossa Missão:
+                                    Tecnologia e Acessibilidade
+                                </h3>
+                                <p class="leading-relaxed">A Plena acredita que a tecnologia deve ser um direito, não um
+                                    privilégio exclusivo de grandes corporações. Nossa missão é democratizar ferramentas
+                                    de gestão de alta performance, simples e acessíveis.</p>
+                                <p class="mt-2 leading-relaxed">Desenvolvemos soluções <strong>Local-First</strong>
+                                    (seus dados ficam com você), garantindo que pequenos empreendedores, autônomos e
+                                    famílias brasileiras tenham controle total sobre suas informações, sem mensalidades
+                                    abusivas e sem depender de conexão constante com a internet.</p>
+                            </div>
+
+                            <!-- PRIVACY -->
+                            <div class="border-t border-gray-100 pt-6">
+                                <h3 class="font-bold text-gray-900 mb-2">Política de Privacidade</h3>
+                                <p>Ao utilizar este sistema, você concorda que:</p>
+                                <ul class="list-disc pl-5 mt-2 space-y-1">
+                                    <li><strong>100% Offline:</strong> Seus dados financeiros não saem deste
+                                        dispositivo.</li>
+                                    <li><strong>Responsabilidade:</strong> O backup (cópia de segurança) é
+                                        responsabilidade exclusiva do usuário.</li>
+                                    <li><strong>Isenção:</strong> A Plena não tem acesso aos seus dados e não pode
+                                        recuperá-los em caso de perda do equipamento.</li>
+                                </ul>
+                            </div>
+                        </div>
+
+                        <!-- CONTACT -->
+                        <div class="mt-8 bg-gray-50 p-6 rounded-xl border border-gray-200">
+                            <h3 class="font-bold text-gray-900 mb-2">Precisa de Suporte ou Personalização?</h3>
+                            <p class="text-sm text-gray-600 mb-4">Tem uma ideia de app ou precisa adaptar este sistema
+                                para seu negócio?</p>
+                            <a href="mailto:tecnologia@plenainformatica.com.br"
+                                class="inline-flex items-center text-plena-indigo font-bold hover:underline">
+                                <i data-lucide="mail" class="w-4 h-4 mr-2"></i> tecnologia@plenainformatica.com.br
+                            </a>
+                        </div>
+                    </div>
+                </div>
+            </section>
+        </div>
+    </main>
+
+    <!-- CARD MODAL -->
+    <div id="cardModal" class="fixed inset-0 modal-backdrop hidden z-50 flex items-center justify-center p-4">
+        <div class="bg-white rounded-2xl shadow-2xl w-full max-w-sm p-6">
+            <div class="flex justify-between items-center mb-6">
+                <h3 class="text-lg font-bold text-gray-800">Novo Cartão</h3>
+                <button onclick="closeModal('cardModal')" class="text-gray-400"><i data-lucide="x"></i></button>
+            </div>
+            <form onsubmit="submitCard(event)" class="space-y-4">
+                <input type="text" id="cd-name" required placeholder="Nome (Ex: Nubank)"
+                    class="w-full border p-2 rounded-lg">
+                <input type="text" id="cd-last4" maxlength="4" placeholder="Últimos 4 dígitos (Opcional)"
+                    class="w-full border p-2 rounded-lg">
+                <div>
+                    <label class="text-xs font-bold text-gray-500 uppercase">Limite Total</label>
+                    <input type="number" step="0.01" id="cd-limit" required class="w-full border p-2 rounded-lg"
+                        placeholder="R$ 0,00">
+                </div>
+                <div class="grid grid-cols-2 gap-4">
+                    <div>
+                        <label class="text-xs font-bold text-gray-500 uppercase">Dia Fechamento</label>
+                        <input type="number" min="1" max="31" id="cd-close" required
+                            class="w-full border p-2 rounded-lg" placeholder="Dia">
+                    </div>
+                    <div>
+                        <label class="text-xs font-bold text-gray-500 uppercase">Dia Vencimento</label>
+                        <input type="number" min="1" max="31" id="cd-due" required class="w-full border p-2 rounded-lg"
+                            placeholder="Dia">
+                    </div>
+                </div>
+                <button type="submit"
+                    class="w-full bg-plena-indigo text-white py-3 rounded-xl font-bold hover:bg-plena-dark">Salvar
+                    Cartão</button>
+            </form>
+        </div>
+    </div>
+
+    <!-- EXPENSE MODAL -->
+    <div id="expModal" class="fixed inset-0 modal-backdrop hidden z-50 flex items-center justify-center p-4">
+        <div class="bg-white rounded-2xl shadow-2xl w-full max-w-lg p-6">
+            <div class="flex justify-between items-center mb-6">
+                <h3 class="text-lg font-bold text-gray-800">Nova Compra</h3>
+                <button onclick="closeModal('expModal')" class="text-gray-400"><i data-lucide="x"></i></button>
+            </div>
+            <form onsubmit="submitExpense(event)" class="space-y-4">
+                <select id="ex-card" required class="w-full border p-2 rounded-lg bg-gray-50 font-medium">
+                    <option value="">Selecione o Cartão...</option>
+                </select>
+
+                <input type="text" id="ex-desc" required placeholder="O que você comprou?"
+                    class="w-full border p-2 rounded-lg">
+                <input type="number" step="0.01" id="ex-val" required placeholder="Valor Total (R$)"
+                    class="w-full border p-2 rounded-lg text-lg font-bold">
+                <input type="date" id="ex-date" required class="w-full border p-2 rounded-lg">
+
+                <div>
+                    <label class="text-xs font-bold text-gray-500 uppercase">Parcelas</label>
+                    <select id="ex-inst" class="w-full border p-2 rounded-lg">
+                        <option value="1">À vista (1x)</option>
+                        <option value="2">2x</option>
+                        <option value="3">3x</option>
+                        <option value="4">4x</option>
+                        <option value="5">5x</option>
+                        <option value="6">6x</option>
+                        <option value="7">7x</option>
+                        <option value="8">8x</option>
+                        <option value="9">9x</option>
+                        <option value="10">10x</option>
+                        <option value="11">11x</option>
+                        <option value="12">12x</option>
+                    </select>
+                </div>
+
+                <button type="submit"
+                    class="w-full bg-plena-indigo text-white py-3 rounded-xl font-bold hover:bg-plena-dark">Confirmar
+                    Compra</button>
+            </form>
+        </div>
+    </div>
+
+    <script>
+        const DB_KEY = 'plena_card_v1';
+        let db = JSON.parse(localStorage.getItem(DB_KEY)) || { cards: [], expenses: [] };
+
+        // State for Invoice View
+        let viewDate = new Date(); // Current viewing month
+
+        const save = () => localStorage.setItem(DB_KEY, JSON.stringify(db));
+        const fmtMoney = (v) => v.toLocaleString('pt-BR', { style: 'currency', currency: 'BRL' });
+        const fmtDate = (d) => { if (!d) return '--/--'; const p = d.split('-'); return `${p[2]}/${p[1]}`; };
+        const getID = () => Date.now().toString(36) + Math.random().toString(36).substr(2);
+        const getMonthYear = (d) => `${d.getFullYear()}-${(d.getMonth() + 1).toString().padStart(2, '0')}`;
+        const getMonthName = (d) => d.toLocaleDateString('pt-BR', { month: 'long', year: 'numeric' }).toUpperCase();
+
+        function init() {
+            lucide.createIcons();
+            document.getElementById('ex-date').value = new Date().toISOString().split('T')[0];
+            router('dashboard');
+        }
+
+        function router(view) {
+            document.querySelectorAll('.view-section').forEach(el => el.classList.add('hide'));
+            document.querySelectorAll('.nav-item').forEach(el => { el.classList.remove('bg-white/10', 'text-white'); el.classList.add('text-gray-400'); });
+
+            document.getElementById(`view-${view}`).classList.remove('hide');
+            document.getElementById(`nav-${view}`).classList.add('bg-white/10', 'text-white');
+            document.getElementById(`nav-${view}`).classList.remove('text-gray-400');
+
+            const titles = { dashboard: 'Dashboard', cards: 'Meus Cartões', invoice: 'Faturas', settings: 'Configurações', about: 'Sobre' };
+            document.getElementById('page-title').innerText = titles[view] || 'Plena Card';
+            document.getElementById('header-actions').innerHTML = ''; // Clear
+
+            if (view === 'dashboard' || view === 'invoice' || view === 'cards') {
+                document.getElementById('header-actions').innerHTML = `<button onclick="openExpenseModal()" class="flex items-center px-3 py-2 bg-plena-indigo text-white rounded-lg text-sm font-bold hover:bg-plena-dark transition-all shadow-lg active:scale-95"><i data-lucide="plus" class="w-5 h-5 sm:mr-2"></i> <span class="hidden sm:inline">Nova Compra</span> <span class="sm:hidden">Nova</span></button>`;
+            }
+
+            if (view === 'dashboard') renderDashboard();
+            if (view === 'cards') renderCards();
+            if (view === 'invoice') {
+                viewDate = new Date(); // Reset to today
+                renderInvoiceView();
+            }
+
+            if (window.innerWidth < 1024) toggleSidebar();
+        }
+
+        function toggleSidebar() { document.getElementById('sidebar').classList.toggle('open'); document.getElementById('overlay').classList.toggle('hidden'); }
+        function closeModal(id) { document.getElementById(id).classList.add('hidden'); }
+        function openCardModal() { document.querySelector('#cardModal form').reset(); document.getElementById('cardModal').classList.remove('hidden'); }
+
+        function openExpenseModal() {
+            if (db.cards.length === 0) return alert('Cadastre um cartão primeiro na aba "Meus Cartões".');
+            document.querySelector('#expModal form').reset();
+            document.getElementById('ex-card').innerHTML = '<option value="">Selecione o Cartão...</option>' + db.cards.map(c => `<option value="${c.id}">${c.name}</option>`).join('');
+            document.getElementById('ex-date').value = new Date().toISOString().split('T')[0];
+            document.getElementById('expModal').classList.remove('hidden');
+        }
+
+        function submitCard(e) {
+            e.preventDefault();
+            const c = {
+                id: getID(),
+                name: document.getElementById('cd-name').value,
+                last4: document.getElementById('cd-last4').value,
+                limit: parseFloat(document.getElementById('cd-limit').value) || 0,
+                closeDay: parseInt(document.getElementById('cd-close').value),
+                dueDay: parseInt(document.getElementById('cd-due').value)
+            };
+            db.cards.push(c);
+            save(); closeModal('cardModal');
+            if (!document.getElementById('view-cards').classList.contains('hide')) renderCards();
+            else router('cards');
+        }
+
+        function submitExpense(e) {
+            e.preventDefault();
+            const cardId = document.getElementById('ex-card').value;
+            const desc = document.getElementById('ex-desc').value;
+            const valTotal = parseFloat(document.getElementById('ex-val').value) || 0;
+            const dateStr = document.getElementById('ex-date').value;
+            const installments = parseInt(document.getElementById('ex-inst').value);
+
+            const card = db.cards.find(c => c.id === cardId);
+            const purchaseDate = new Date(dateStr + 'T12:00:00'); // Fix TZ issues
+
+            const valPerInst = valTotal / installments;
+
+            // Generate Installments
+            for (let i = 1; i <= installments; i++) {
+                // Determine Invoice Month for this installment
+                // Logic: Start with purchase date. If day >= closeDay, move to next month.
+                // Then add (i-1) months for subsequent installments.
+
+                let targetDate = new Date(purchaseDate);
+
+                // If buying on closing day or after, it goes to next month
+                if (targetDate.getDate() >= card.closeDay) {
+                    targetDate.setMonth(targetDate.getMonth() + 1);
+                }
+
+                // Add months for installments 2, 3...
+                targetDate.setMonth(targetDate.getMonth() + (i - 1));
+
+                const invoiceMonth = getMonthYear(targetDate);
+
+                db.expenses.push({
+                    id: getID(),
+                    cardId,
+                    desc: `${desc} (${i}/${installments})`,
+                    val: valPerInst,
+                    date: dateStr, // Purchase date remains original
+                    invoiceMonth: invoiceMonth, // This is the key for grouping
+                    installment: i,
+                    totalInstallments: installments,
+                    paid: false
+                });
+            }
+
+            save(); closeModal('expModal');
+            router('invoice'); // Go to invoices to see result
+        }
+
+        function deleteExpense(id) {
+            if (confirm('Apagar este lançamento?')) {
+                db.expenses = db.expenses.filter(e => e.id !== id);
+                save(); renderInvoiceView();
+            }
+        }
+
+        // --- RENDERS ---
+
+        function renderDashboard() {
+            const today = new Date();
+            const currentMonth = getMonthYear(today);
+            document.getElementById('dash-month-label').innerText = getMonthName(today);
+
+            // Invoice Summary Cards
+            document.getElementById('dash-cards-list').innerHTML = db.cards.map(c => {
+                const total = db.expenses.filter(e => e.cardId === c.id && e.invoiceMonth === currentMonth).reduce((a, b) => a + b.val, 0);
+                return `
+                <div class="card-gradient p-5 rounded-2xl text-white shadow-lg relative overflow-hidden group hover:scale-[1.02] transition-transform cursor-pointer" onclick="router('invoice')">
+                    <div class="absolute right-[-20px] top-[-20px] opacity-10"><i data-lucide="credit-card" class="w-32 h-32"></i></div>
+                    <div class="flex justify-between items-start mb-6">
+                        <span class="font-bold text-sm opacity-80">${c.name} •••• ${c.last4 || '****'}</span>
+                        <i data-lucide="contactless" class="w-5 h-5 opacity-50"></i>
+                    </div>
+                    <p class="text-xs opacity-70 uppercase tracking-wider">Fatura Atual (${c.dueDay})</p>
+                    <h3 class="text-2xl font-bold">${fmtMoney(total)}</h3>
+                </div>`;
+            }).join('') || '<div class="col-span-3 text-center py-8 text-gray-400">Nenhum cartão cadastrado.</div>';
+
+            // Limit List
+            document.getElementById('limit-list').innerHTML = db.cards.map(c => {
+                // Calculate used limit: All unpaid unpaid installments for future or present
+                // Naive approach: Sum of all expenses in DB minus paid ones? No, user manually marks invoices as paid.
+                // Assuming "Paid" mark on invoice clears limit. NOT IMPLEMENTED complex logic.
+                // Simple logic: total limit - sum of all unpaid expenses in DB.
+                const used = db.expenses.filter(e => e.cardId === c.id && !e.paid).reduce((a, b) => a + b.val, 0);
+                const pct = Math.min((used / c.limit) * 100, 100);
+
+                return `
+                <div>
+                     <div class="flex justify-between text-sm mb-1">
+                        <span class="font-bold text-gray-700">${c.name}</span>
+                        <span class="text-gray-500">${fmtMoney(c.limit - used)} disp.</span>
+                    </div>
+                    <div class="h-2 bg-gray-100 rounded-full overflow-hidden">
+                        <div class="h-full bg-plena-indigo" style="width: ${pct}%"></div>
+                    </div>
+                </div>`;
+            }).join('');
+
+            lucide.createIcons();
+        }
+
+        function renderCards() {
+            document.getElementById('cards-grid').innerHTML = db.cards.map(c => `
+                <div class="bg-white p-6 rounded-2xl shadow-sm border border-gray-100">
+                    <div class="flex justify-between items-center mb-4">
+                        <div class="flex items-center gap-3">
+                            <div class="bg-indigo-50 p-3 rounded-lg text-indigo-600"><i data-lucide="credit-card"></i></div>
+                            <div>
+                                <h3 class="font-bold text-gray-800">${c.name}</h3>
+                                <p class="text-xs text-gray-500">**** ${c.last4 || '****'}</p>
+                            </div>
+                        </div>
+                        <button onclick="deleteCard('${c.id}')" class="text-gray-300 hover:text-red-500"><i data-lucide="trash-2" class="w-4 h-4"></i></button>
+                    </div>
+                    <div class="grid grid-cols-3 gap-4 text-center border-t pt-4">
+                        <div>
+                            <p class="text-[10px] uppercase font-bold text-gray-400">Limite</p>
+                            <p class="font-bold text-gray-800">${fmtMoney(c.limit)}</p>
+                        </div>
+                        <div>
+                            <p class="text-[10px] uppercase font-bold text-gray-400">Fecha</p>
+                            <p class="font-bold text-gray-800 underline decoration-red-200">Dia ${c.closeDay}</p>
+                        </div>
+                        <div>
+                            <p class="text-[10px] uppercase font-bold text-gray-400">Vence</p>
+                            <p class="font-bold text-gray-800 underline decoration-green-200">Dia ${c.dueDay}</p>
+                        </div>
+                    </div>
+                </div>
+            `).join('');
+            lucide.createIcons();
+        }
+
+        function deleteCard(id) {
+            if (confirm('Excluir cartão e todas as despesas associadas?')) {
+                db.cards = db.cards.filter(c => c.id !== id);
+                db.expenses = db.expenses.filter(e => e.cardId !== id);
+                save(); renderCards();
+            }
+        }
+
+        function changeMonth(delta) {
+            viewDate.setMonth(viewDate.getMonth() + delta);
+            renderInvoiceView();
+        }
+
+        function renderInvoiceView() {
+            // Update Select if empty
+            const sel = document.getElementById('inv-card-select');
+            if (sel.options.length === 1 && db.cards.length > 0) {
+                db.cards.forEach(c => {
+                    const opt = document.createElement('option');
+                    opt.value = c.id; opt.innerText = c.name;
+                    sel.appendChild(opt);
+                });
+            }
+
+            const monthStr = getMonthYear(viewDate);
+            document.getElementById('inv-month-display').innerText = getMonthName(viewDate);
+
+            const selectedCard = sel.value;
+
+            let items = db.expenses.filter(e => e.invoiceMonth === monthStr);
+            if (selectedCard !== 'all') items = items.filter(e => e.cardId === selectedCard);
+
+            const total = items.reduce((a, b) => a + b.val, 0);
+            document.getElementById('inv-total').innerText = fmtMoney(total);
+
+            document.getElementById('inv-items-list').innerHTML = items.sort((a, b) => a.date.localeCompare(b.date)).map(e => {
+                const c = db.cards.find(x => x.id === e.cardId);
+                return `
+                <tr class="${e.paid ? 'opacity-40' : ''}">
+                    <td class="px-6 py-4 text-gray-500 font-mono">${fmtDate(e.date)}</td>
+                    <td class="px-6 py-4 font-bold text-gray-800">${e.desc}</td>
+                    <td class="px-6 py-4 text-xs bg-gray-50 rounded"><i data-lucide="credit-card" class="w-3 h-3 inline mr-1"></i> ${c ? c.name : 'Unknown'}</td>
+                    <td class="px-6 py-4 text-center text-xs text-gray-500">${e.installment}/${e.totalInstallments}</td>
+                    <td class="px-6 py-4 text-right font-bold text-gray-800">${fmtMoney(e.val)}</td>
+                    <td class="px-6 py-4 text-right"><button onclick="deleteExpense('${e.id}')" class="text-gray-300 hover:text-red-500">×</button></td>
+                </tr>`;
+            }).join('');
+
+            lucide.createIcons();
+        }
+
+        function payInvoice() {
+            if (confirm('Marcar todos os lançamentos desta fatura como Pagos? Isso liberará o limite.')) {
+                const monthStr = getMonthYear(viewDate);
+                const selectedCard = document.getElementById('inv-card-select').value;
+
+                db.expenses.forEach(e => {
+                    if (e.invoiceMonth === monthStr && (selectedCard === 'all' || e.cardId === selectedCard)) {
+                        e.paid = true;
+                    }
+                });
+                save(); renderInvoiceView();
+            }
+        }
+
+        function downloadBackup() { const a = document.createElement('a'); a.href = "data:text/json;charset=utf-8," + encodeURIComponent(JSON.stringify(db)); a.download = `plena_card.json`; a.click(); }
+        function restoreBackup(input) { const reader = new FileReader(); reader.onload = (e) => { try { db = JSON.parse(e.target.result); save(); location.reload(); } catch (e) { alert('Erro no arquivo'); } }; reader.readAsText(input.files[0]); }
+        function factoryReset() { if (confirm('Apagar tudo?')) { localStorage.removeItem(DB_KEY); location.reload(); } }
+
+        // SECURITY LOCK
+        setInterval(() => {
+            const footer = document.querySelector('.sidebar .border-t');
+            if (footer && !footer.innerText.includes('Plena')) { document.body.innerHTML = '<div style="background:#111;color:red;height:100vh;display:flex;align-items:center;justify-content:center;"><h1>VIOLAÇÃO DE SEGURANÇA</h1></div>'; throw new Error("Piracy"); }
+        }, 8000);
+
+        init();
+    </script>
+</body>
+
+</html>

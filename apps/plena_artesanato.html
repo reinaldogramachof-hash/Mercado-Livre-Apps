@@ -1,0 +1,858 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>Plena Artesanato - Precificação</title>
+
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script>
+        tailwind.config = {
+            theme: {
+                extend: {
+                    colors: {
+                        plena: { pink: '#db2777', dark: '#be185d', black: '#1a1a1a' }, // Pink Theme for Crafts
+                        success: '#10B981', danger: '#EF4444', warning: '#F59E0B'
+                    }
+                }
+            }
+        }
+    </script>
+    <script src="https://unpkg.com/lucide@latest"></script>
+
+    <style>
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+            background-color: #FDF2F8;
+            -webkit-tap-highlight-color: transparent;
+        }
+
+        .hide {
+            display: none !important;
+        }
+
+        .fade-in {
+            animation: fadeIn 0.3s ease-out;
+        }
+
+        @keyframes fadeIn {
+            from {
+                opacity: 0;
+                transform: translateY(5px);
+            }
+
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+
+        .modal-backdrop {
+            background-color: rgba(0, 0, 0, 0.6);
+            backdrop-filter: blur(2px);
+        }
+
+        @media (max-width: 1024px) {
+            .sidebar {
+                transform: translateX(-100%);
+                position: fixed;
+                z-index: 50;
+                height: 100vh;
+                width: 280px;
+            }
+
+            .sidebar.open {
+                transform: translateX(0);
+            }
+        }
+
+        @media (min-width: 1025px) {
+            .sidebar {
+                width: 280px;
+                position: fixed;
+                height: 100vh;
+            }
+
+            .main-content {
+                margin-left: 280px;
+            }
+        }
+    </style>
+</head>
+
+<body class="text-gray-800 antialiased">
+
+    <div id="overlay" class="fixed inset-0 bg-black/50 hidden z-40 transition-opacity" onclick="toggleSidebar()"></div>
+
+    <aside id="sidebar"
+        class="sidebar bg-plena-black text-white transition-transform duration-300 flex flex-col shadow-2xl">
+        <div class="h-20 flex items-center px-6 bg-plena-pink">
+            <i data-lucide="scissors" class="w-8 h-8 mr-3"></i>
+            <div>
+                <h1 class="text-xl font-bold tracking-tight">PLENA</h1>
+                <p class="text-xs text-white/90 font-medium">Gestão para Artesanato</p>
+            </div>
+        </div>
+
+        <nav class="p-4 space-y-2 flex-1 overflow-y-auto">
+            <button onclick="router('dashboard')"
+                class="nav-item w-full flex items-center px-4 py-3 rounded-xl hover:bg-white/10 transition-all group active-nav"
+                id="nav-dashboard">
+                <i data-lucide="layout-dashboard" class="w-5 h-5 mr-3 text-gray-400 group-hover:text-white"></i> Visão
+                Geral
+            </button>
+            <button onclick="router('products')"
+                class="nav-item w-full flex items-center px-4 py-3 rounded-xl hover:bg-white/10 transition-all group"
+                id="nav-products">
+                <i data-lucide="package" class="w-5 h-5 mr-3 text-gray-400 group-hover:text-white"></i> Meus Produtos
+            </button>
+            <button onclick="router('stock')"
+                class="nav-item w-full flex items-center px-4 py-3 rounded-xl hover:bg-white/10 transition-all group"
+                id="nav-stock">
+                <i data-lucide="layers" class="w-5 h-5 mr-3 text-gray-400 group-hover:text-white"></i> Estoque Materiais
+            </button>
+            <button onclick="router('transactions')"
+                class="nav-item w-full flex items-center px-4 py-3 rounded-xl hover:bg-white/10 transition-all group"
+                id="nav-transactions">
+                <i data-lucide="wallet" class="w-5 h-5 mr-3 text-gray-400 group-hover:text-white"></i> Caixa
+            </button>
+            <button onclick="router('settings')"
+                class="nav-item w-full flex items-center px-4 py-3 rounded-xl hover:bg-white/10 transition-all group"
+                id="nav-settings">
+                <i data-lucide="calculator" class="w-5 h-5 mr-3 text-gray-400 group-hover:text-white"></i> Config.
+                Precificação
+            </button>
+            <button onclick="router('instructions')"
+                class="nav-item w-full flex items-center px-4 py-3 rounded-xl hover:bg-white/10 transition-all group"
+                id="nav-instructions">
+                <i data-lucide="book-open" class="w-5 h-5 mr-3 text-gray-400 group-hover:text-white"></i> Manual de Uso
+            </button>
+            <button onclick="router('about')"
+                class="nav-item w-full flex items-center px-4 py-3 rounded-xl hover:bg-white/10 transition-all group"
+                id="nav-about">
+                <i data-lucide="info" class="w-5 h-5 mr-3 text-gray-400 group-hover:text-white"></i> Saiba Mais
+            </button>
+        </nav>
+
+        <div class="p-6 border-t border-white/10 text-center">
+            <p class="text-xs text-gray-500">Todos os Direitos Reservados &copy; 2025</p>
+            <a href="https://www.plenaaplicativos.com.br" target="_blank"
+                class="text-[10px] text-gray-600 hover:text-plena-pink transition-colors mt-1 block decoration-0">Plena
+                Apps</a>
+        </div>
+    </aside>
+
+    <main class="main-content min-h-screen flex flex-col">
+        <header
+            class="bg-white h-20 flex items-center justify-between px-4 lg:px-8 sticky top-0 z-30 shadow-sm border-b border-gray-100">
+            <div class="flex items-center gap-4">
+                <button onclick="toggleSidebar()" class="lg:hidden p-2 hover:bg-gray-100 rounded-lg text-gray-600"><i
+                        data-lucide="menu" class="w-6 h-6"></i></button>
+                <h2 id="page-title" class="text-xl font-bold text-gray-800 hidden sm:block">Dashboard</h2>
+            </div>
+            <div class="flex items-center gap-2">
+                <button onclick="openProductModal()"
+                    class="flex items-center px-3 py-2 bg-plena-pink text-white rounded-lg text-sm font-bold hover:bg-plena-dark transition-all shadow-lg active:scale-95">
+                    <i data-lucide="plus" class="w-5 h-5 sm:mr-2"></i> <span class="hidden sm:inline">Precificar
+                        Peça</span> <span class="sm:hidden">Novo</span>
+                </button>
+            </div>
+        </header>
+
+        <div class="p-4 lg:p-8 flex-1 overflow-y-auto">
+            <!-- DASHBOARD -->
+            <section id="view-dashboard" class="view-section fade-in">
+                <div class="bg-gradient-to-r from-pink-500 to-pink-700 rounded-2xl p-6 text-white mb-8 shadow-lg">
+                    <div class="flex justify-between items-start">
+                        <div>
+                            <p class="text-pink-100 text-sm font-medium mb-1">Valor da sua Hora</p>
+                            <h3 id="dash-hourly-rate" class="text-4xl font-bold">R$ 0,00</h3>
+                        </div>
+                        <button onclick="router('settings')"
+                            class="bg-white/20 hover:bg-white/30 p-2 rounded-lg transition-colors"><i
+                                data-lucide="settings" class="w-5 h-5"></i></button>
+                    </div>
+                    <p class="text-xs text-pink-200 mt-2">Baseado na sua meta salarial configurada.</p>
+                </div>
+
+                <div class="grid grid-cols-1 md:grid-cols-2 gap-6 mb-8">
+                    <div class="bg-white p-6 rounded-2xl shadow-sm border border-gray-100">
+                        <p class="text-xs font-bold text-gray-400 uppercase tracking-wider mb-1">Peças Precificadas</p>
+                        <h3 id="dash-products-count" class="text-3xl font-bold text-gray-800">0</h3>
+                    </div>
+                    <div class="bg-white p-6 rounded-2xl shadow-sm border border-gray-100">
+                        <p class="text-xs font-bold text-gray-400 uppercase tracking-wider mb-1">Faturamento (Mês)</p>
+                        <h3 id="dash-revenue" class="text-3xl font-bold text-green-600">R$ 0,00</h3>
+                    </div>
+                </div>
+
+                <div class="bg-white p-6 rounded-2xl shadow-sm border border-gray-100">
+                    <h3 class="font-bold text-gray-800 mb-6">Últimas Peças Cadastradas</h3>
+                    <div id="latest-products-list" class="space-y-4"></div>
+                </div>
+            </section>
+
+            <!-- PRODUCTS -->
+            <section id="view-products" class="view-section hide fade-in">
+                <div class="bg-white p-4 rounded-xl border border-gray-100 mb-6 flex gap-2">
+                    <i data-lucide="search" class="text-gray-400"></i>
+                    <input type="text" id="prod-search" onkeyup="renderProducts()" placeholder="Buscar peça..."
+                        class="w-full outline-none">
+                </div>
+                <div id="products-list" class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6"></div>
+            </section>
+
+            <!-- STOCK (Simplified) -->
+            <section id="view-stock" class="view-section hide fade-in">
+                <div class="bg-white p-8 rounded-2xl text-center border border-gray-100">
+                    <i data-lucide="layers" class="w-12 h-12 text-gray-300 mx-auto mb-4"></i>
+                    <h3 class="text-lg font-bold text-gray-800">Controle de Estoque</h3>
+                    <p class="text-gray-500 mb-4">Esta funcionalidade permite cadastrar seus materiais (tecidos, tintas,
+                        linhas) para cálculo automático de custo.</p>
+                    <button class="bg-gray-100 text-gray-400 px-4 py-2 rounded-lg cursor-not-allowed">Em Breve</button>
+                </div>
+            </section>
+
+            <!-- FINANCEIRO -->
+            <section id="view-transactions" class="view-section hide fade-in">
+                <div
+                    class="bg-white p-6 rounded-2xl shadow-sm border border-gray-100 mb-4 flex justify-between items-center">
+                    <h3 class="font-bold text-gray-800">Caixa do Ateliê</h3>
+                    <button onclick="openTransModal()"
+                        class="text-sm bg-gray-800 text-white px-3 py-2 rounded-lg hover:bg-black">Registrar
+                        Venda/Gasto</button>
+                </div>
+                <div class="bg-white rounded-2xl shadow-sm border border-gray-100 overflow-hidden">
+                    <div class="overflow-x-auto">
+                        <table class="w-full text-left">
+                            <thead class="bg-gray-50 text-gray-500 text-xs uppercase">
+                                <tr>
+                                    <th class="px-6 py-3">Data</th>
+                                    <th class="px-6 py-3">Descrição</th>
+                                    <th class="px-6 py-3 text-right">Valor</th>
+                                    <th class="px-6 py-3"></th>
+                                </tr>
+                            </thead>
+                            <tbody id="trans-list" class="divide-y divide-gray-100 text-sm"></tbody>
+                        </table>
+                    </div>
+                </div>
+            </section>
+
+            <!-- SETTINGS (PRICING CONFIG) -->
+            <section id="view-settings" class="view-section hide fade-in">
+                <div class="max-w-2xl mx-auto">
+                    <div class="bg-white p-8 rounded-2xl shadow-sm border border-gray-100 mb-6">
+                        <h3 class="text-xl font-bold text-plena-pink mb-4 flex items-center"><i data-lucide="calculator"
+                                class="mr-2"></i> Calculadora de Valor Hora</h3>
+                        <p class="text-gray-500 text-sm mb-6">Para precificar corretamente, precisamos saber quanto vale
+                            sua hora de trabalho. Preencha os dados abaixo:</p>
+
+                        <div class="space-y-4">
+                            <div>
+                                <label class="font-bold text-gray-700 text-sm">Quanto você quer ganhar por mês?
+                                    (Salário)</label>
+                                <div class="flex items-center mt-1">
+                                    <span class="bg-gray-100 p-3 rounded-l-lg text-gray-500 border border-r-0">R$</span>
+                                    <input type="number" id="conf-salary"
+                                        class="w-full border p-3 rounded-r-lg outline-none focus:border-plena-pink transition-colors"
+                                        placeholder="Ex: 2500.00" onchange="calculateHourlyRate()">
+                                </div>
+                            </div>
+
+                            <div class="grid grid-cols-2 gap-4">
+                                <div>
+                                    <label class="font-bold text-gray-700 text-sm">Horas por dia</label>
+                                    <input type="number" id="conf-hours-day" class="w-full border p-3 rounded-lg mt-1"
+                                        placeholder="Ex: 6" onchange="calculateHourlyRate()">
+                                </div>
+                                <div>
+                                    <label class="font-bold text-gray-700 text-sm">Dias por semana</label>
+                                    <input type="number" id="conf-days-week" class="w-full border p-3 rounded-lg mt-1"
+                                        placeholder="Ex: 5" onchange="calculateHourlyRate()">
+                                </div>
+                            </div>
+
+                            <div class="bg-pink-50 p-4 rounded-xl border border-pink-100 text-center mt-6">
+                                <p class="text-sm text-pink-800 font-bold uppercase">Sua hora vale:</p>
+                                <h2 id="conf-result-rate" class="text-4xl font-bold text-plena-pink mt-1">R$ 0,00</h2>
+                            </div>
+
+                            <button onclick="saveSettings()"
+                                class="w-full bg-gray-900 text-white py-4 rounded-xl font-bold hover:bg-black mt-4">Salvar
+                                Configuração</button>
+                        </div>
+                    </div>
+
+                    <!-- DATA SECURITY -->
+                    <div class="bg-white p-6 rounded-2xl shadow-sm border border-gray-100">
+                        <h3 class="font-bold text-gray-800 mb-4 flex items-center"><i data-lucide="shield-alert"
+                                class="w-4 h-4 mr-2"></i> Segurança de Dados</h3>
+                        <div class="bg-blue-50 border border-blue-200 p-3 rounded-lg text-sm text-blue-800 mb-4">
+                            <strong>Importante:</strong> Seus dados (receitas, preços) ficam salvos 100% no navegador.
+                            <strong>Faça backups semanais!</strong>
+                        </div>
+                        <button onclick="downloadBackup()"
+                            class="w-full border border-gray-300 py-3 rounded-lg text-sm font-medium hover:bg-gray-50 mb-3 flex justify-center gap-2"><i
+                                data-lucide="download" class="w-4 h-4"></i> Baixar Backup (.json)</button>
+                        <div class="relative mb-6">
+                            <button
+                                class="w-full bg-gray-800 text-white py-3 rounded-lg text-sm font-medium flex justify-center gap-2"><i
+                                    data-lucide="upload" class="w-4 h-4"></i> Restaurar Backup</button>
+                            <input type="file" onchange="restoreBackup(this)"
+                                class="absolute inset-0 opacity-0 cursor-pointer">
+                        </div>
+                        <div class="border-t pt-4">
+                            <button onclick="factoryReset()"
+                                class="text-red-500 text-sm hover:underline w-full text-center">Resetar Sistema de
+                                Fábrica</button>
+                        </div>
+                    </div>
+                </div>
+            </section>
+
+            <!-- ABOUT -->
+            <section id="view-instructions" class="view-section hide fade-in">
+                <div class="max-w-3xl mx-auto space-y-6">
+                    <div class="bg-white p-8 rounded-2xl shadow-sm border border-gray-100">
+                        <div class="text-center mb-8">
+                            <h2 class="text-2xl font-bold text-gray-800">Guia da Artesã de Sucesso</h2>
+                            <p class="text-gray-500">Valorize seu trabalho cobrando o preço certo.</p>
+                        </div>
+
+                        <div class="space-y-4">
+                            <!-- ITEM 1: BACKUP -->
+                            <details
+                                class="group bg-blue-50 border border-blue-100 rounded-xl overflow-hidden transition-all duration-300 open:shadow-md">
+                                <summary
+                                    class="flex items-center justify-between p-4 cursor-pointer select-none text-blue-900 font-bold">
+                                    <div class="flex items-center gap-3">
+                                        <div
+                                            class="w-8 h-8 rounded-full bg-blue-200 flex items-center justify-center text-blue-700">
+                                            <i data-lucide="shield-check" class="w-4 h-4"></i>
+                                        </div>
+                                        1. Não perca seus cadastros! (Backup)
+                                    </div>
+                                    <i data-lucide="chevron-down"
+                                        class="w-5 h-5 transition-transform group-open:rotate-180 text-blue-400"></i>
+                                </summary>
+                                <div
+                                    class="p-4 pt-0 text-sm text-gray-600 bg-blue-50 leading-relaxed border-t border-blue-100/50">
+                                    <p class="mb-2">Imagine perder o cadastro de todos os seus produtos? Para evitar
+                                        isso:</p>
+                                    <ol class="list-decimal pl-5 space-y-2 mt-2 font-medium text-gray-700">
+                                        <li>Vá em <strong>Config. Precificação</strong> no menu.</li>
+                                        <li>Role até achar o botão <span class="text-blue-600"><i data-lucide="download"
+                                                    class="w-3 h-3 inline"></i> Baixar Backup</span>.</li>
+                                        <li>Guarde esse arquivo em um local seguro (nuvem ou e-mail).</li>
+                                        <li>Faça isso toda semana!</li>
+                                    </ol>
+                                </div>
+                            </details>
+
+                            <!-- ITEM 2: PRICING -->
+                            <details
+                                class="group bg-white border border-gray-200 rounded-xl overflow-hidden transition-all duration-300 open:shadow-md hover:border-plena-pink">
+                                <summary
+                                    class="flex items-center justify-between p-4 cursor-pointer select-none text-gray-800 font-bold">
+                                    <div class="flex items-center gap-3">
+                                        <div
+                                            class="w-8 h-8 rounded-full bg-pink-100 flex items-center justify-center text-plena-pink">
+                                            <i data-lucide="calculator" class="w-4 h-4"></i>
+                                        </div>
+                                        2. Como o Sistema Calcula o Preço?
+                                    </div>
+                                    <i data-lucide="chevron-down"
+                                        class="w-5 h-5 transition-transform group-open:rotate-180 text-gray-400"></i>
+                                </summary>
+                                <div class="p-4 pt-0 text-sm text-gray-600 leading-relaxed">
+                                    <p>O preço de venda sugerido soma 3 coisas:</p>
+                                    <ul class="list-disc pl-5 space-y-2 mt-2">
+                                        <li><strong>Hora de Trabalho:</strong> O tempo que você gasta x Valor da sua
+                                            hora.</li>
+                                        <li><strong>Materiais:</strong> Custo proporcional de cada item usado (ex: 20cm
+                                            de fita).</li>
+                                        <li><strong>Margem de Lucro:</strong> A porcentagem que você quer ganhar acima
+                                            dos custos.</li>
+                                    </ul>
+                                    <p class="mt-2 text-xs bg-pink-50 p-2 rounded text-pink-700">Dica: Configure
+                                        corretamente o "Valor da Hora" nas Configurações para o cálculo ser justo com
+                                        você!</p>
+                                </div>
+                            </details>
+
+                            <!-- ITEM 3: STOCK -->
+                            <details
+                                class="group bg-white border border-gray-200 rounded-xl overflow-hidden transition-all duration-300 open:shadow-md hover:border-gray-300">
+                                <summary
+                                    class="flex items-center justify-between p-4 cursor-pointer select-none text-gray-800 font-bold">
+                                    <div class="flex items-center gap-3">
+                                        <div
+                                            class="w-8 h-8 rounded-full bg-gray-100 flex items-center justify-center text-gray-600">
+                                            <i data-lucide="layers" class="w-4 h-4"></i>
+                                        </div>
+                                        3. Controle de Estoque
+                                    </div>
+                                    <i data-lucide="chevron-down"
+                                        class="w-5 h-5 transition-transform group-open:rotate-180 text-gray-400"></i>
+                                </summary>
+                                <div class="p-4 pt-0 text-sm text-gray-600 leading-relaxed">
+                                    <p>Cadastre seus materiais (Linhas, Tecidos, Tintas) na aba
+                                        <strong>Estoque</strong>. Informe quanto pagou e a quantidade total no pacote.
+                                    </p>
+                                    <p class="mt-2">Assim, quando você precificar uma peça, o sistema já sabe quanto
+                                        custa cada pedacinho usado.</p>
+                                </div>
+                            </details>
+
+                            <!-- ITEM 4: APP INSTALL -->
+                            <details
+                                class="group bg-white border border-gray-200 rounded-xl overflow-hidden transition-all duration-300 open:shadow-md hover:border-gray-300">
+                                <summary
+                                    class="flex items-center justify-between p-4 cursor-pointer select-none text-gray-800 font-bold">
+                                    <div class="flex items-center gap-3">
+                                        <div
+                                            class="w-8 h-8 rounded-full bg-gray-100 flex items-center justify-center text-gray-600">
+                                            <i data-lucide="smartphone" class="w-4 h-4"></i>
+                                        </div>
+                                        4. Instalar no Celular
+                                    </div>
+                                    <i data-lucide="chevron-down"
+                                        class="w-5 h-5 transition-transform group-open:rotate-180 text-gray-400"></i>
+                                </summary>
+                                <div class="p-4 pt-0 text-sm text-gray-600 leading-relaxed">
+                                    <div class="grid grid-cols-1 md:grid-cols-2 gap-4 mt-3">
+                                        <div class="bg-gray-50 p-3 rounded-lg">
+                                            <strong>Android:</strong> Chrome > 3 pontinhos > "Adicionar à Tela Inicial".
+                                        </div>
+                                        <div class="bg-gray-50 p-3 rounded-lg">
+                                            <strong>iPhone:</strong> Safari > Compartilhar > "Adicionar à Tela de
+                                            Início".
+                                        </div>
+                                    </div>
+                                </div>
+                            </details>
+                        </div>
+
+                        <!-- SUPPORT -->
+                        <div class="mt-8 pt-6 border-t border-gray-100 text-center">
+                            <p class="text-sm text-gray-500 mb-2">Dúvidas?</p>
+                            <a href="mailto:suporte@plenainformatica.com.br"
+                                class="text-plena-pink font-bold hover:underline text-sm">Fale com o Suporte</a>
+                        </div>
+                    </div>
+                </div>
+            </section>
+
+            <section id="view-about" class="view-section hide fade-in">
+                <div class="max-w-3xl mx-auto space-y-6">
+                    <div class="bg-white p-8 rounded-2xl shadow-sm border border-gray-100">
+                        <h2 class="text-2xl font-bold text-gray-800 mb-6">Sobre a Plena</h2>
+
+                        <!-- DISCLAIMER / LEGAL -->
+                        <div class="bg-red-50 border-l-4 border-red-500 p-4 mb-8">
+                            <div class="flex items-start">
+                                <div class="flex-shrink-0">
+                                    <i data-lucide="alert-triangle" class="h-5 w-5 text-red-600"></i>
+                                </div>
+                                <div class="ml-3">
+                                    <h3 class="text-sm font-bold text-red-800 uppercase tracking-wide">Registro e
+                                        Distribuição</h3>
+                                    <div class="mt-2 text-sm text-red-700 space-y-2">
+                                        <p>Este software é um produto original desenvolvido pela <strong>Plena Soluções
+                                                Digitais</strong>. Sua comercialização é exclusiva através de canais
+                                            oficiais (Loja Oficial no Mercado Livre).</p>
+                                        <p>A revenda não autorizada, engenharia reversa, cópia parcial do código-fonte
+                                            ou distribuição em pacotes "piratas" constitui <strong>violação de
+                                                propriedade intelectual (Lei 9.610/98)</strong>. O infrator está sujeito
+                                            a sanções cíveis e criminais. Valorize o desenvolvimento nacional.</p>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+
+                        <div class="space-y-8 text-sm text-gray-600">
+                            <!-- MISSION -->
+                            <div>
+                                <h3 class="flex items-center text-lg font-bold text-gray-900 mb-2">
+                                    <i data-lucide="heart" class="w-5 h-5 mr-2 text-plena-pink"></i> Nossa Missão:
+                                    Tecnologia e Acessibilidade
+                                </h3>
+                                <p class="leading-relaxed">A Plena acredita que a tecnologia deve ser um direito, não um
+                                    privilégio exclusivo de grandes corporações. Nossa missão é democratizar ferramentas
+                                    de gestão de alta performance, simples e acessíveis.</p>
+                                <p class="mt-2 leading-relaxed">Desenvolvemos soluções <strong>Local-First</strong>
+                                    (seus dados ficam com você), garantindo que pequenos empreendedores, autônomos e
+                                    famílias brasileiras tenham controle total sobre suas informações, sem mensalidades
+                                    abusivas e sem depender de conexão constante com a internet.</p>
+                            </div>
+
+                            <!-- PRIVACY -->
+                            <div class="border-t border-gray-100 pt-6">
+                                <h3 class="font-bold text-gray-900 mb-2">Política de Privacidade</h3>
+                                <p>Ao utilizar este sistema, você concorda que:</p>
+                                <ul class="list-disc pl-5 mt-2 space-y-1">
+                                    <li><strong>100% Offline:</strong> Seus dados financeiros não saem deste
+                                        dispositivo.</li>
+                                    <li><strong>Responsabilidade:</strong> O backup (cópia de segurança) é
+                                        responsabilidade exclusiva do usuário.</li>
+                                    <li><strong>Isenção:</strong> A Plena não tem acesso aos seus dados e não pode
+                                        recuperá-los em caso de perda do equipamento.</li>
+                                </ul>
+                            </div>
+                        </div>
+
+                        <!-- CONTACT -->
+                        <div class="mt-8 bg-gray-50 p-6 rounded-xl border border-gray-200">
+                            <h3 class="font-bold text-gray-900 mb-2">Precisa de Suporte ou Personalização?</h3>
+                            <p class="text-sm text-gray-600 mb-4">Tem uma ideia de app ou precisa adaptar este sistema
+                                para seu negócio?</p>
+                            <a href="mailto:tecnologia@plenainformatica.com.br"
+                                class="inline-flex items-center text-plena-pink font-bold hover:underline">
+                                <i data-lucide="mail" class="w-4 h-4 mr-2"></i> tecnologia@plenainformatica.com.br
+                            </a>
+                        </div>
+                    </div>
+                </div>
+            </section>
+        </div>
+    </main>
+
+    <!-- NEW PRODUCT MODAL (PRICING CALCULATOR) -->
+    <div id="productModal" class="fixed inset-0 modal-backdrop hidden z-50 flex items-center justify-center p-4">
+        <div class="bg-white rounded-2xl shadow-2xl w-full max-w-2xl p-6 max-h-[90vh] overflow-y-auto">
+            <div class="flex justify-between items-center mb-6">
+                <h3 class="text-lg font-bold text-gray-800" id="prod-modal-title">Precificar Nova Peça</h3>
+                <button onclick="closeModal('productModal')" class="text-gray-400"><i data-lucide="x"></i></button>
+            </div>
+            <form onsubmit="submitProduct(event)" class="space-y-6">
+                <input type="hidden" id="pd-id">
+
+                <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+                    <div>
+                        <label class="text-xs font-bold text-gray-500 uppercase">Nome da Peça</label>
+                        <input type="text" id="pd-name" required class="w-full border p-2 rounded-lg"
+                            placeholder="Ex: Bolsa de Crochê">
+                    </div>
+                    <div>
+                        <label class="text-xs font-bold text-gray-500 uppercase">Tempo de Produção (Horas)</label>
+                        <input type="number" step="0.1" id="pd-time" required class="w-full border p-2 rounded-lg"
+                            placeholder="Ex: 2.5" onkeyup="calculatePrice()">
+                    </div>
+                </div>
+
+                <div class="bg-gray-50 p-4 rounded-xl border border-gray-200">
+                    <h4 class="font-bold text-gray-700 text-sm mb-3">Custos de Materiais</h4>
+                    <div class="grid grid-cols-3 gap-3 mb-2">
+                        <input type="text" id="mat-name" class="col-span-2 border p-2 rounded-lg text-sm"
+                            placeholder="Material (Ex: Linha)">
+                        <input type="number" step="0.01" id="mat-cost" class="border p-2 rounded-lg text-sm"
+                            placeholder="Valor R$">
+                    </div>
+                    <button type="button" onclick="addMaterial()"
+                        class="text-xs bg-gray-800 text-white px-3 py-2 rounded mb-3">Adicionar Material</button>
+
+                    <ul id="materials-list" class="space-y-1 text-sm text-gray-600 mb-2"></ul>
+                    <input type="hidden" id="pd-materials-json">
+
+                    <div class="flex justify-between border-t border-gray-300 pt-2 font-bold text-gray-800">
+                        <span>Total Materiais:</span>
+                        <span id="display-mat-total">R$ 0,00</span>
+                    </div>
+                </div>
+
+                <div class="grid grid-cols-2 gap-6">
+                    <div>
+                        <label class="text-xs font-bold text-gray-500 uppercase">Margem de Lucro (%)</label>
+                        <input type="number" id="pd-profit" class="w-full border p-2 rounded-lg" value="30"
+                            onkeyup="calculatePrice()">
+                    </div>
+                    <div class="bg-plena-pink/10 p-4 rounded-xl border border-plena-pink/20 text-center">
+                        <p class="text-xs text-plena-pink font-bold uppercase">Preço Final Sugerido</p>
+                        <h2 id="display-final-price" class="text-3xl font-bold text-plena-pink">R$ 0,00</h2>
+                        <input type="hidden" id="pd-final-price">
+                    </div>
+                </div>
+
+                <div class="flex gap-2">
+                    <button type="button" onclick="deleteProduct()" id="btn-delete-prod"
+                        class="hidden px-4 py-3 text-red-500 hover:bg-red-50 rounded-xl font-bold border border-red-200">Excluir</button>
+                    <button type="submit"
+                        class="flex-1 bg-plena-pink text-white py-3 rounded-xl font-bold hover:bg-plena-dark">Salvar
+                        Peça</button>
+                </div>
+            </form>
+        </div>
+    </div>
+
+    <!-- TRANSACTION MODAL -->
+    <div id="transModal" class="fixed inset-0 modal-backdrop hidden z-50 flex items-center justify-center p-4">
+        <div class="bg-white rounded-2xl shadow-2xl w-full max-w-sm p-6">
+            <h3 class="text-lg font-bold text-gray-800 mb-4">Lançar no Caixa</h3>
+            <form onsubmit="submitTrans(event)" class="space-y-4">
+                <div class="flex gap-2">
+                    <label
+                        class="flex-1 cursor-pointer bg-green-50 border border-green-200 p-2 rounded text-center"><input
+                            type="radio" name="tr-type" value="income" class="hidden" checked> <span
+                            class="text-green-700 font-bold">Venda</span></label>
+                    <label class="flex-1 cursor-pointer bg-red-50 border border-red-200 p-2 rounded text-center"><input
+                            type="radio" name="tr-type" value="expense" class="hidden"> <span
+                            class="text-red-700 font-bold">Gasto</span></label>
+                </div>
+                <input type="text" id="tr-desc" required placeholder="Descrição" class="w-full border p-2 rounded-lg">
+                <input type="number" step="0.01" id="tr-amount" required placeholder="Valor R$"
+                    class="w-full border p-2 rounded-lg">
+                <input type="date" id="tr-date" required class="w-full border p-2 rounded-lg">
+                <button type="submit" class="w-full bg-gray-900 text-white py-3 rounded-lg font-bold">Salvar</button>
+                <button type="button" onclick="closeModal('transModal')"
+                    class="w-full text-gray-500 py-2">Cancelar</button>
+            </form>
+        </div>
+    </div>
+
+    <script>
+        const DB_KEY = 'plena_artesanato_v1';
+        let db = JSON.parse(localStorage.getItem(DB_KEY)) || { products: [], transactions: [], settings: { salary: 0, hoursDay: 0, daysWeek: 0, hourlyRate: 0 } };
+
+        const save = () => localStorage.setItem(DB_KEY, JSON.stringify(db));
+        const fmtMoney = (v) => v.toLocaleString('pt-BR', { style: 'currency', currency: 'BRL' });
+        const fmtDate = (d) => { if (!d) return '--/--/-'; const p = d.split('-'); return `${p[2]}/${p[1]}`; };
+        const getID = () => Date.now().toString(36) + Math.random().toString(36).substr(2);
+
+        function init() {
+            lucide.createIcons();
+            document.getElementById('tr-date').value = new Date().toISOString().split('T')[0];
+            loadSettings();
+            renderDashboard();
+        }
+
+        function router(view) {
+            document.querySelectorAll('.view-section').forEach(el => el.classList.add('hide'));
+            document.querySelectorAll('.nav-item').forEach(el => { el.classList.remove('bg-white/10', 'text-white'); el.classList.add('text-gray-400'); });
+            document.getElementById(`view-${view}`).classList.remove('hide');
+            document.getElementById(`nav-${view}`).classList.add('bg-white/10', 'text-white');
+            document.getElementById(`nav-${view}`).classList.remove('text-gray-400');
+
+            const titles = { dashboard: 'Visão Geral', products: 'Meus Produtos', transactions: 'Caixa', settings: 'Configurações', stock: 'Estoque', about: 'Sobre' };
+            document.getElementById('page-title').innerText = titles[view] || 'Plena Artesanato';
+
+            if (view === 'dashboard') renderDashboard();
+            if (view === 'products') renderProducts();
+            if (view === 'transactions') renderTrans();
+            if (view === 'settings') loadSettings();
+
+            if (window.innerWidth < 1024) toggleSidebar();
+        }
+
+        function toggleSidebar() { document.getElementById('sidebar').classList.toggle('open'); document.getElementById('overlay').classList.toggle('hidden'); }
+        function closeModal(id) { document.getElementById(id).classList.add('hidden'); }
+        function openTransModal() { document.getElementById('transModal').classList.remove('hidden'); }
+
+        // SETTINGS & RATE CALC
+        function loadSettings() {
+            const s = db.settings;
+            document.getElementById('conf-salary').value = s.salary || '';
+            document.getElementById('conf-hours-day').value = s.hoursDay || '';
+            document.getElementById('conf-days-week').value = s.daysWeek || '';
+            document.getElementById('conf-result-rate').innerText = fmtMoney(s.hourlyRate || 0);
+            document.getElementById('dash-hourly-rate').innerText = fmtMoney(s.hourlyRate || 0);
+        }
+
+        function calculateHourlyRate() {
+            const salary = parseFloat(document.getElementById('conf-salary').value) || 0;
+            const hours = parseFloat(document.getElementById('conf-hours-day').value) || 0;
+            const days = parseFloat(document.getElementById('conf-days-week').value) || 0;
+
+            if (salary && hours && days) {
+                const totalHoursMonth = hours * days * 4.33; // aprox weeks/month
+                const rate = salary / totalHoursMonth;
+                document.getElementById('conf-result-rate').innerText = fmtMoney(rate);
+                return rate;
+            }
+            return 0;
+        }
+
+        function saveSettings() {
+            const rate = calculateHourlyRate();
+            db.settings = {
+                salary: parseFloat(document.getElementById('conf-salary').value) || 0,
+                hoursDay: parseFloat(document.getElementById('conf-hours-day').value) || 0,
+                daysWeek: parseFloat(document.getElementById('conf-days-week').value) || 0,
+                hourlyRate: rate
+            };
+            save();
+            alert('Configurações salvas!');
+            loadSettings();
+        }
+
+        // PRODUCTS & PRICING LOGIC
+        let tempMaterials = [];
+
+        function openProductModal(id = null) {
+            document.querySelector('#productModal form').reset();
+            tempMaterials = [];
+            renderTempMaterials();
+            document.getElementById('btn-delete-prod').classList.add('hidden');
+
+            if (id) {
+                const p = db.products.find(x => x.id === id);
+                if (p) {
+                    document.getElementById('pd-id').value = p.id;
+                    document.getElementById('pd-name').value = p.name;
+                    document.getElementById('pd-time').value = p.productionTime;
+                    document.getElementById('pd-profit').value = p.profitMargin;
+                    tempMaterials = p.materials || [];
+                    renderTempMaterials();
+                    calculatePrice();
+                    document.getElementById('prod-modal-title').innerText = 'Editar Peça';
+                    document.getElementById('btn-delete-prod').classList.remove('hidden');
+                }
+            } else {
+                document.getElementById('pd-id').value = '';
+                document.getElementById('prod-modal-title').innerText = 'Nova Peça';
+                calculatePrice();
+            }
+            document.getElementById('productModal').classList.remove('hidden');
+        }
+
+        function addMaterial() {
+            const name = document.getElementById('mat-name').value;
+            const cost = parseFloat(document.getElementById('mat-cost').value);
+            if (name && cost) {
+                tempMaterials.push({ name, cost });
+                document.getElementById('mat-name').value = '';
+                document.getElementById('mat-cost').value = '';
+                renderTempMaterials();
+                calculatePrice();
+            }
+        }
+
+        function renderTempMaterials() {
+            const list = document.getElementById('materials-list');
+            list.innerHTML = tempMaterials.map((m, idx) => `
+                <li class="flex justify-between border-b pb-1">
+                    <span>${m.name}</span>
+                    <span>${fmtMoney(m.cost)} <button type="button" onclick="removeMaterial(${idx})" class="ml-2 text-red-500 font-bold">x</button></span>
+                </li>
+            `).join('');
+
+            const total = tempMaterials.reduce((acc, m) => acc + m.cost, 0);
+            document.getElementById('display-mat-total').innerText = fmtMoney(total);
+        }
+
+        function removeMaterial(idx) { tempMaterials.splice(idx, 1); renderTempMaterials(); calculatePrice(); }
+
+        function calculatePrice() {
+            const time = parseFloat(document.getElementById('pd-time').value) || 0;
+            const profit = parseFloat(document.getElementById('pd-profit').value) || 0;
+            const matTotal = tempMaterials.reduce((acc, m) => acc + m.cost, 0);
+            const laborCost = time * (db.settings.hourlyRate || 0);
+
+            const costBase = matTotal + laborCost;
+            const finalPrice = costBase * (1 + profit / 100);
+
+            document.getElementById('display-final-price').innerText = fmtMoney(finalPrice);
+            document.getElementById('pd-final-price').value = finalPrice;
+        }
+
+        function submitProduct(e) {
+            e.preventDefault();
+            const id = document.getElementById('pd-id').value;
+
+            const prodData = {
+                id: id || getID(),
+                name: document.getElementById('pd-name').value,
+                productionTime: parseFloat(document.getElementById('pd-time').value) || 0,
+                profitMargin: parseFloat(document.getElementById('pd-profit').value) || 0,
+                materials: tempMaterials,
+                finalPrice: parseFloat(document.getElementById('pd-final-price').value) || 0,
+                date: new Date().toISOString()
+            };
+
+            if (id) {
+                const idx = db.products.findIndex(x => x.id === id);
+                db.products[idx] = prodData;
+            } else {
+                db.products.push(prodData);
+            }
+            save(); closeModal('productModal'); renderDashboard(); renderProducts();
+        }
+
+        function deleteProduct() {
+            const id = document.getElementById('pd-id').value;
+            if (confirm('Excluir esta peça?')) {
+                db.products = db.products.filter(x => x.id !== id);
+                save(); closeModal('productModal'); renderProducts(); renderDashboard();
+            }
+        }
+
+        function renderProducts() {
+            const term = document.getElementById('prod-search').value.toLowerCase();
+            const list = db.products.filter(p => p.name.toLowerCase().includes(term));
+            document.getElementById('products-list').innerHTML = list.map(p => `
+                <div class="bg-white p-6 rounded-xl border border-gray-100 shadow-sm hover:border-plena-pink transition-all cursor-pointer" onclick="openProductModal('${p.id}')">
+                    <h3 class="font-bold text-gray-800 text-lg mb-2">${p.name}</h3>
+                    <div class="text-sm text-gray-500 mb-4 space-y-1">
+                        <p>Tempo: ${p.productionTime}h</p>
+                        <p>Materiais: ${p.materials.length} itens</p>
+                    </div>
+                    <div class="flex justify-between items-center border-t pt-4">
+                        <span class="text-xs font-bold uppercase text-gray-400">Preço Sugerido</span>
+                        <span class="font-bold text-2xl text-plena-pink">${fmtMoney(p.finalPrice)}</span>
+                    </div>
+                </div>
+            `).join('') || '<div class="col-span-3 text-center text-gray-400 py-10">Nenhuma peça cadastrada.</div>';
+        }
+
+        function renderDashboard() {
+            const totalRevenue = db.transactions.filter(t => t.type === 'income').reduce((acc, t) => acc + t.val, 0);
+
+            document.getElementById('dash-products-count').innerText = db.products.length;
+            document.getElementById('dash-revenue').innerText = fmtMoney(totalRevenue);
+
+            const latest = db.products.slice(-3).reverse();
+            document.getElementById('latest-products-list').innerHTML = latest.map(p => `
+                 <div class="flex justify-between items-center bg-gray-50 p-3 rounded-lg border border-gray-100">
+                    <span class="font-bold text-gray-800">${p.name}</span>
+                    <span class="font-bold text-plena-pink">${fmtMoney(p.finalPrice)}</span>
+                </div>
+            `).join('');
+        }
+
+        function submitTrans(e) {
+            e.preventDefault();
+            const type = document.querySelector('input[name="tr-type"]:checked').value;
+            db.transactions.push({
+                id: getID(), type,
+                desc: document.getElementById('tr-desc').value,
+                val: parseFloat(document.getElementById('tr-amount').value),
+                date: document.getElementById('tr-date').value
+            });
+            save(); closeModal('transModal'); e.target.reset(); renderTrans(); renderDashboard();
+        }
+        function renderTrans() {
+            const list = db.transactions.slice().reverse();
+            document.getElementById('trans-list').innerHTML = list.map(t => `
+                <tr>
+                    <td class="px-6 py-4 text-gray-500">${fmtDate(t.date)}</td>
+                    <td class="px-6 py-4">${t.desc}</td>
+                    <td class="px-6 py-4 text-right font-bold ${t.type === 'income' ? 'text-green-600' : 'text-red-600'}">${t.type === 'income' ? '+' : '-'} ${fmtMoney(t.val)}</td>
+                </tr>`).join('');
+        }
+
+        function downloadBackup() { const a = document.createElement('a'); a.href = "data:text/json;charset=utf-8," + encodeURIComponent(JSON.stringify(db)); a.download = `plena_artesanato.json`; a.click(); }
+        function restoreBackup(input) { const reader = new FileReader(); reader.onload = (e) => { try { db = JSON.parse(e.target.result); save(); location.reload(); } catch (e) { alert('Erro no arquivo'); } }; reader.readAsText(input.files[0]); }
+        function factoryReset() { if (confirm('Apagar tudo?')) { localStorage.removeItem(DB_KEY); location.reload(); } }
+
+        // SECURITY LOCK
+        setInterval(() => {
+            const footer = document.querySelector('.sidebar .border-t');
+            if (footer && !footer.innerText.includes('Plena')) { document.body.innerHTML = '<div style="background:#111;color:red;height:100vh;display:flex;align-items:center;justify-content:center;"><h1>VIOLAÇÃO DE SEGURANÇA</h1></div>'; throw new Error("Piracy"); }
+        }, 8000);
+
+        init();
+    </script>
+</body>
+
+</html>

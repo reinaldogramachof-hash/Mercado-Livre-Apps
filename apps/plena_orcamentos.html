@@ -1,0 +1,985 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>Plena Orçamentos - Prestador de Serviço</title>
+
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script>
+        tailwind.config = {
+            theme: {
+                extend: {
+                    colors: {
+                        plena: { orange: '#2563EB', dark: '#1e40af', black: '#1a1a1a' }, // Blue theme for Services
+                        success: '#10B981', danger: '#EF4444', warning: '#F59E0B'
+                    }
+                }
+            }
+        }
+    </script>
+
+    <script src="https://unpkg.com/lucide@latest"></script>
+
+    <style>
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+            background-color: #F3F4F6;
+            -webkit-tap-highlight-color: transparent;
+        }
+
+        .hide {
+            display: none !important;
+        }
+
+        .fade-in {
+            animation: fadeIn 0.3s ease-out;
+        }
+
+        @keyframes fadeIn {
+            from {
+                opacity: 0;
+                transform: translateY(5px);
+            }
+
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+
+        /* Chart */
+        .chart-container {
+            display: flex;
+            align-items: flex-end;
+            justify-content: space-between;
+            height: 180px;
+            gap: 2%;
+        }
+
+        .bar-group {
+            flex: 1;
+            display: flex;
+            flex-direction: column;
+            justify-content: flex-end;
+            height: 100%;
+        }
+
+        .bar {
+            width: 45%;
+            border-radius: 4px 4px 0 0;
+            transition: height 0.5s;
+            min-height: 2px;
+        }
+
+        .x-label {
+            font-size: 10px;
+            color: #666;
+            text-align: center;
+            margin-top: 5px;
+        }
+
+        /* Modal */
+        .modal-backdrop {
+            background-color: rgba(0, 0, 0, 0.6);
+            backdrop-filter: blur(2px);
+        }
+
+        /* Sidebar */
+        @media (max-width: 1024px) {
+            .sidebar {
+                transform: translateX(-100%);
+                position: fixed;
+                z-index: 50;
+                height: 100vh;
+                width: 280px;
+            }
+
+            .sidebar.open {
+                transform: translateX(0);
+            }
+        }
+
+        @media (min-width: 1025px) {
+            .sidebar {
+                width: 280px;
+                position: fixed;
+                height: 100vh;
+            }
+
+            .main-content {
+                margin-left: 280px;
+            }
+        }
+
+        /* Print Styles for Quotes */
+        @media print {
+            body * {
+                visibility: hidden;
+            }
+
+            #invoice-print,
+            #invoice-print * {
+                visibility: visible;
+            }
+
+            #invoice-print {
+                position: absolute;
+                left: 0;
+                top: 0;
+                width: 100%;
+                background: white;
+                padding: 20px;
+            }
+        }
+    </style>
+</head>
+
+<body class="text-gray-800 antialiased">
+
+    <div id="overlay" class="fixed inset-0 bg-black/50 hidden z-40 transition-opacity" onclick="toggleSidebar()"></div>
+
+    <aside id="sidebar"
+        class="sidebar bg-plena-black text-white transition-transform duration-300 flex flex-col shadow-2xl">
+        <div class="h-20 flex items-center px-6 bg-plena-orange">
+            <i data-lucide="clipboard-list" class="w-8 h-8 mr-3"></i>
+            <div>
+                <h1 class="text-xl font-bold tracking-tight">PLENA</h1>
+                <p class="text-xs text-white/90 font-medium">Gestão de Orçamentos</p>
+            </div>
+        </div>
+
+        <nav class="p-4 space-y-2 flex-1 overflow-y-auto">
+            <button onclick="router('dashboard')"
+                class="nav-item w-full flex items-center px-4 py-3 rounded-xl hover:bg-white/10 transition-all group active-nav"
+                id="nav-dashboard">
+                <i data-lucide="layout-dashboard" class="w-5 h-5 mr-3 text-gray-400 group-hover:text-white"></i> Visão
+                Geral
+            </button>
+            <button onclick="router('quotes')"
+                class="nav-item w-full flex items-center px-4 py-3 rounded-xl hover:bg-white/10 transition-all group"
+                id="nav-quotes">
+                <i data-lucide="file-text" class="w-5 h-5 mr-3 text-gray-400 group-hover:text-white"></i> Orçamentos
+            </button>
+            <button onclick="router('transactions')"
+                class="nav-item w-full flex items-center px-4 py-3 rounded-xl hover:bg-white/10 transition-all group"
+                id="nav-transactions">
+                <i data-lucide="wallet" class="w-5 h-5 mr-3 text-gray-400 group-hover:text-white"></i> Fluxo de Caixa
+            </button>
+            <button onclick="router('reports')"
+                class="nav-item w-full flex items-center px-4 py-3 rounded-xl hover:bg-white/10 transition-all group"
+                id="nav-reports">
+                <i data-lucide="bar-chart-3" class="w-5 h-5 mr-3 text-gray-400 group-hover:text-white"></i> Relatórios
+            </button>
+            <button onclick="router('settings')"
+                class="nav-item w-full flex items-center px-4 py-3 rounded-xl hover:bg-white/10 transition-all group"
+                id="nav-settings">
+                <i data-lucide="settings" class="w-5 h-5 mr-3 text-gray-400 group-hover:text-white"></i> Configurações
+            </button>
+            <button onclick="router('instructions')"
+                class="nav-item w-full flex items-center px-4 py-3 rounded-xl hover:bg-white/10 transition-all group"
+                id="nav-instructions">
+                <i data-lucide="book-open" class="w-5 h-5 mr-3 text-gray-400 group-hover:text-white"></i> Manual de Uso
+            </button>
+            <button onclick="router('about')"
+                class="nav-item w-full flex items-center px-4 py-3 rounded-xl hover:bg-white/10 transition-all group"
+                id="nav-about">
+                <i data-lucide="info" class="w-5 h-5 mr-3 text-gray-400 group-hover:text-white"></i> Saiba Mais
+            </button>
+        </nav>
+
+        <div class="p-6 border-t border-white/10 text-center">
+            <p class="text-xs text-gray-500">Todos os Direitos Reservados &copy; 2025</p>
+            <a href="https://www.plenaaplicativos.com.br" target="_blank"
+                class="text-[10px] text-gray-600 hover:text-plena-orange transition-colors mt-1 block decoration-0">Plena
+                Apps</a>
+        </div>
+    </aside>
+
+    <main class="main-content min-h-screen flex flex-col">
+        <header
+            class="bg-white h-20 flex items-center justify-between px-4 lg:px-8 sticky top-0 z-30 shadow-sm border-b border-gray-100">
+            <div class="flex items-center gap-4">
+                <button onclick="toggleSidebar()" class="lg:hidden p-2 hover:bg-gray-100 rounded-lg text-gray-600"><i
+                        data-lucide="menu" class="w-6 h-6"></i></button>
+                <h2 id="page-title" class="text-xl font-bold text-gray-800 hidden sm:block">Dashboard</h2>
+            </div>
+            <div class="flex items-center gap-2 sm:gap-3">
+                <button onclick="openQuoteModal()"
+                    class="flex items-center px-3 py-2 bg-plena-orange text-white rounded-lg text-sm font-bold hover:bg-plena-dark transition-all shadow-lg shadow-blue-200 active:scale-95">
+                    <i data-lucide="plus" class="w-5 h-5 sm:mr-2"></i> <span class="hidden sm:inline">Criar
+                        Orçamento</span> <span class="sm:hidden">Novo</span>
+                </button>
+            </div>
+        </header>
+
+        <div class="p-4 lg:p-8 flex-1 overflow-y-auto">
+
+            <section id="view-dashboard" class="view-section fade-in">
+                <div class="grid grid-cols-1 md:grid-cols-3 gap-6 mb-8">
+                    <div class="bg-white p-6 rounded-2xl shadow-sm border border-gray-100 relative overflow-hidden">
+                        <div class="absolute right-0 top-0 h-full w-1.5 bg-yellow-400"></div>
+                        <p class="text-xs font-bold text-gray-400 uppercase tracking-wider mb-1">Orçamentos Abertos</p>
+                        <h3 id="dash-pending" class="text-3xl font-bold text-yellow-500">0</h3>
+                        <p class="text-xs text-gray-400 mt-1">Aguardando aprovação</p>
+                    </div>
+                    <div class="bg-white p-6 rounded-2xl shadow-sm border border-gray-100 relative overflow-hidden">
+                        <div class="absolute right-0 top-0 h-full w-1.5 bg-green-500"></div>
+                        <p class="text-xs font-bold text-gray-400 uppercase tracking-wider mb-1">Aprovados</p>
+                        <h3 id="dash-approved" class="text-3xl font-bold text-green-600">0</h3>
+                    </div>
+                    <div class="bg-white p-6 rounded-2xl shadow-sm border border-gray-100">
+                        <p class="text-xs font-bold text-gray-400 uppercase tracking-wider mb-1">Saldo de Caixa</p>
+                        <h3 id="dash-balance" class="text-2xl font-bold text-gray-800">R$ 0,00</h3>
+                    </div>
+                </div>
+
+                <div class="bg-white p-6 rounded-2xl shadow-sm border border-gray-100 mb-8">
+                    <h3 class="font-bold text-gray-800 mb-6">Últimos Orçamentos</h3>
+                    <div id="latest-quotes" class="space-y-4"></div>
+                </div>
+            </section>
+
+            <section id="view-quotes" class="view-section hide fade-in">
+                <div class="bg-white rounded-2xl shadow-sm border border-gray-100 overflow-hidden">
+                    <div class="p-4 bg-gray-50 flex gap-3 border-b border-gray-200">
+                        <input type="text" id="quote-search" onkeyup="renderQuotes()" placeholder="Buscar cliente..."
+                            class="w-full px-4 py-2 rounded-lg border border-gray-300 outline-none">
+                    </div>
+                    <div id="quotes-list" class="divide-y divide-gray-100"></div>
+                </div>
+            </section>
+
+            <section id="view-transactions" class="view-section hide fade-in">
+                <div
+                    class="bg-white p-6 rounded-2xl shadow-sm border border-gray-100 mb-4 flex justify-between items-center">
+                    <h3 class="font-bold text-gray-800">Lançamentos de Caixa</h3>
+                    <button onclick="openTransModal()"
+                        class="text-sm bg-gray-800 text-white px-3 py-2 rounded-lg hover:bg-black">Novo
+                        Lançamento</button>
+                </div>
+                <div class="bg-white rounded-2xl shadow-sm border border-gray-100 overflow-hidden">
+                    <div class="overflow-x-auto">
+                        <table class="w-full text-left">
+                            <thead class="bg-gray-50 text-gray-500 text-xs uppercase">
+                                <tr>
+                                    <th class="px-6 py-3">Data</th>
+                                    <th class="px-6 py-3">Descrição</th>
+                                    <th class="px-6 py-3 text-right">Valor</th>
+                                    <th class="px-6 py-3"></th>
+                                </tr>
+                            </thead>
+                            <tbody id="trans-list" class="divide-y divide-gray-100 text-sm"></tbody>
+                        </table>
+                    </div>
+                </div>
+            </section>
+
+            <section id="view-reports" class="view-section hide fade-in">
+                <div class="bg-white p-6 rounded-2xl shadow-sm border border-gray-100 mb-6">
+                    <h3 class="font-bold text-gray-800 mb-4">Relatório de Caixa</h3>
+                    <div class="flex gap-4">
+                        <input type="date" id="rep-start" class="border p-2 rounded-lg w-full">
+                        <input type="date" id="rep-end" class="border p-2 rounded-lg w-full">
+                        <button onclick="renderReports()"
+                            class="bg-gray-800 text-white px-4 rounded-lg">Filtrar</button>
+                    </div>
+                    <div class="mt-6 grid grid-cols-3 gap-4 text-center">
+                        <div class="bg-green-50 p-4 rounded-xl border border-green-100">
+                            <p class="text-xs font-bold text-gray-500 uppercase">Ganhos</p>
+                            <p id="rep-inc" class="text-lg font-bold text-green-700">R$ 0,00</p>
+                        </div>
+                        <div class="bg-red-50 p-4 rounded-xl border border-red-100">
+                            <p class="text-xs font-bold text-gray-500 uppercase">Gastos</p>
+                            <p id="rep-exp" class="text-lg font-bold text-red-700">R$ 0,00</p>
+                        </div>
+                        <div class="bg-blue-50 p-4 rounded-xl border border-blue-100">
+                            <p class="text-xs font-bold text-gray-500 uppercase">Saldo</p>
+                            <p id="rep-bal" class="text-lg font-bold text-blue-700">R$ 0,00</p>
+                        </div>
+                    </div>
+                </div>
+            </section>
+
+            <section id="view-settings" class="view-section hide fade-in">
+                <div class="bg-white p-6 rounded-2xl shadow-sm border border-gray-100">
+                    <h3 class="font-bold text-gray-800 mb-4 flex items-center"><i data-lucide="shield-alert"
+                            class="w-4 h-4 mr-2"></i> Segurança de Dados</h3>
+
+                    <div class="bg-blue-50 border border-blue-200 p-3 rounded-lg text-sm text-blue-800 mb-4">
+                        <strong>Importante:</strong> Seus dados ficam salvos 100% no navegador. Se você limpar o
+                        cache ou formatar o dispositivo, perderá tudo. <strong>Faça backups semanais!</strong>
+                    </div>
+
+                    <button onclick="downloadBackup()"
+                        class="w-full border border-gray-300 py-3 rounded-lg text-sm font-medium hover:bg-gray-50 mb-3 flex justify-center gap-2">
+                        <i data-lucide="download" class="w-4 h-4"></i> Baixar Backup (.json)
+                    </button>
+                    <div class="relative mb-6">
+                        <button
+                            class="w-full bg-gray-800 text-white py-3 rounded-lg text-sm font-medium flex justify-center gap-2">
+                            <i data-lucide="upload" class="w-4 h-4"></i> Restaurar Backup
+                        </button>
+                        <input type="file" onchange="restoreBackup(this)"
+                            class="absolute inset-0 opacity-0 cursor-pointer">
+                    </div>
+
+                    <div class="border-t pt-4">
+                        <div class="bg-red-50 p-3 rounded-lg border border-red-100 mb-3">
+                            <p class="text-xs text-red-600"><strong>Zona de Perigo:</strong> O botão abaixo apaga
+                                tudo e reinicia o sistema do zero. Use com cautela.</p>
+                        </div>
+                        <button onclick="factoryReset()"
+                            class="text-red-500 text-sm hover:underline w-full text-center">Resetar Sistema de
+                            Fábrica</button>
+                    </div>
+                </div>
+            </section>
+
+            <section id="view-instructions" class="view-section hide fade-in">
+                <div class="max-w-3xl mx-auto space-y-6">
+                    <div class="bg-white p-8 rounded-2xl shadow-sm border border-gray-100">
+                        <div class="text-center mb-8">
+                            <h2 class="text-2xl font-bold text-gray-800">Manual de Orçamentos</h2>
+                            <p class="text-gray-500">Crie propostas profissionais e feche mais negócios.</p>
+                        </div>
+
+                        <div class="space-y-4">
+                            <!-- ITEM 1: BACKUP -->
+                            <details
+                                class="group bg-blue-50 border border-blue-100 rounded-xl overflow-hidden transition-all duration-300 open:shadow-md">
+                                <summary
+                                    class="flex items-center justify-between p-4 cursor-pointer select-none text-blue-900 font-bold">
+                                    <div class="flex items-center gap-3">
+                                        <div
+                                            class="w-8 h-8 rounded-full bg-blue-200 flex items-center justify-center text-blue-700">
+                                            <i data-lucide="shield-check" class="w-4 h-4"></i>
+                                        </div>
+                                        1. Segurança: Como salvar seus orçamentos?
+                                    </div>
+                                    <i data-lucide="chevron-down"
+                                        class="w-5 h-5 transition-transform group-open:rotate-180 text-blue-400"></i>
+                                </summary>
+                                <div
+                                    class="p-4 pt-0 text-sm text-gray-600 bg-blue-50 leading-relaxed border-t border-blue-100/50">
+                                    <p class="mb-2">Seus dados ficam 100% no seu dispositivo. Para não perder seu
+                                        histórico de clientes:</p>
+                                    <ol class="list-decimal pl-5 space-y-2 mt-2 font-medium text-gray-700">
+                                        <li>Vá em <strong>Configurações</strong> no menu lateral.</li>
+                                        <li>Clique em <span class="text-blue-600"><i data-lucide="download"
+                                                    class="w-3 h-3 inline"></i> Baixar Backup</span>.</li>
+                                        <li>Salve o arquivo no Google Drive ou envie por e-mail para você mesmo.</li>
+                                        <li>Faça isso sempre que criar muitos orçamentos importantes!</li>
+                                    </ol>
+                                </div>
+                            </details>
+
+                            <!-- ITEM 2: CREATE QUOTE -->
+                            <details
+                                class="group bg-white border border-gray-200 rounded-xl overflow-hidden transition-all duration-300 open:shadow-md hover:border-plena-orange">
+                                <summary
+                                    class="flex items-center justify-between p-4 cursor-pointer select-none text-gray-800 font-bold">
+                                    <div class="flex items-center gap-3">
+                                        <div
+                                            class="w-8 h-8 rounded-full bg-orange-100 flex items-center justify-center text-plena-orange">
+                                            <i data-lucide="file-text" class="w-4 h-4"></i>
+                                        </div>
+                                        2. Como criar e enviar um orçamento PDF?
+                                    </div>
+                                    <i data-lucide="chevron-down"
+                                        class="w-5 h-5 transition-transform group-open:rotate-180 text-gray-400"></i>
+                                </summary>
+                                <div class="p-4 pt-0 text-sm text-gray-600 leading-relaxed">
+                                    <ul class="list-disc pl-5 space-y-2 mt-2">
+                                        <li>Clique em <strong>"+ Novo Orçamento"</strong>.</li>
+                                        <li>Preencha os dados do cliente e descreva o serviço.</li>
+                                        <li>Separe o valor de <strong>Mão de Obra</strong> e <strong>Material</strong>.
+                                        </li>
+                                        <li>Após salvar, você verá um ícone de <strong>WhatsApp</strong>. Clique nele
+                                            para enviar o resumo pronto para seu cliente!</li>
+                                        <li>Você também pode tirar um print da tela para enviar como imagem.</li>
+                                    </ul>
+                                </div>
+                            </details>
+
+                            <!-- ITEM 3: STATUS -->
+                            <details
+                                class="group bg-white border border-gray-200 rounded-xl overflow-hidden transition-all duration-300 open:shadow-md hover:border-gray-300">
+                                <summary
+                                    class="flex items-center justify-between p-4 cursor-pointer select-none text-gray-800 font-bold">
+                                    <div class="flex items-center gap-3">
+                                        <div
+                                            class="w-8 h-8 rounded-full bg-gray-100 flex items-center justify-center text-gray-600">
+                                            <i data-lucide="check-circle-2" class="w-4 h-4"></i>
+                                        </div>
+                                        3. Aprovado ou Pendente?
+                                    </div>
+                                    <i data-lucide="chevron-down"
+                                        class="w-5 h-5 transition-transform group-open:rotate-180 text-gray-400"></i>
+                                </summary>
+                                <div class="p-4 pt-0 text-sm text-gray-600 leading-relaxed">
+                                    <p>Organize sua agenda controlando os status:</p>
+                                    <ul class="list-disc pl-5 space-y-1 mt-2">
+                                        <li><strong>Pendente (Amarelo):</strong> Enviou e o cliente está pensando.</li>
+                                        <li><strong>Aprovado (Verde):</strong> Cliente fechou! O valor entra na previsão
+                                            de receita.</li>
+                                        <li><strong>Concluído (Azul):</strong> Serviço feito e pago.</li>
+                                        <li><strong>Cancelado (Vermelho):</strong> Cliente desistiu.</li>
+                                    </ul>
+                                </div>
+                            </details>
+
+                            <!-- ITEM 4: APP INSTALL -->
+                            <details
+                                class="group bg-white border border-gray-200 rounded-xl overflow-hidden transition-all duration-300 open:shadow-md hover:border-gray-300">
+                                <summary
+                                    class="flex items-center justify-between p-4 cursor-pointer select-none text-gray-800 font-bold">
+                                    <div class="flex items-center gap-3">
+                                        <div
+                                            class="w-8 h-8 rounded-full bg-gray-100 flex items-center justify-center text-gray-600">
+                                            <i data-lucide="smartphone" class="w-4 h-4"></i>
+                                        </div>
+                                        4. Instalar no Celular
+                                    </div>
+                                    <i data-lucide="chevron-down"
+                                        class="w-5 h-5 transition-transform group-open:rotate-180 text-gray-400"></i>
+                                </summary>
+                                <div class="p-4 pt-0 text-sm text-gray-600 leading-relaxed">
+                                    <p>Este sistema funciona offline como um app:</p>
+                                    <div class="grid grid-cols-1 md:grid-cols-2 gap-4 mt-3">
+                                        <div class="bg-gray-50 p-3 rounded-lg">
+                                            <strong>Android:</strong> Chrome > 3 pontinhos > "Adicionar à Tela Inicial".
+                                        </div>
+                                        <div class="bg-gray-50 p-3 rounded-lg">
+                                            <strong>iPhone:</strong> Safari > Compartilhar > "Adicionar à Tela de
+                                            Início".
+                                        </div>
+                                    </div>
+                                </div>
+                            </details>
+                        </div>
+
+                        <!-- SUPPORT -->
+                        <div class="mt-8 pt-6 border-t border-gray-100 text-center">
+                            <p class="text-sm text-gray-500 mb-2">Dúvidas?</p>
+                            <a href="mailto:suporte@plenainformatica.com.br"
+                                class="text-plena-orange font-bold hover:underline text-sm">Fale com o Suporte</a>
+                        </div>
+                    </div>
+                </div>
+            </section>
+
+            <section id="view-about" class="view-section hide fade-in">
+                <div class="max-w-3xl mx-auto space-y-6">
+                    <div class="bg-white p-8 rounded-2xl shadow-sm border border-gray-100">
+                        <h2 class="text-2xl font-bold text-gray-800 mb-6">Sobre a Plena</h2>
+
+                        <!-- DISCLAIMER / LEGAL -->
+                        <div class="bg-red-50 border-l-4 border-red-500 p-4 mb-8">
+                            <div class="flex items-start">
+                                <div class="flex-shrink-0">
+                                    <i data-lucide="alert-triangle" class="h-5 w-5 text-red-600"></i>
+                                </div>
+                                <div class="ml-3">
+                                    <h3 class="text-sm font-bold text-red-800 uppercase tracking-wide">Registro e
+                                        Distribuição</h3>
+                                    <div class="mt-2 text-sm text-red-700 space-y-2">
+                                        <p>Este software é um produto original desenvolvido pela <strong>Plena Soluções
+                                                Digitais</strong>. Sua comercialização é exclusiva através de canais
+                                            oficiais (Loja Oficial no Mercado Livre).</p>
+                                        <p>A revenda não autorizada, engenharia reversa, cópia parcial do código-fonte
+                                            ou distribuição em pacotes "piratas" constitui <strong>violação de
+                                                propriedade intelectual (Lei 9.610/98)</strong>. O infrator está sujeito
+                                            a sanções cíveis e criminais. Valorize o desenvolvimento nacional.</p>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+
+                        <div class="space-y-8 text-sm text-gray-600">
+                            <!-- MISSION -->
+                            <div>
+                                <h3 class="flex items-center text-lg font-bold text-gray-900 mb-2">
+                                    <i data-lucide="heart" class="w-5 h-5 mr-2 text-plena-orange"></i> Nossa Missão:
+                                    Tecnologia e Acessibilidade
+                                </h3>
+                                <p class="leading-relaxed">A Plena acredita que a tecnologia deve ser um direito, não um
+                                    privilégio exclusivo de grandes corporações. Nossa missão é democratizar ferramentas
+                                    de gestão de alta performance, simples e acessíveis.</p>
+                                <p class="mt-2 leading-relaxed">Desenvolvemos soluções <strong>Local-First</strong>
+                                    (seus dados ficam com você), garantindo que pequenos empreendedores, autônomos e
+                                    famílias brasileiras tenham controle total sobre suas informações, sem mensalidades
+                                    abusivas e sem depender de conexão constante com a internet.</p>
+                            </div>
+
+                            <!-- PRIVACY -->
+                            <div class="border-t border-gray-100 pt-6">
+                                <h3 class="font-bold text-gray-900 mb-2">Política de Privacidade</h3>
+                                <p>Ao utilizar este sistema, você concorda que:</p>
+                                <ul class="list-disc pl-5 mt-2 space-y-1">
+                                    <li><strong>100% Offline:</strong> Seus dados financeiros não saem deste
+                                        dispositivo.</li>
+                                    <li><strong>Responsabilidade:</strong> O backup (cópia de segurança) é
+                                        responsabilidade exclusiva do usuário.</li>
+                                    <li><strong>Isenção:</strong> A Plena não tem acesso aos seus dados e não pode
+                                        recuperá-los em caso de perda do equipamento.</li>
+                                </ul>
+                            </div>
+                        </div>
+
+                        <!-- CONTACT -->
+                        <div class="mt-8 bg-gray-50 p-6 rounded-xl border border-gray-200">
+                            <h3 class="font-bold text-gray-900 mb-2">Precisa de Suporte ou Personalização?</h3>
+                            <p class="text-sm text-gray-600 mb-4">Tem uma ideia de app ou precisa adaptar este sistema
+                                para seu negócio?</p>
+                            <a href="mailto:tecnologia@plenainformatica.com.br"
+                                class="inline-flex items-center text-plena-orange font-bold hover:underline">
+                                <i data-lucide="mail" class="w-4 h-4 mr-2"></i> tecnologia@plenainformatica.com.br
+                            </a>
+                        </div>
+                    </div>
+                </div>
+            </section>
+        </div>
+    </main>
+
+    <!-- NEW QUOTE MODAL -->
+    <div id="quoteModal" class="fixed inset-0 modal-backdrop hidden z-50 flex items-center justify-center p-4">
+        <div class="bg-white rounded-2xl shadow-2xl w-full max-w-lg p-6 max-h-[90vh] overflow-y-auto">
+            <div class="flex justify-between items-center mb-6">
+                <h3 class="text-lg font-bold text-gray-800" id="modal-title">Novo Orçamento</h3>
+                <button onclick="closeModal('quoteModal')" class="text-gray-400"><i data-lucide="x"></i></button>
+            </div>
+            <form onsubmit="submitQuote(event)" class="space-y-4">
+                <input type="hidden" id="q-id">
+                <div>
+                    <label class="text-xs font-bold text-gray-500 uppercase">Cliente</label>
+                    <input type="text" id="q-client" required class="w-full border p-2 rounded-lg"
+                        placeholder="Nome do Cliente">
+                </div>
+                <div>
+                    <label class="text-xs font-bold text-gray-500 uppercase">Serviços / Descrição</label>
+                    <textarea id="q-desc" required rows="3" class="w-full border p-2 rounded-lg"
+                        placeholder="Descreva o que será feito..."></textarea>
+                </div>
+                <div class="grid grid-cols-2 gap-4">
+                    <div>
+                        <label class="text-xs font-bold text-gray-500 uppercase">Valor Mão de Obra</label>
+                        <input type="number" step="0.01" id="q-labor" required class="w-full border p-2 rounded-lg"
+                            placeholder="0.00">
+                    </div>
+                    <div>
+                        <label class="text-xs font-bold text-gray-500 uppercase">Valor Material</label>
+                        <input type="number" step="0.01" id="q-material" class="w-full border p-2 rounded-lg"
+                            placeholder="0.00">
+                    </div>
+                </div>
+                <div>
+                    <label class="text-xs font-bold text-gray-500 uppercase">Validade</label>
+                    <input type="date" id="q-validity" required class="w-full border p-2 rounded-lg">
+                </div>
+                <button type="submit"
+                    class="w-full bg-plena-orange text-white py-3 rounded-xl font-bold hover:bg-plena-dark">Gerar
+                    Orçamento</button>
+            </form>
+        </div>
+    </div>
+
+    <!-- TRANSACTION MODAL -->
+    <div id="transModal" class="fixed inset-0 modal-backdrop hidden z-50 flex items-center justify-center p-4">
+        <div class="bg-white rounded-2xl shadow-2xl w-full max-w-sm p-6">
+            <h3 class="text-lg font-bold text-gray-800 mb-4">Lançar no Caixa</h3>
+            <form onsubmit="submitTrans(event)" class="space-y-4">
+                <div class="flex gap-2">
+                    <label
+                        class="flex-1 cursor-pointer bg-green-50 border border-green-200 p-2 rounded text-center"><input
+                            type="radio" name="tr-type" value="income" class="hidden" checked> <span
+                            class="text-green-700 font-bold">Entrada</span></label>
+                    <label class="flex-1 cursor-pointer bg-red-50 border border-red-200 p-2 rounded text-center"><input
+                            type="radio" name="tr-type" value="expense" class="hidden"> <span
+                            class="text-red-700 font-bold">Saída</span></label>
+                </div>
+                <input type="text" id="tr-desc" required placeholder="Descrição" class="w-full border p-2 rounded-lg">
+                <input type="number" step="0.01" id="tr-amount" required placeholder="Valor R$"
+                    class="w-full border p-2 rounded-lg">
+                <input type="date" id="tr-date" required class="w-full border p-2 rounded-lg">
+                <button type="submit" class="w-full bg-gray-900 text-white py-3 rounded-lg font-bold">Salvar</button>
+                <button type="button" onclick="closeModal('transModal')"
+                    class="w-full text-gray-500 py-2">Cancelar</button>
+            </form>
+        </div>
+    </div>
+
+    <!-- QUOTE VIEW MODAL (PRINT) -->
+    <div id="quoteViewModal"
+        class="fixed inset-0 modal-backdrop hidden z-50 flex items-center justify-center p-4 z-[60]">
+        <div class="bg-white rounded-xl shadow-2xl w-full max-w-2xl max-h-[90vh] overflow-y-auto relative">
+            <button onclick="closeModal('quoteViewModal')"
+                class="absolute right-4 top-4 text-gray-400 hover:text-black"><i data-lucide="x"></i></button>
+            <div id="invoice-print" class="p-8">
+                <div class="flex justify-between items-start mb-8 border-b pb-6">
+                    <div>
+                        <h1 class="text-2xl font-bold text-plena-orange">ORÇAMENTO</h1>
+                        <p class="text-gray-500 text-sm mt-1" id="qv-id">#000</p>
+                    </div>
+                    <div class="text-right">
+                        <p class="font-bold text-gray-800">Prestador de Serviço</p>
+                        <p class="text-sm text-gray-500" id="qv-date">Data: --/--/----</p>
+                    </div>
+                </div>
+
+                <div class="mb-8">
+                    <p class="text-xs font-bold text-gray-400 uppercase">Cliente</p>
+                    <h3 class="text-lg font-bold text-gray-800" id="qv-client">Nome do Cliente</h3>
+                </div>
+
+                <div class="bg-gray-50 rounded-lg p-6 mb-8">
+                    <h4 class="font-bold text-gray-800 mb-4 border-b pb-2">Descrição dos Serviços</h4>
+                    <p class="text-gray-600 whitespace-pre-line mb-6" id="qv-desc">...</p>
+
+                    <div class="flex justify-between text-sm text-gray-600 mb-2">
+                        <span>Mão de Obra</span>
+                        <span class="font-bold" id="qv-labor">R$ 0,00</span>
+                    </div>
+                    <div class="flex justify-between text-sm text-gray-600 mb-2">
+                        <span>Materiais</span>
+                        <span class="font-bold" id="qv-material">R$ 0,00</span>
+                    </div>
+                    <div class="flex justify-between text-lg font-bold text-plena-orange border-t pt-4 mt-4">
+                        <span>TOTAL</span>
+                        <span id="qv-total">R$ 0,00</span>
+                    </div>
+                </div>
+
+                <div class="text-center text-xs text-gray-400">
+                    <p>Orçamento válido até <span id="qv-validity">--/--/----</span></p>
+                    <p class="mt-2 text-[10px]">Gerado por Plena Orçamentos</p>
+                </div>
+            </div>
+
+            <div class="bg-gray-100 p-4 space-y-3">
+                <div class="flex gap-3 items-center bg-white p-2 rounded-lg border border-gray-200">
+                    <span class="text-xs font-bold uppercase text-gray-500 ml-2">Status:</span>
+                    <select id="qv-status" onchange="updateStatus(this.value)"
+                        class="flex-1 border-none bg-transparent font-bold text-gray-800 outline-none cursor-pointer">
+                        <option value="pending">🟡 Pendente</option>
+                        <option value="sent">🔵 Enviado</option>
+                        <option value="approved">✅ Aprovado</option>
+                        <option value="rejected">❌ Recusado</option>
+                        <option value="closed">⚫ Fechado</option>
+                    </select>
+                </div>
+                <div class="flex gap-3">
+                    <button onclick="editQuote()"
+                        class="flex-1 bg-white border border-gray-300 text-gray-700 py-3 rounded-lg font-bold hover:bg-gray-50 flex justify-center gap-2"><i
+                            data-lucide="edit-3" class="w-4 h-4"></i> Editar</button>
+                    <button onclick="shareQuoteWA()"
+                        class="flex-1 bg-[#25D366] text-white py-3 rounded-lg font-bold hover:bg-[#128C7E] flex justify-center gap-2"><i
+                            data-lucide="share-2" class="w-4 h-4"></i> WhatsApp</button>
+                    <button onclick="window.print()" class="px-4 border border-gray-300 rounded-lg hover:bg-white"><i
+                            data-lucide="printer" class="w-5 h-5 text-gray-600"></i></button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        const DB_KEY = 'plena_orcamentos_v1';
+        let db = JSON.parse(localStorage.getItem(DB_KEY)) || { quotes: [], transactions: [] };
+
+        const save = () => localStorage.setItem(DB_KEY, JSON.stringify(db));
+        const fmtMoney = (v) => v.toLocaleString('pt-BR', { style: 'currency', currency: 'BRL' });
+        const fmtDate = (d) => { if (!d) return '--/--/----'; const p = d.split('-'); return `${p[2]}/${p[1]}/${p[0]}`; };
+        const getID = () => Date.now().toString(36) + Math.random().toString(36).substr(2);
+
+        function init() {
+            lucide.createIcons();
+            const today = new Date().toISOString().split('T')[0];
+            document.getElementById('q-validity').value = new Date(Date.now() + 7 * 86400000).toISOString().split('T')[0];
+            document.getElementById('tr-date').value = today;
+            document.getElementById('rep-start').value = new Date(new Date().getFullYear(), new Date().getMonth(), 1).toISOString().split('T')[0];
+            document.getElementById('rep-end').value = today;
+            renderDashboard();
+        }
+
+        function router(view) {
+            document.querySelectorAll('.view-section').forEach(el => el.classList.add('hide'));
+            document.querySelectorAll('.nav-item').forEach(el => { el.classList.remove('bg-white/10', 'text-white'); el.classList.add('text-gray-400'); });
+
+            document.getElementById(`view-${view}`).classList.remove('hide');
+            document.getElementById(`nav-${view}`).classList.add('bg-white/10', 'text-white');
+            document.getElementById(`nav-${view}`).classList.remove('text-gray-400');
+
+            const titles = {
+                dashboard: 'Visão Geral',
+                quotes: 'Orçamentos',
+                transactions: 'Fluxo de Caixa',
+                reports: 'Relatórios',
+                settings: 'Configurações',
+                about: 'Informações Legais'
+            };
+            document.getElementById('page-title').innerText = titles[view] || 'Plena Manager';
+
+            if (view === 'dashboard') renderDashboard();
+            if (view === 'quotes') renderQuotes();
+            if (view === 'transactions') renderTrans();
+
+            if (window.innerWidth < 1024) toggleSidebar();
+        }
+
+        function toggleSidebar() {
+            document.getElementById('sidebar').classList.toggle('open'); document.getElementById('overlay').classList.toggle('hidden');
+        }
+
+        function renderDashboard() {
+            const pending = db.quotes.filter(q => ['pending', 'sent'].includes(q.status)).length;
+            const approved = db.quotes.filter(q => q.status === 'approved').length;
+            const balance = db.transactions.reduce((acc, t) => acc + (t.type === 'income' ? t.val : -t.val), 0);
+
+            document.getElementById('dash-pending').innerText = pending;
+            document.getElementById('dash-approved').innerText = approved;
+            document.getElementById('dash-balance').innerText = fmtMoney(balance);
+
+            const list = db.quotes.slice(-3).reverse();
+            const box = document.getElementById('latest-quotes');
+
+            const statusMap = {
+                pending: { l: 'Pendente', c: 'text-yellow-600', bg: 'bg-yellow-100' },
+                sent: { l: 'Enviado', c: 'text-blue-600', bg: 'bg-blue-100' },
+                approved: { l: 'Aprovado', c: 'text-green-600', bg: 'bg-green-100' },
+                rejected: { l: 'Recusado', c: 'text-red-600', bg: 'bg-red-100' },
+                closed: { l: 'Fechado', c: 'text-gray-600', bg: 'bg-gray-100' }
+            };
+
+            box.innerHTML = list.length ? list.map(q => {
+                const s = statusMap[q.status] || statusMap.pending;
+                return `
+                <div class="flex justify-between items-center bg-gray-50 p-3 rounded-lg border border-gray-100">
+                    <div>
+                        <p class="font-bold text-gray-800 text-sm">${q.client}</p>
+                        <div class="flex items-center gap-2 mt-1">
+                            <span class="text-[10px] px-2 py-0.5 rounded-full font-bold uppercase ${s.bg} ${s.c}">${s.l}</span>
+                            <span class="text-xs text-gray-400">• ${fmtDate(q.date)}</span>
+                        </div>
+                    </div>
+                    <span class="font-bold text-plena-orange">${fmtMoney(q.total)}</span>
+                </div>
+            `}).join('') : '<p class="text-gray-400 text-sm">Nenhum orçamento recente.</p>';
+        }
+
+        // QUOTES LOGIC
+        function renderQuotes() {
+            const term = document.getElementById('quote-search').value.toLowerCase();
+            const list = db.quotes.filter(q => q.client.toLowerCase().includes(term)).reverse();
+            const container = document.getElementById('quotes-list');
+
+            const statusMap = {
+                pending: { c: 'bg-yellow-400', t: 'Pendente' },
+                sent: { c: 'bg-blue-500', t: 'Enviado' },
+                approved: { c: 'bg-green-500', t: 'Aprovado' },
+                rejected: { c: 'bg-red-500', t: 'Recusado' },
+                closed: { c: 'bg-gray-500', t: 'Fechado' }
+            };
+
+            container.innerHTML = list.map(q => {
+                const s = statusMap[q.status] || statusMap.pending;
+                return `
+                <div class="p-4 flex justify-between items-center hover:bg-gray-50 cursor-pointer" onclick="viewQuote('${q.id}')">
+                    <div class="flex items-center gap-3">
+                        <div class="w-2.5 h-2.5 rounded-full ${s.c}"></div>
+                        <div>
+                            <p class="font-bold text-gray-800">${q.client}</p>
+                            <p class="text-xs text-gray-500">Validade: ${fmtDate(q.validity)}</p>
+                        </div>
+                    </div>
+                    <div class="text-right">
+                        <p class="font-bold text-plena-orange">${fmtMoney(q.total)}</p>
+                        <p class="text-[10px] text-gray-400 uppercase font-bold tracking-wider">${s.t}</p>
+                    </div>
+                </div>
+            `}).join('') || '<div class="p-8 text-center text-gray-400">Nenhum orçamento encontrado.</div>';
+        }
+
+        function submitQuote(e) {
+            e.preventDefault();
+            const id = document.getElementById('q-id').value;
+            const labor = parseFloat(document.getElementById('q-labor').value) || 0;
+            const mat = parseFloat(document.getElementById('q-material').value) || 0;
+
+            const quoteData = {
+                id: id || getID(),
+                client: document.getElementById('q-client').value,
+                desc: document.getElementById('q-desc').value,
+                labor, material: mat,
+                total: labor + mat,
+                validity: document.getElementById('q-validity').value,
+                date: id ? db.quotes.find(x => x.id === id).date : new Date().toISOString().split('T')[0],
+                status: id ? db.quotes.find(x => x.id === id).status : 'pending'
+            };
+
+            if (id) {
+                const idx = db.quotes.findIndex(x => x.id === id);
+                if (idx !== -1) db.quotes[idx] = quoteData;
+            } else {
+                db.quotes.push(quoteData);
+            }
+
+            save();
+            closeModal('quoteModal'); e.target.reset();
+            renderDashboard(); renderQuotes();
+            if (id && currentQuoteId === id) viewQuote(id);
+        }
+
+        let currentQuoteId = null;
+        function viewQuote(id) {
+            const q = db.quotes.find(x => x.id === id);
+            if (!q) return;
+            currentQuoteId = id;
+            document.getElementById('qv-id').innerText = '#' + q.id.substr(0, 6).toUpperCase();
+            document.getElementById('qv-date').innerText = 'Data: ' + fmtDate(q.date);
+            document.getElementById('qv-client').innerText = q.client;
+            document.getElementById('qv-desc').innerText = q.desc;
+            document.getElementById('qv-labor').innerText = fmtMoney(q.labor);
+            document.getElementById('qv-material').innerText = fmtMoney(q.material);
+            document.getElementById('qv-total').innerText = fmtMoney(q.total);
+            document.getElementById('qv-validity').innerText = fmtDate(q.validity);
+
+            document.getElementById('qv-status').value = q.status;
+            document.getElementById('quoteViewModal').classList.remove('hidden');
+        }
+
+        function updateStatus(newStatus) {
+            const q = db.quotes.find(x => x.id === currentQuoteId);
+            if (q) {
+                q.status = newStatus;
+                save();
+                renderDashboard(); renderQuotes();
+            }
+        }
+
+        function editQuote() {
+            closeModal('quoteViewModal');
+            const q = db.quotes.find(x => x.id === currentQuoteId);
+            if (!q) return;
+
+            document.getElementById('q-id').value = q.id;
+            document.getElementById('q-client').value = q.client;
+            document.getElementById('q-desc').value = q.desc;
+            document.getElementById('q-labor').value = q.labor;
+            document.getElementById('q-material').value = q.material;
+            document.getElementById('q-validity').value = q.validity;
+
+            document.getElementById('modal-title').innerText = 'Editar Orçamento';
+            document.getElementById('quoteModal').classList.remove('hidden');
+        }
+
+        function shareQuoteWA() {
+            const q = db.quotes.find(x => x.id === currentQuoteId);
+            const msg = `*📑 Proposta de Orçamento* %23${q.id.substr(0, 4).toUpperCase()}%0A%0A` +
+                `👤 *Cliente:* ${q.client}%0A` +
+                `🛠 *Serviço:* ${q.desc}%0A` +
+                `--------------------------------%0A` +
+                `👷 Mão de Obra: ${fmtMoney(q.labor)}%0A` +
+                `🧱 Material: ${fmtMoney(q.material)}%0A` +
+                `--------------------------------%0A` +
+                `💰 *TOTAL: ${fmtMoney(q.total)}*%0A` +
+                `📅 Válido até: ${fmtDate(q.validity)}%0A%0A` +
+                `_Gerado por Plena Orçamentos_`;
+
+            if (q.status === 'pending') {
+                q.status = 'sent';
+                save();
+                renderDashboard(); renderQuotes();
+                document.getElementById('qv-status').value = 'sent';
+            }
+
+            window.open(`https://wa.me/?text=${msg}`);
+        }
+
+        function openQuoteModal() {
+            if (!document.getElementById('quoteModal').classList.contains('hidden')) return;
+            document.getElementById('q-id').value = '';
+            document.querySelector('#quoteModal form').reset();
+            document.getElementById('modal-title').innerText = 'Novo Orçamento';
+            document.getElementById('q-validity').value = new Date(Date.now() + 7 * 86400000).toISOString().split('T')[0];
+            document.getElementById('quoteModal').classList.remove('hidden');
+        }
+
+        function closeModal(id) { document.getElementById(id).classList.add('hidden'); }
+        function openTransModal() { document.getElementById('transModal').classList.remove('hidden'); }
+
+        function submitTrans(e) {
+            e.preventDefault();
+            const type = document.querySelector('input[name="tr-type"]:checked').value;
+            db.transactions.push({
+                id: getID(),
+                type,
+                desc: document.getElementById('tr-desc').value,
+                val: parseFloat(document.getElementById('tr-amount').value),
+                date: document.getElementById('tr-date').value
+            });
+            save(); closeModal('transModal'); e.target.reset(); renderTrans(); renderDashboard();
+        }
+
+        function renderTrans() {
+            const list = db.transactions.slice().reverse();
+            document.getElementById('trans-list').innerHTML = list.map(t => `
+                <tr>
+                    <td class="px-6 py-4 text-gray-500">${fmtDate(t.date)}</td>
+                    <td class="px-6 py-4">${t.desc}</td>
+                    <td class="px-6 py-4 text-right font-bold ${t.type === 'income' ? 'text-green-600' : 'text-red-600'}">${t.type === 'income' ? '+' : '-'} ${fmtMoney(t.val)}</td>
+                    <td class="px-6 py-4 text-center"><button onclick="delTrans('${t.id}')" class="text-gray-300 hover:text-red-500">×</button></td>
+                </tr>
+            `).join('');
+        }
+        function delTrans(id) {
+            if (confirm('Apagar?')) { db.transactions = db.transactions.filter(x => x.id !== id); save(); renderTrans(); renderDashboard(); }
+        }
+
+        function renderReports() {
+            const s = document.getElementById('rep-start').value;
+            const e = document.getElementById('rep-end').value;
+            const f = db.transactions.filter(t => t.date >= s && t.date <= e);
+            const inc = f.filter(t => t.type === 'income').reduce((a, b) => a + b.val, 0);
+            const exp = f.filter(t => t.type === 'expense').reduce((a, b) => a + b.val, 0);
+            document.getElementById('rep-inc').innerText = fmtMoney(inc);
+            document.getElementById('rep-exp').innerText = fmtMoney(exp);
+            document.getElementById('rep-bal').innerText = fmtMoney(inc - exp);
+        }
+
+        function downloadBackup() {
+            const a = document.createElement('a');
+            a.href = "data:text/json;charset=utf-8," + encodeURIComponent(JSON.stringify(db));
+            a.download = `plena_orcamentos.json`; a.click();
+        }
+        function restoreBackup(input) {
+            const reader = new FileReader();
+            reader.onload = (e) => {
+                try {
+                    db = JSON.parse(e.target.result); save(); location.reload();
+                } catch (e) { alert('Erro no arquivo'); }
+            };
+            reader.readAsText(input.files[0]);
+        }
+
+        function factoryReset() {
+            if (confirm('TEM CERTEZA? Isso apagará TODOS os orçamentos e transações. Não há como desfazer.')) {
+                localStorage.removeItem(DB_KEY);
+                location.reload();
+            }
+        }
+
+        // SECURITY LOCK
+        setInterval(() => {
+            const footer = document.querySelector('.sidebar .border-t');
+            if (footer && !footer.innerText.includes('Plena')) {
+                document.body.innerHTML = '<div style="background:#111;color:red;height:100vh;display:flex;align-items:center;justify-content:center;"><h1>VIOLAÇÃO DE SEGURANÇA</h1></div>'; throw new Error("Piracy");
+            }
+        }, 8000);
+
+        init();
+    </script>
+</body>
+
+</html>

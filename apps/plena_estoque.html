@@ -1,0 +1,831 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>Plena Estoque - Controle Inteligente</title>
+
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script>
+        tailwind.config = {
+            theme: {
+                extend: {
+                    colors: {
+                        plena: { cyan: '#06B6D4', dark: '#0E7490', black: '#1a1a1a' }, // Cyan Theme for Stock
+                        success: '#10B981', danger: '#EF4444', warning: '#F59E0B'
+                    }
+                }
+            }
+        }
+    </script>
+    <script src="https://unpkg.com/lucide@latest"></script>
+
+    <style>
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+            background-color: #ECFEFF;
+            -webkit-tap-highlight-color: transparent;
+        }
+
+        .hide {
+            display: none !important;
+        }
+
+        .fade-in {
+            animation: fadeIn 0.3s ease-out;
+        }
+
+        @keyframes fadeIn {
+            from {
+                opacity: 0;
+                transform: translateY(5px);
+            }
+
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+
+        .modal-backdrop {
+            background-color: rgba(0, 0, 0, 0.6);
+            backdrop-filter: blur(2px);
+        }
+
+        @media (max-width: 1024px) {
+            .sidebar {
+                transform: translateX(-100%);
+                position: fixed;
+                z-index: 50;
+                height: 100vh;
+                width: 280px;
+            }
+
+            .sidebar.open {
+                transform: translateX(0);
+            }
+        }
+
+        @media (min-width: 1025px) {
+            .sidebar {
+                width: 280px;
+                position: fixed;
+                height: 100vh;
+            }
+
+            .main-content {
+                margin-left: 280px;
+            }
+        }
+    </style>
+</head>
+
+<body class="text-gray-800 antialiased">
+
+    <div id="overlay" class="fixed inset-0 bg-black/50 hidden z-40 transition-opacity" onclick="toggleSidebar()"></div>
+
+    <aside id="sidebar"
+        class="sidebar bg-plena-black text-white transition-transform duration-300 flex flex-col shadow-2xl">
+        <div class="h-20 flex items-center px-6 bg-plena-cyan">
+            <i data-lucide="package-search" class="w-8 h-8 mr-3"></i>
+            <div>
+                <h1 class="text-xl font-bold tracking-tight">PLENA</h1>
+                <p class="text-xs text-white/90 font-medium">Estoque & Dispensa</p>
+            </div>
+        </div>
+
+        <nav class="p-4 space-y-2 flex-1 overflow-y-auto">
+            <button onclick="router('dashboard')"
+                class="nav-item w-full flex items-center px-4 py-3 rounded-xl hover:bg-white/10 transition-all group active-nav"
+                id="nav-dashboard">
+                <i data-lucide="layout-dashboard" class="w-5 h-5 mr-3 text-gray-400 group-hover:text-white"></i> Visão
+                Geral
+            </button>
+            <button onclick="router('inventory')"
+                class="nav-item w-full flex items-center px-4 py-3 rounded-xl hover:bg-white/10 transition-all group"
+                id="nav-inventory">
+                <i data-lucide="boxes" class="w-5 h-5 mr-3 text-gray-400 group-hover:text-white"></i> Meu Estoque
+            </button>
+            <button onclick="router('shopping')"
+                class="nav-item w-full flex items-center px-4 py-3 rounded-xl hover:bg-white/10 transition-all group"
+                id="nav-shopping">
+                <i data-lucide="shopping-cart" class="w-5 h-5 mr-3 text-gray-400 group-hover:text-white"></i> Lista de
+                Compras
+            </button>
+            <button onclick="router('history')"
+                class="nav-item w-full flex items-center px-4 py-3 rounded-xl hover:bg-white/10 transition-all group"
+                id="nav-history">
+                <i data-lucide="history" class="w-5 h-5 mr-3 text-gray-400 group-hover:text-white"></i> Movimentações
+            </button>
+            <button onclick="router('settings')"
+                class="nav-item w-full flex items-center px-4 py-3 rounded-xl hover:bg-white/10 transition-all group"
+                id="nav-settings">
+                <i data-lucide="settings" class="w-5 h-5 mr-3 text-gray-400 group-hover:text-white"></i> Configurações
+            </button>
+            <button onclick="router('instructions')"
+                class="nav-item w-full flex items-center px-4 py-3 rounded-xl hover:bg-white/10 transition-all group"
+                id="nav-instructions">
+                <i data-lucide="book-open" class="w-5 h-5 mr-3 text-gray-400 group-hover:text-white"></i> Manual de Uso
+            </button>
+            <button onclick="router('about')"
+                class="nav-item w-full flex items-center px-4 py-3 rounded-xl hover:bg-white/10 transition-all group"
+                id="nav-about">
+                <i data-lucide="info" class="w-5 h-5 mr-3 text-gray-400 group-hover:text-white"></i> Saiba Mais
+            </button>
+        </nav>
+
+        <div class="p-6 border-t border-white/10 text-center">
+            <p class="text-xs text-gray-500">Todos os Direitos Reservados &copy; 2025</p>
+            <a href="https://www.plenaaplicativos.com.br" target="_blank"
+                class="text-[10px] text-gray-600 hover:text-plena-cyan transition-colors mt-1 block decoration-0">Plena
+                Apps</a>
+        </div>
+    </aside>
+
+    <main class="main-content min-h-screen flex flex-col">
+        <header
+            class="bg-white h-20 flex items-center justify-between px-4 lg:px-8 sticky top-0 z-30 shadow-sm border-b border-gray-100">
+            <div class="flex items-center gap-4">
+                <button onclick="toggleSidebar()" class="lg:hidden p-2 hover:bg-gray-100 rounded-lg text-gray-600"><i
+                        data-lucide="menu" class="w-6 h-6"></i></button>
+                <div class="flex flex-col">
+                    <h2 id="page-title" class="text-xl font-bold text-gray-800">Dashboard</h2>
+                    <p id="page-subtitle" class="text-xs text-gray-500 hidden"></p>
+                </div>
+            </div>
+            <div class="flex items-center gap-2">
+                <div id="header-actions">
+                    <button onclick="openProductModal()"
+                        class="flex items-center px-3 py-2 bg-plena-cyan text-white rounded-lg text-sm font-bold hover:bg-plena-dark transition-all shadow-lg active:scale-95">
+                        <i data-lucide="plus" class="w-5 h-5 sm:mr-2"></i> <span class="hidden sm:inline">Novo
+                            Item</span> <span class="sm:hidden">Novo</span>
+                    </button>
+                </div>
+            </div>
+        </header>
+
+        <div class="p-4 lg:p-8 flex-1 overflow-y-auto">
+            <!-- DASHBOARD -->
+            <section id="view-dashboard" class="view-section fade-in">
+                <div class="grid grid-cols-1 md:grid-cols-3 gap-6 mb-8">
+                    <div class="bg-white p-6 rounded-2xl shadow-sm border border-gray-100">
+                        <p class="text-xs font-bold text-gray-400 uppercase tracking-wider mb-1">Itens Cadastrados</p>
+                        <h3 id="dash-total-items" class="text-3xl font-bold text-gray-800">0</h3>
+                    </div>
+                    <div class="bg-white p-6 rounded-2xl shadow-sm border border-gray-100 relative overflow-hidden">
+                        <div class="absolute right-0 top-0 h-full w-1.5 bg-red-500"></div>
+                        <p class="text-xs font-bold text-gray-400 uppercase tracking-wider mb-1">Estoque Crítico (Falta)
+                        </p>
+                        <h3 id="dash-low-stock" class="text-3xl font-bold text-red-500">0</h3>
+                    </div>
+                    <div class="bg-white p-6 rounded-2xl shadow-sm border border-gray-100 relative overflow-hidden">
+                        <div class="absolute right-0 top-0 h-full w-1.5 bg-yellow-400"></div>
+                        <p class="text-xs font-bold text-gray-400 uppercase tracking-wider mb-1">Vencendo em 30 dias</p>
+                        <h3 id="dash-expiring" class="text-3xl font-bold text-yellow-600">0</h3>
+                    </div>
+                </div>
+
+                <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+                    <div class="bg-white p-6 rounded-2xl shadow-sm border border-gray-100">
+                        <h3 class="font-bold text-gray-800 mb-4 flex items-center text-red-600"><i
+                                data-lucide="alert-triangle" class="w-4 h-4 mr-2"></i> Atenção: Vencimento Próximo</h3>
+                        <div id="expiring-list" class="space-y-3"></div>
+                    </div>
+
+                    <div class="bg-white p-6 rounded-2xl shadow-sm border border-gray-100">
+                        <h3 class="font-bold text-gray-800 mb-4 flex items-center text-plena-cyan"><i
+                                data-lucide="history" class="w-4 h-4 mr-2"></i> Últimas Movimentações</h3>
+                        <div id="recent-history-list" class="space-y-3"></div>
+                    </div>
+                </div>
+            </section>
+
+            <!-- INVENTORY -->
+            <section id="view-inventory" class="view-section hide fade-in">
+                <div class="bg-white p-4 rounded-xl border border-gray-100 mb-6 flex gap-2">
+                    <i data-lucide="search" class="text-gray-400"></i>
+                    <input type="text" id="inv-search" onkeyup="renderInventory()" placeholder="Buscar item..."
+                        class="w-full outline-none">
+                </div>
+                <div id="inventory-list" class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6"></div>
+            </section>
+
+            <!-- SHOPPING LIST -->
+            <section id="view-shopping" class="view-section hide fade-in">
+                <div class="flex justify-between items-center mb-6">
+                    <div>
+                        <h3 class="text-xl font-bold text-gray-800">Sugestão de Compra</h3>
+                        <p class="text-sm text-gray-500">Itens com quantidade abaixo do mínimo definido.</p>
+                    </div>
+                    <button onclick="copyShoppingList()"
+                        class="bg-green-600 text-white px-4 py-2 rounded-lg font-bold hover:bg-green-700 flex items-center"><i
+                            data-lucide="copy" class="w-4 h-4 mr-2"></i> Copiar Lista</button>
+                </div>
+                <div id="shopping-list-container"
+                    class="bg-white rounded-2xl shadow-sm border border-gray-100 overflow-hidden"></div>
+            </section>
+
+            <!-- HISTORY -->
+            <section id="view-history" class="view-section hide fade-in">
+                <div class="bg-white rounded-2xl shadow-sm border border-gray-100 overflow-hidden">
+                    <div class="overflow-x-auto">
+                        <table class="w-full text-left">
+                            <thead class="bg-gray-50 text-gray-500 text-xs uppercase">
+                                <tr>
+                                    <th class="px-6 py-3">Data</th>
+                                    <th class="px-6 py-3">Item</th>
+                                    <th class="px-6 py-3">Tipo</th>
+                                    <th class="px-6 py-3 text-right">Qtd</th>
+                                </tr>
+                            </thead>
+                            <tbody id="full-history-list" class="divide-y divide-gray-100 text-sm"></tbody>
+                        </table>
+                    </div>
+                </div>
+            </section>
+
+            <!-- SETTINGS -->
+            <section id="view-settings" class="view-section hide fade-in">
+                <div class="bg-white p-6 rounded-2xl shadow-sm border border-gray-100">
+                    <h3 class="font-bold text-gray-800 mb-4 flex items-center"><i data-lucide="shield-alert"
+                            class="w-4 h-4 mr-2"></i> Segurança de Dados</h3>
+                    <div class="bg-blue-50 border border-blue-200 p-3 rounded-lg text-sm text-blue-800 mb-4">
+                        <strong>Importante:</strong> Dados 100% locais. <strong>Faça backups!</strong>
+                    </div>
+                    <button onclick="downloadBackup()"
+                        class="w-full border border-gray-300 py-3 rounded-lg text-sm font-medium hover:bg-gray-50 mb-3 flex justify-center gap-2"><i
+                            data-lucide="download" class="w-4 h-4"></i> Baixar Backup (.json)</button>
+                    <div class="relative mb-6">
+                        <button
+                            class="w-full bg-gray-800 text-white py-3 rounded-lg text-sm font-medium flex justify-center gap-2"><i
+                                data-lucide="upload" class="w-4 h-4"></i> Restaurar Backup</button>
+                        <input type="file" onchange="restoreBackup(this)"
+                            class="absolute inset-0 opacity-0 cursor-pointer">
+                    </div>
+                    <div class="border-t pt-4">
+                        <button onclick="factoryReset()"
+                            class="text-red-500 text-sm hover:underline w-full text-center">Resetar Sistema de
+                            Fábrica</button>
+                    </div>
+                </div>
+            </section>
+
+            <!-- ABOUT -->
+            <section id="view-instructions" class="view-section hide fade-in">
+                <div class="max-w-3xl mx-auto space-y-6">
+                    <div class="bg-white p-8 rounded-2xl shadow-sm border border-gray-100">
+                        <div class="text-center mb-8">
+                            <h2 class="text-2xl font-bold text-gray-800">Manual de Estoque e Validade</h2>
+                            <p class="text-gray-500">Evite prejuízos com mercadorias vencidas.</p>
+                        </div>
+
+                        <div class="space-y-4">
+                            <!-- ITEM 1: BACKUP -->
+                            <details
+                                class="group bg-blue-50 border border-blue-100 rounded-xl overflow-hidden transition-all duration-300 open:shadow-md">
+                                <summary
+                                    class="flex items-center justify-between p-4 cursor-pointer select-none text-blue-900 font-bold">
+                                    <div class="flex items-center gap-3">
+                                        <div
+                                            class="w-8 h-8 rounded-full bg-blue-200 flex items-center justify-center text-blue-700">
+                                            <i data-lucide="shield-check" class="w-4 h-4"></i>
+                                        </div>
+                                        1. Segurança: Seu Estoque Vale Dinheiro (Backup)
+                                    </div>
+                                    <i data-lucide="chevron-down"
+                                        class="w-5 h-5 transition-transform group-open:rotate-180 text-blue-400"></i>
+                                </summary>
+                                <div
+                                    class="p-4 pt-0 text-sm text-gray-600 bg-blue-50 leading-relaxed border-t border-blue-100/50">
+                                    <p class="mb-2">Não corra o risco de perder seu inventário. Faça backup
+                                        regularmente:</p>
+                                    <ol class="list-decimal pl-5 space-y-2 mt-2 font-medium text-gray-700">
+                                        <li>Vá em <strong>Configurações</strong> no menu.</li>
+                                        <li>Clique em <span class="text-blue-600"><i data-lucide="download"
+                                                    class="w-3 h-3 inline"></i> Baixar Backup</span>.</li>
+                                        <li>Salve no seu Google Drive, E-mail ou WhatsApp.</li>
+                                        <li>Faça isso após cada contagem de estoque!</li>
+                                    </ol>
+                                </div>
+                            </details>
+
+                            <!-- ITEM 2: EXPIRY -->
+                            <details
+                                class="group bg-white border border-gray-200 rounded-xl overflow-hidden transition-all duration-300 open:shadow-md hover:border-plena-cyan">
+                                <summary
+                                    class="flex items-center justify-between p-4 cursor-pointer select-none text-gray-800 font-bold">
+                                    <div class="flex items-center gap-3">
+                                        <div
+                                            class="w-8 h-8 rounded-full bg-cyan-100 flex items-center justify-center text-plena-cyan">
+                                            <i data-lucide="calendar-off" class="w-4 h-4"></i>
+                                        </div>
+                                        2. Controle de Validade
+                                    </div>
+                                    <i data-lucide="chevron-down"
+                                        class="w-5 h-5 transition-transform group-open:rotate-180 text-gray-400"></i>
+                                </summary>
+                                <div class="p-4 pt-0 text-sm text-gray-600 leading-relaxed">
+                                    <p>O sistema te avisa antes do produto estragar:</p>
+                                    <ul class="list-disc pl-5 space-y-2 mt-2">
+                                        <li><strong>Cadastro:</strong> Sempre informe a "Data de Validade" ao adicionar
+                                            um item.</li>
+                                        <li><strong>Dashboard:</strong> Fique de olho no bloco "<span
+                                                class="text-yellow-600 font-bold">Vencendo em 30 dias</span>".</li>
+                                        <li>Crie promoções para esses produtos e evite o descarte!</li>
+                                    </ul>
+                                </div>
+                            </details>
+
+                            <!-- ITEM 3: ALERTS -->
+                            <details
+                                class="group bg-white border border-gray-200 rounded-xl overflow-hidden transition-all duration-300 open:shadow-md hover:border-gray-300">
+                                <summary
+                                    class="flex items-center justify-between p-4 cursor-pointer select-none text-gray-800 font-bold">
+                                    <div class="flex items-center gap-3">
+                                        <div
+                                            class="w-8 h-8 rounded-full bg-gray-100 flex items-center justify-center text-gray-600">
+                                            <i data-lucide="alert-triangle" class="w-4 h-4"></i>
+                                        </div>
+                                        3. Alertas de Falta (Estoque Mínimo)
+                                    </div>
+                                    <i data-lucide="chevron-down"
+                                        class="w-5 h-5 transition-transform group-open:rotate-180 text-gray-400"></i>
+                                </summary>
+                                <div class="p-4 pt-0 text-sm text-gray-600 leading-relaxed">
+                                    <p>Nunca deixe faltar mercadoria para seu cliente:</p>
+                                    <ul class="list-disc pl-5 space-y-1 mt-2">
+                                        <li>Defina o <strong>Estoque Mínimo</strong> no cadastro do produto.</li>
+                                        <li>Se a quantidade atual for menor que o mínimo, o item aparecerá na lista de
+                                            "<span class="text-red-500 font-bold">Estoque Crítico</span>".</li>
+                                        <li>Use essa lista para fazer suas compras de reposição.</li>
+                                    </ul>
+                                </div>
+                            </details>
+
+                            <!-- ITEM 4: APP INSTALL -->
+                            <details
+                                class="group bg-white border border-gray-200 rounded-xl overflow-hidden transition-all duration-300 open:shadow-md hover:border-gray-300">
+                                <summary
+                                    class="flex items-center justify-between p-4 cursor-pointer select-none text-gray-800 font-bold">
+                                    <div class="flex items-center gap-3">
+                                        <div
+                                            class="w-8 h-8 rounded-full bg-gray-100 flex items-center justify-center text-gray-600">
+                                            <i data-lucide="smartphone" class="w-4 h-4"></i>
+                                        </div>
+                                        4. Instalar no Celular
+                                    </div>
+                                    <i data-lucide="chevron-down"
+                                        class="w-5 h-5 transition-transform group-open:rotate-180 text-gray-400"></i>
+                                </summary>
+                                <div class="p-4 pt-0 text-sm text-gray-600 leading-relaxed">
+                                    <p>Tenha seu estoque na palma da mão, mesmo sem internet:</p>
+                                    <div class="grid grid-cols-1 md:grid-cols-2 gap-4 mt-3">
+                                        <div class="bg-gray-50 p-3 rounded-lg">
+                                            <strong>Android:</strong> Menu do Chrome > "Adicionar à Tela Inicial".
+                                        </div>
+                                        <div class="bg-gray-50 p-3 rounded-lg">
+                                            <strong>iPhone:</strong> Safari > Compartilhar > "Adicionar à Tela de
+                                            Início".
+                                        </div>
+                                    </div>
+                                </div>
+                            </details>
+                        </div>
+
+                        <!-- SUPPORT -->
+                        <div class="mt-8 pt-6 border-t border-gray-100 text-center">
+                            <p class="text-sm text-gray-500 mb-2">Dúvidas?</p>
+                            <a href="mailto:suporte@plenainformatica.com.br"
+                                class="text-plena-cyan font-bold hover:underline text-sm">Fale com o Suporte</a>
+                        </div>
+                    </div>
+                </div>
+            </section>
+
+            <section id="view-about" class="view-section hide fade-in">
+                <div class="max-w-3xl mx-auto space-y-6">
+                    <div class="bg-white p-8 rounded-2xl shadow-sm border border-gray-100">
+                        <h2 class="text-2xl font-bold text-gray-800 mb-6">Sobre a Plena</h2>
+
+                        <!-- DISCLAIMER / LEGAL -->
+                        <div class="bg-red-50 border-l-4 border-red-500 p-4 mb-8">
+                            <div class="flex items-start">
+                                <div class="flex-shrink-0">
+                                    <i data-lucide="alert-triangle" class="h-5 w-5 text-red-600"></i>
+                                </div>
+                                <div class="ml-3">
+                                    <h3 class="text-sm font-bold text-red-800 uppercase tracking-wide">Registro e
+                                        Distribuição</h3>
+                                    <div class="mt-2 text-sm text-red-700 space-y-2">
+                                        <p>Este software é um produto original desenvolvido pela <strong>Plena Soluções
+                                                Digitais</strong>. Sua comercialização é exclusiva através de canais
+                                            oficiais (Loja Oficial no Mercado Livre).</p>
+                                        <p>A revenda não autorizada, engenharia reversa, cópia parcial do código-fonte
+                                            ou distribuição em pacotes "piratas" constitui <strong>violação de
+                                                propriedade intelectual (Lei 9.610/98)</strong>. O infrator está sujeito
+                                            a sanções cíveis e criminais. Valorize o desenvolvimento nacional.</p>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+
+                        <div class="space-y-8 text-sm text-gray-600">
+                            <!-- MISSION -->
+                            <div>
+                                <h3 class="flex items-center text-lg font-bold text-gray-900 mb-2">
+                                    <i data-lucide="heart" class="w-5 h-5 mr-2 text-plena-cyan"></i> Nossa Missão:
+                                    Tecnologia e Acessibilidade
+                                </h3>
+                                <p class="leading-relaxed">A Plena acredita que a tecnologia deve ser um direito, não um
+                                    privilégio exclusivo de grandes corporações. Nossa missão é democratizar ferramentas
+                                    de gestão de alta performance, simples e acessíveis.</p>
+                                <p class="mt-2 leading-relaxed">Desenvolvemos soluções <strong>Local-First</strong>
+                                    (seus dados ficam com você), garantindo que pequenos empreendedores, autônomos e
+                                    famílias brasileiras tenham controle total sobre suas informações, sem mensalidades
+                                    abusivas e sem depender de conexão constante com a internet.</p>
+                            </div>
+
+                            <!-- PRIVACY -->
+                            <div class="border-t border-gray-100 pt-6">
+                                <h3 class="font-bold text-gray-900 mb-2">Política de Privacidade</h3>
+                                <p>Ao utilizar este sistema, você concorda que:</p>
+                                <ul class="list-disc pl-5 mt-2 space-y-1">
+                                    <li><strong>100% Offline:</strong> Seus dados financeiros não saem deste
+                                        dispositivo.</li>
+                                    <li><strong>Responsabilidade:</strong> O backup (cópia de segurança) é
+                                        responsabilidade exclusiva do usuário.</li>
+                                    <li><strong>Isenção:</strong> A Plena não tem acesso aos seus dados e não pode
+                                        recuperá-los em caso de perda do equipamento.</li>
+                                </ul>
+                            </div>
+                        </div>
+
+                        <!-- CONTACT -->
+                        <div class="mt-8 bg-gray-50 p-6 rounded-xl border border-gray-200">
+                            <h3 class="font-bold text-gray-900 mb-2">Precisa de Suporte ou Personalização?</h3>
+                            <p class="text-sm text-gray-600 mb-4">Tem uma ideia de app ou precisa adaptar este sistema
+                                para seu negócio?</p>
+                            <a href="mailto:tecnologia@plenainformatica.com.br"
+                                class="inline-flex items-center text-plena-cyan font-bold hover:underline">
+                                <i data-lucide="mail" class="w-4 h-4 mr-2"></i> tecnologia@plenainformatica.com.br
+                            </a>
+                        </div>
+                    </div>
+                </div>
+            </section>
+        </div>
+    </main>
+
+    <!-- PRODUCT MODAL -->
+    <div id="productModal" class="fixed inset-0 modal-backdrop hidden z-50 flex items-center justify-center p-4">
+        <div class="bg-white rounded-2xl shadow-2xl w-full max-w-lg p-6">
+            <div class="flex justify-between items-center mb-6">
+                <h3 class="text-lg font-bold text-gray-800" id="prod-modal-title">Novo Item</h3>
+                <button onclick="closeModal('productModal')" class="text-gray-400"><i data-lucide="x"></i></button>
+            </div>
+            <form onsubmit="submitProduct(event)" class="space-y-4">
+                <input type="hidden" id="pd-id">
+                <input type="text" id="pd-name" required placeholder="Nome do Produto (Ex: Arroz 5kg)"
+                    class="w-full border p-2 rounded-lg">
+                <input type="text" id="pd-cat" placeholder="Categoria (Ex: Grãos)" class="w-full border p-2 rounded-lg"
+                    list="cat-suggestions">
+                <datalist id="cat-suggestions"></datalist>
+
+                <div class="grid grid-cols-2 gap-4">
+                    <div>
+                        <label class="text-xs font-bold text-gray-500 uppercase">Estoque Atual</label>
+                        <input type="number" id="pd-qty" required class="w-full border p-2 rounded-lg" placeholder="10">
+                    </div>
+                    <div>
+                        <label class="text-xs font-bold text-gray-500 uppercase">Estoque Mínimo</label>
+                        <input type="number" id="pd-min" required class="w-full border p-2 rounded-lg"
+                            placeholder="Avise-me quando chegar em..." value="5">
+                    </div>
+                </div>
+
+                <div>
+                    <label class="text-xs font-bold text-gray-500 uppercase">Validade (Opcional)</label>
+                    <input type="date" id="pd-exp" class="w-full border p-2 rounded-lg text-gray-700">
+                </div>
+
+                <div class="flex gap-2 pt-2">
+                    <button type="button" onclick="deleteProduct()" id="btn-delete-prod"
+                        class="hidden px-4 py-3 text-red-500 hover:bg-red-50 rounded-xl font-bold border border-red-200">Excluir</button>
+                    <button type="submit"
+                        class="flex-1 bg-plena-cyan text-white py-3 rounded-xl font-bold hover:bg-plena-dark">Salvar
+                        Item</button>
+                </div>
+            </form>
+        </div>
+    </div>
+
+    <!-- MOVEMENT MODAL -->
+    <div id="moveModal" class="fixed inset-0 modal-backdrop hidden z-50 flex items-center justify-center p-4">
+        <div class="bg-white rounded-2xl shadow-2xl w-full max-w-sm p-6">
+            <h3 class="text-lg font-bold text-gray-800 mb-1" id="mv-title">Registrar Movimentação</h3>
+            <p class="text-sm text-gray-500 mb-4" id="mv-subtitle">Produto...</p>
+            <form onsubmit="submitMove(event)" class="space-y-4">
+                <input type="hidden" id="mv-pid">
+                <div class="flex gap-2">
+                    <label
+                        class="flex-1 cursor-pointer bg-green-50 border border-green-200 p-2 rounded text-center"><input
+                            type="radio" name="mv-type" value="in" class="hidden"> <span
+                            class="text-green-700 font-bold">Entrada (+)</span></label>
+                    <label class="flex-1 cursor-pointer bg-red-50 border border-red-200 p-2 rounded text-center"><input
+                            type="radio" name="mv-type" value="out" class="hidden" checked> <span
+                            class="text-red-700 font-bold">Saída (-)</span></label>
+                </div>
+                <input type="number" id="mv-qty" required placeholder="Quantidade"
+                    class="w-full border p-2 rounded-lg text-center text-lg font-bold">
+                <button type="submit" class="w-full bg-gray-900 text-white py-3 rounded-lg font-bold">Atualizar
+                    Estoque</button>
+            </form>
+        </div>
+    </div>
+
+    <script>
+        const DB_KEY = 'plena_estoque_v1';
+        let db = JSON.parse(localStorage.getItem(DB_KEY)) || { products: [], movements: [] };
+
+        const save = () => localStorage.setItem(DB_KEY, JSON.stringify(db));
+        const fmtDate = (d) => { if (!d) return '--/--/-'; const p = d.split('-'); return `${p[2]}/${p[1]}`; }; // Simple format
+        const getID = () => Date.now().toString(36) + Math.random().toString(36).substr(2);
+
+        function init() {
+            lucide.createIcons();
+            router('dashboard');
+            populateCats();
+        }
+
+        function router(view) {
+            document.querySelectorAll('.view-section').forEach(el => el.classList.add('hide'));
+            document.querySelectorAll('.nav-item').forEach(el => { el.classList.remove('bg-white/10', 'text-white'); el.classList.add('text-gray-400'); });
+
+            document.getElementById(`view-${view}`).classList.remove('hide');
+            document.getElementById(`nav-${view}`).classList.add('bg-white/10', 'text-white');
+            document.getElementById(`nav-${view}`).classList.remove('text-gray-400');
+
+            const titles = { dashboard: 'Visão Geral', inventory: 'Meu Estoque', shopping: 'Lista de Compras', history: 'Histórico', settings: 'Configurações', about: 'Sobre' };
+            document.getElementById('page-title').innerText = titles[view] || 'Plena Estoque';
+
+            document.getElementById('header-actions').innerHTML = '';
+
+            if (view === 'dashboard') {
+                document.getElementById('header-actions').innerHTML = `<button onclick="openProductModal()" class="flex items-center px-3 py-2 bg-plena-cyan text-white rounded-lg text-sm font-bold hover:bg-plena-dark transition-all shadow-lg active:scale-95"><i data-lucide="plus" class="w-5 h-5 sm:mr-2"></i> <span class="hidden sm:inline">Novo Item</span> <span class="sm:hidden">Novo</span></button>`;
+                renderDashboard();
+            }
+            if (view === 'inventory') {
+                document.getElementById('header-actions').innerHTML = `<button onclick="openProductModal()" class="flex items-center px-3 py-2 bg-plena-cyan text-white rounded-lg text-sm font-bold hover:bg-plena-dark transition-all shadow-lg active:scale-95"><i data-lucide="plus" class="w-5 h-5 sm:mr-2"></i> <span class="hidden sm:inline">Novo Item</span> <span class="sm:hidden">Novo</span></button>`;
+                renderInventory();
+            }
+            if (view === 'shopping') renderShopping();
+            if (view === 'history') renderHistory();
+
+            if (window.innerWidth < 1024) toggleSidebar();
+        }
+
+        function toggleSidebar() { document.getElementById('sidebar').classList.toggle('open'); document.getElementById('overlay').classList.toggle('hidden'); }
+        function closeModal(id) { document.getElementById(id).classList.add('hidden'); }
+
+        function populateCats() {
+            const cats = [...new Set(db.products.map(p => p.cat).filter(Boolean))];
+            document.getElementById('cat-suggestions').innerHTML = cats.map(c => `<option value="${c}">`).join('');
+        }
+
+        function openProductModal(id = null) {
+            document.querySelector('#productModal form').reset();
+            document.getElementById('btn-delete-prod').classList.add('hidden');
+
+            if (id) {
+                const p = db.products.find(x => x.id === id);
+                if (p) {
+                    document.getElementById('pd-id').value = p.id;
+                    document.getElementById('pd-name').value = p.name;
+                    document.getElementById('pd-cat').value = p.cat;
+                    document.getElementById('pd-qty').value = p.qty;
+                    document.getElementById('pd-min').value = p.min;
+                    document.getElementById('pd-exp').value = p.exp || '';
+
+                    document.getElementById('prod-modal-title').innerText = 'Editar Item';
+                    document.getElementById('btn-delete-prod').classList.remove('hidden');
+                }
+            } else {
+                document.getElementById('pd-id').value = '';
+                document.getElementById('prod-modal-title').innerText = 'Novo Item';
+            }
+            document.getElementById('productModal').classList.remove('hidden');
+        }
+
+        function openMoveModal(pid) {
+            const p = db.products.find(x => x.id === pid);
+            if (!p) return;
+            document.querySelector('#moveModal form').reset();
+            document.getElementById('mv-pid').value = pid;
+            document.getElementById('mv-subtitle').innerText = `${p.name} (Atual: ${p.qty})`;
+            document.getElementById('moveModal').classList.remove('hidden');
+        }
+
+        function submitProduct(e) {
+            e.preventDefault();
+            const id = document.getElementById('pd-id').value;
+            const data = {
+                id: id || getID(),
+                name: document.getElementById('pd-name').value,
+                cat: document.getElementById('pd-cat').value,
+                qty: parseFloat(document.getElementById('pd-qty').value) || 0,
+                min: parseFloat(document.getElementById('pd-min').value) || 0,
+                exp: document.getElementById('pd-exp').value || null
+            };
+
+            if (id) {
+                const idx = db.products.findIndex(x => x.id === id);
+                db.products[idx] = data;
+            } else {
+                db.products.push(data);
+            }
+            save(); closeModal('productModal'); populateCats();
+
+            // Intelligence: Decide where to go back
+            if (!document.getElementById('view-inventory').classList.contains('hide')) renderInventory();
+            else renderDashboard();
+        }
+
+        function deleteProduct() {
+            const id = document.getElementById('pd-id').value;
+            if (confirm('Excluir item do estoque?')) {
+                db.products = db.products.filter(x => x.id !== id);
+                save(); closeModal('productModal');
+                if (!document.getElementById('view-inventory').classList.contains('hide')) renderInventory();
+                else renderDashboard();
+            }
+        }
+
+        function submitMove(e) {
+            e.preventDefault();
+            const pid = document.getElementById('mv-pid').value;
+            const type = document.querySelector('input[name="mv-type"]:checked').value;
+            const qty = parseFloat(document.getElementById('mv-qty').value) || 0;
+
+            const idx = db.products.findIndex(x => x.id === pid);
+            if (idx === -1) return;
+
+            if (type === 'in') db.products[idx].qty += qty;
+            else db.products[idx].qty = Math.max(0, db.products[idx].qty - qty);
+
+            db.movements.push({
+                id: getID(),
+                pid,
+                prodName: db.products[idx].name,
+                type,
+                qty,
+                date: new Date().toISOString()
+            });
+
+            save(); closeModal('moveModal');
+            if (!document.getElementById('view-inventory').classList.contains('hide')) renderInventory();
+            else renderDashboard();
+        }
+
+        function renderDashboard() {
+            // Stats
+            const lowStock = db.products.filter(p => p.qty < p.min).length;
+            const today = new Date();
+            const warningDate = new Date(); warningDate.setDate(today.getDate() + 30);
+
+            const expiring = db.products.filter(p => {
+                if (!p.exp) return false;
+                const d = new Date(p.exp);
+                return d >= today && d <= warningDate;
+            });
+            const expired = db.products.filter(p => p.exp && new Date(p.exp) < today);
+
+            document.getElementById('dash-total-items').innerText = db.products.length;
+            document.getElementById('dash-low-stock').innerText = lowStock;
+            document.getElementById('dash-expiring').innerText = expiring.length + expired.length;
+
+            // Render Expiring List
+            const expiryList = [...expired, ...expiring].sort((a, b) => new Date(a.exp) - new Date(b.exp)).slice(0, 5);
+
+            document.getElementById('expiring-list').innerHTML = expiryList.map(p => {
+                const isEp = new Date(p.exp) < today;
+                return `
+                <div class="flex justify-between items-center bg-gray-50 p-3 rounded-lg border ${isEp ? 'border-red-200 bg-red-50' : 'border-yellow-200 bg-yellow-50'}">
+                    <div>
+                        <h4 class="font-bold text-gray-800">${p.name}</h4>
+                        <p class="text-xs text-gray-600">Validade: ${fmtDate(p.exp)}</p>
+                    </div>
+                    <span class="text-xs font-bold uppercase rounded px-2 py-1 ${isEp ? 'bg-red-200 text-red-800' : 'bg-yellow-200 text-yellow-800'}">${isEp ? 'VENCIDO' : 'VENCE LOGO'}</span>
+                </div>`;
+            }).join('') || '<p class="text-gray-400 text-sm">Nenhum item em alerta de validade.</p>';
+
+            // Recent History
+            const hist = db.movements.slice(-5).reverse();
+            document.getElementById('recent-history-list').innerHTML = hist.map(m => `
+                 <div class="flex justify-between items-center bg-white border-b py-2">
+                    <span class="text-sm font-medium text-gray-800">${m.prodName}</span>
+                    <span class="text-sm font-bold ${m.type === 'in' ? 'text-green-600' : 'text-red-600'}">${m.type === 'in' ? '+' : '-'} ${m.qty}</span>
+                </div>
+            `).join('') || '<p class="text-gray-400 text-sm">Sem movimentações recentes.</p>';
+
+            lucide.createIcons();
+        }
+
+        function renderInventory() {
+            const term = document.getElementById('inv-search').value.toLowerCase();
+            const list = db.products.filter(p => p.name.toLowerCase().includes(term));
+
+            document.getElementById('inventory-list').innerHTML = list.map(p => {
+                const isLow = p.qty < p.min;
+                return `
+                <div class="bg-white p-5 rounded-xl border ${isLow ? 'border-red-300 shadow-red-100' : 'border-gray-100'} shadow-sm relative group transition-all hover:border-plena-cyan">
+                    <div class="flex justify-between items-start mb-2">
+                        <span class="text-xs font-bold uppercase text-gray-400 bg-gray-100 px-2 py-1 rounded">${p.cat || 'Geral'}</span>
+                         <button onclick="openProductModal('${p.id}')" class="text-gray-400 hover:text-plena-cyan"><i data-lucide="edit-2" class="w-4 h-4"></i></button>
+                    </div>
+                    <h3 class="font-bold text-lg text-gray-800 leading-tight mb-4">${p.name}</h3>
+                    
+                    <div class="flex justify-between items-center mb-4">
+                        <div class="text-center">
+                            <p class="text-xs text-gray-500 uppercase">Qtd Atual</p>
+                            <p class="text-2xl font-bold ${isLow ? 'text-red-500' : 'text-gray-800'}">${p.qty}</p>
+                        </div>
+                        <div class="text-center">
+                            <p class="text-xs text-gray-500 uppercase">Mínimo</p>
+                            <p class="text-lg font-bold text-gray-400">${p.min}</p>
+                        </div>
+                    </div>
+
+                    <button onclick="openMoveModal('${p.id}')" class="w-full bg-gray-50 hover:bg-gray-100 text-gray-700 font-bold py-2 rounded-lg border border-gray-200 text-sm">Movimentar (+/-)</button>
+                    ${isLow ? '<span class="absolute top-2 right-10 flex h-3 w-3"><span class="animate-ping absolute inline-flex h-full w-full rounded-full bg-red-400 opacity-75"></span><span class="relative inline-flex rounded-full h-3 w-3 bg-red-500"></span></span>' : ''}
+                </div>
+            `;
+            }).join('');
+            lucide.createIcons();
+        }
+
+        function renderShopping() {
+            const toBuy = db.products.filter(p => p.qty < p.min);
+
+            if (toBuy.length === 0) {
+                document.getElementById('shopping-list-container').innerHTML = '<div class="p-8 text-center text-gray-500"><i data-lucide="check-circle" class="w-12 h-12 mx-auto mb-4 text-green-500"></i><p>Tudo certo! Estoque abastecido.</p></div>';
+            } else {
+                document.getElementById('shopping-list-container').innerHTML = `
+                    <table class="w-full text-left">
+                        <thead class="bg-gray-50 text-gray-500 text-xs uppercase">
+                            <tr>
+                                <th class="px-6 py-3">Produto</th>
+                                <th class="px-6 py-3">Estoque Atual</th>
+                                <th class="px-6 py-3 text-right">Comprar (+/-)</th>
+                            </tr>
+                        </thead>
+                        <tbody class="divide-y divide-gray-100 text-sm">
+                            ${toBuy.map(p => `
+                                <tr>
+                                    <td class="px-6 py-4 font-bold text-gray-800">${p.name}</td>
+                                    <td class="px-6 py-4 text-red-500 font-bold">${p.qty} / ${p.min}</td>
+                                    <td class="px-6 py-4 text-right">${p.min - p.qty} un</td>
+                                </tr>
+                            `).join('')}
+                        </tbody>
+                    </table>
+                 `;
+            }
+            lucide.createIcons();
+        }
+
+        function copyShoppingList() {
+            const toBuy = db.products.filter(p => p.qty < p.min);
+            if (!toBuy.length) return alert('Lista vazia!');
+
+            const text = "*LISTA DE COMPRAS - PLENA ESTOQUE* 🛒\n\n" + toBuy.map(p => `- [ ] ${p.name} (Faltam ${p.min - p.qty})`).join('\n');
+            navigator.clipboard.writeText(text).then(() => alert('Lista copiada para a área de transferência!'));
+        }
+
+        function renderHistory() {
+            const list = db.movements.slice().reverse();
+            document.getElementById('full-history-list').innerHTML = list.map(m => `
+                <tr>
+                    <td class="px-6 py-4 text-gray-500">${new Date(m.date).toLocaleDateString('pt-BR')} ${new Date(m.date).toLocaleTimeString('pt-BR', { hour: '2-digit', minute: '2-digit' })}</td>
+                    <td class="px-6 py-4 font-bold">${m.prodName}</td>
+                    <td class="px-6 py-4"><span class="px-2 py-1 rounded text-[10px] font-bold uppercase ${m.type === 'in' ? 'bg-green-100 text-green-700' : 'bg-red-100 text-red-700'}">${m.type === 'in' ? 'Entrada' : 'Saída'}</span></td>
+                    <td class="px-6 py-4 text-right font-bold">${m.qty}</td>
+                </tr>
+             `).join('');
+        }
+
+        function downloadBackup() { const a = document.createElement('a'); a.href = "data:text/json;charset=utf-8," + encodeURIComponent(JSON.stringify(db)); a.download = `plena_estoque.json`; a.click(); }
+        function restoreBackup(input) { const reader = new FileReader(); reader.onload = (e) => { try { db = JSON.parse(e.target.result); save(); location.reload(); } catch (e) { alert('Erro no arquivo'); } }; reader.readAsText(input.files[0]); }
+        function factoryReset() { if (confirm('Apagar tudo?')) { localStorage.removeItem(DB_KEY); location.reload(); } }
+
+        // SECURITY LOCK
+        setInterval(() => {
+            const footer = document.querySelector('.sidebar .border-t');
+            if (footer && !footer.innerText.includes('Plena')) { document.body.innerHTML = '<div style="background:#111;color:red;height:100vh;display:flex;align-items:center;justify-content:center;"><h1>VIOLAÇÃO DE SEGURANÇA</h1></div>'; throw new Error("Piracy"); }
+        }, 8000);
+
+        init();
+    </script>
+</body>
+
+</html>

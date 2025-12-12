@@ -1,0 +1,1077 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>Plena Finanças - Zero Dívida</title>
+
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script>
+        tailwind.config = {
+            theme: {
+                extend: {
+                    colors: {
+                        plena: { orange: '#10B981', dark: '#047857', black: '#1a1a1a' }, // Green theme for Finances
+                        success: '#10B981', danger: '#EF4444'
+                    }
+                }
+            }
+        }
+    </script>
+
+    <script src="https://unpkg.com/lucide@latest"></script>
+
+    <style>
+        /* CSS Otimizado */
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+            background-color: #F3F4F6;
+            -webkit-tap-highlight-color: transparent;
+        }
+
+        .hide {
+            display: none !important;
+        }
+
+        .fade-in {
+            animation: fadeIn 0.3s ease-out;
+        }
+
+        @keyframes fadeIn {
+            from {
+                opacity: 0;
+                transform: translateY(5px);
+            }
+
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+
+        /* Gráfico CSS */
+        .chart-container {
+            display: flex;
+            align-items: flex-end;
+            justify-content: space-between;
+            height: 180px;
+            gap: 2%;
+        }
+
+        .bar-group {
+            flex: 1;
+            display: flex;
+            flex-direction: column;
+            justify-content: flex-end;
+            height: 100%;
+            position: relative;
+        }
+
+        .bar-wrapper {
+            display: flex;
+            align-items: flex-end;
+            justify-content: center;
+            gap: 2px;
+            height: 100%;
+            width: 100%;
+        }
+
+        .bar {
+            width: 45%;
+            border-radius: 4px 4px 0 0;
+            transition: height 0.5s;
+            min-height: 2px;
+        }
+
+        .x-label {
+            font-size: 10px;
+            color: #666;
+            text-align: center;
+            margin-top: 5px;
+        }
+
+        /* Modal Backdrop */
+        .modal-backdrop {
+            background-color: rgba(0, 0, 0, 0.6);
+            backdrop-filter: blur(2px);
+        }
+
+        /* Sidebar Mobile */
+        @media (max-width: 1024px) {
+            .sidebar {
+                transform: translateX(-100%);
+                position: fixed;
+                z-index: 50;
+                height: 100vh;
+                width: 280px;
+            }
+
+            .sidebar.open {
+                transform: translateX(0);
+            }
+        }
+
+        @media (min-width: 1025px) {
+            .sidebar {
+                width: 280px;
+                position: fixed;
+                height: 100vh;
+            }
+
+            .main-content {
+                margin-left: 280px;
+            }
+        }
+    </style>
+</head>
+
+<body class="text-gray-800 antialiased">
+
+    <div id="overlay" class="fixed inset-0 bg-black/50 hidden z-40 transition-opacity" onclick="toggleSidebar()"></div>
+
+    <aside id="sidebar"
+        class="sidebar bg-plena-black text-white transition-transform duration-300 flex flex-col shadow-2xl">
+        <div class="h-20 flex items-center px-6 bg-plena-orange">
+            <i data-lucide="piggy-bank" class="w-8 h-8 mr-3"></i>
+            <div>
+                <h1 class="text-xl font-bold tracking-tight">PLENA</h1>
+                <p class="text-xs text-white/90 font-medium">Finanças Pessoais</p>
+            </div>
+        </div>
+
+        <nav class="p-4 space-y-2 flex-1 overflow-y-auto">
+            <button onclick="router('dashboard')"
+                class="nav-item w-full flex items-center px-4 py-3 rounded-xl hover:bg-white/10 transition-all group active-nav"
+                id="nav-dashboard">
+                <i data-lucide="layout-dashboard" class="w-5 h-5 mr-3 text-gray-400 group-hover:text-white"></i>
+                Visão Geral
+            </button>
+            <button onclick="router('transactions')"
+                class="nav-item w-full flex items-center px-4 py-3 rounded-xl hover:bg-white/10 transition-all group"
+                id="nav-transactions">
+                <i data-lucide="receipt" class="w-5 h-5 mr-3 text-gray-400 group-hover:text-white"></i>
+                Lançamentos
+            </button>
+            <button onclick="router('reports')"
+                class="nav-item w-full flex items-center px-4 py-3 rounded-xl hover:bg-white/10 transition-all group"
+                id="nav-reports">
+                <i data-lucide="pie-chart" class="w-5 h-5 mr-3 text-gray-400 group-hover:text-white"></i>
+                Relatórios
+            </button>
+            <button onclick="router('settings')"
+                class="nav-item w-full flex items-center px-4 py-3 rounded-xl hover:bg-white/10 transition-all group"
+                id="nav-settings">
+                <i data-lucide="settings" class="w-5 h-5 mr-3 text-gray-400 group-hover:text-white"></i>
+                Configurações
+            </button>
+            <button onclick="router('instructions')"
+                class="nav-item w-full flex items-center px-4 py-3 rounded-xl hover:bg-white/10 transition-all group"
+                id="nav-instructions">
+                <i data-lucide="book-open" class="w-5 h-5 mr-3 text-gray-400 group-hover:text-white"></i>
+                Dicas de Economia
+            </button>
+            <button onclick="router('about')"
+                class="nav-item w-full flex items-center px-4 py-3 rounded-xl hover:bg-white/10 transition-all group"
+                id="nav-about">
+                <i data-lucide="info" class="w-5 h-5 mr-3 text-gray-400 group-hover:text-white"></i>
+                Saiba Mais
+            </button>
+        </nav>
+
+        <div class="p-6 border-t border-white/10 text-center">
+            <p class="text-xs text-gray-500">Todos os Direitos Reservados &copy; 2025</p>
+            <a href="https://www.plenaaplicativos.com.br" target="_blank"
+                class="text-[10px] text-gray-600 hover:text-plena-orange transition-colors mt-1 block decoration-0">
+                Plena Apps
+            </a>
+        </div>
+    </aside>
+
+    <main class="main-content min-h-screen flex flex-col">
+        <header
+            class="bg-white h-20 flex items-center justify-between px-4 lg:px-8 sticky top-0 z-30 shadow-sm border-b border-gray-100">
+            <div class="flex items-center gap-4">
+                <button onclick="toggleSidebar()" class="lg:hidden p-2 hover:bg-gray-100 rounded-lg text-gray-600">
+                    <i data-lucide="menu" class="w-6 h-6"></i>
+                </button>
+                <h2 id="page-title" class="text-xl font-bold text-gray-800 hidden sm:block">Dashboard</h2>
+            </div>
+
+            <div class="flex items-center gap-2 sm:gap-3">
+                <button onclick="openClosingModal()"
+                    class="flex items-center px-3 py-2 bg-gray-800 text-white rounded-lg text-sm font-medium hover:bg-black transition-all shadow-sm active:scale-95">
+                    <i data-lucide="calendar-check" class="w-4 h-4 sm:mr-2"></i>
+                    <span class="hidden sm:inline">Resumo do Mês</span>
+                </button>
+
+                <button onclick="openTransactionModal()"
+                    class="flex items-center px-3 py-2 bg-plena-orange text-white rounded-lg text-sm font-bold hover:bg-plena-dark transition-all shadow-lg shadow-green-200 active:scale-95">
+                    <i data-lucide="plus" class="w-5 h-5 sm:mr-2"></i>
+                    <span class="hidden sm:inline">Nova Conta</span>
+                    <span class="sm:hidden">Nova</span>
+                </button>
+            </div>
+        </header>
+
+        <div class="p-4 lg:p-8 flex-1 overflow-y-auto">
+
+            <section id="view-dashboard" class="view-section fade-in">
+                <div class="grid grid-cols-1 md:grid-cols-3 gap-6 mb-8">
+                    <div class="bg-white p-6 rounded-2xl shadow-sm border border-gray-100 relative overflow-hidden">
+                        <div class="absolute right-0 top-0 h-full w-1.5 bg-plena-orange"></div>
+                        <p class="text-xs font-bold text-gray-400 uppercase tracking-wider mb-1">Economia do Mês</p>
+                        <h3 id="dash-economy" class="text-3xl font-bold text-gray-900">R$ 0,00</h3>
+                        <p class="text-xs text-gray-400 mt-1">Sobra do salário</p>
+                    </div>
+                    <div class="bg-white p-6 rounded-2xl shadow-sm border border-gray-100">
+                        <p class="text-xs font-bold text-gray-400 uppercase tracking-wider mb-1">Receitas (Mês)</p>
+                        <h3 id="dash-income" class="text-2xl font-bold text-success">+R$ 0,00</h3>
+                    </div>
+                    <div class="bg-white p-6 rounded-2xl shadow-sm border border-gray-100">
+                        <p class="text-xs font-bold text-gray-400 uppercase tracking-wider mb-1">Despesas (Mês)</p>
+                        <h3 id="dash-expense" class="text-2xl font-bold text-danger">-R$ 0,00</h3>
+                    </div>
+                </div>
+
+                <div class="grid grid-cols-1 xl:grid-cols-3 gap-6">
+                    <div class="xl:col-span-2 bg-white p-6 rounded-2xl shadow-sm border border-gray-100">
+                        <h3 class="font-bold text-gray-800 mb-6">Balanço (Últimos 7 Dias)</h3>
+                        <div id="chart-area" class="chart-container">
+                        </div>
+                    </div>
+                    <div class="bg-white p-6 rounded-2xl shadow-sm border border-gray-100">
+                        <h3 class="font-bold text-gray-800 mb-6">Onde gastei mais?</h3>
+                        <div id="top-expenses" class="space-y-4">
+                        </div>
+                    </div>
+                </div>
+            </section>
+
+            <section id="view-transactions" class="view-section hide fade-in">
+                <div class="bg-white rounded-2xl shadow-sm border border-gray-100 overflow-hidden">
+                    <div
+                        class="p-4 bg-gray-50 flex flex-col sm:flex-row gap-3 justify-between border-b border-gray-200">
+                        <div class="relative flex-1">
+                            <i data-lucide="search" class="absolute left-3 top-2.5 w-4 h-4 text-gray-400"></i>
+                            <input type="text" id="search-term" onkeyup="renderTransactions()"
+                                placeholder="Buscar conta..."
+                                class="w-full pl-10 pr-4 py-2 rounded-lg border border-gray-300 focus:ring-2 focus:ring-plena-orange outline-none text-sm">
+                        </div>
+                        <select id="filter-type" onchange="renderTransactions()"
+                            class="px-4 py-2 rounded-lg border border-gray-300 text-sm bg-white outline-none">
+                            <option value="all">Todas</option>
+                            <option value="income">Receitas</option>
+                            <option value="expense">Despesas</option>
+                        </select>
+                    </div>
+                    <div class="overflow-x-auto">
+                        <table class="w-full text-left">
+                            <thead class="bg-gray-50 text-gray-500 text-xs uppercase">
+                                <tr>
+                                    <th class="px-6 py-3">Data</th>
+                                    <th class="px-6 py-3">Descrição</th>
+                                    <th class="px-6 py-3">Categoria</th>
+                                    <th class="px-6 py-3">Tipo</th>
+                                    <th class="px-6 py-3 text-right">Valor</th>
+                                    <th class="px-6 py-3 text-center">Ações</th>
+                                </tr>
+                            </thead>
+                            <tbody id="trans-table-body" class="divide-y divide-gray-100 text-sm"></tbody>
+                        </table>
+                    </div>
+                    <div id="empty-msg" class="hidden p-8 text-center text-gray-400">Nenhum registro encontrado.</div>
+                </div>
+            </section>
+
+            <section id="view-reports" class="view-section hide fade-in">
+                <div class="bg-white p-6 rounded-2xl shadow-sm border border-gray-100 mb-6">
+                    <h3 class="font-bold text-gray-800 mb-4">Análise Financeira</h3>
+                    <div class="flex flex-wrap gap-4 items-end">
+                        <div class="flex-1">
+                            <label class="text-xs font-bold text-gray-500 uppercase">Início</label>
+                            <input type="date" id="rep-start" class="w-full border p-2 rounded-lg text-sm mt-1">
+                        </div>
+                        <div class="flex-1">
+                            <label class="text-xs font-bold text-gray-500 uppercase">Fim</label>
+                            <input type="date" id="rep-end" class="w-full border p-2 rounded-lg text-sm mt-1">
+                        </div>
+                        <button onclick="generateReport()"
+                            class="bg-gray-800 text-white px-6 py-2 rounded-lg text-sm font-bold hover:bg-black">Analisar</button>
+                    </div>
+                </div>
+
+                <div id="report-result" class="hide">
+                    <div class="grid grid-cols-3 gap-4 mb-6">
+                        <div class="bg-green-50 p-4 rounded-xl text-center border border-green-100">
+                            <p class="text-xs text-gray-500 uppercase font-bold">Ganhei</p>
+                            <p id="rep-inc" class="text-lg font-bold text-green-700">R$ 0,00</p>
+                        </div>
+                        <div class="bg-red-50 p-4 rounded-xl text-center border border-red-100">
+                            <p class="text-xs text-gray-500 uppercase font-bold">Gastei</p>
+                            <p id="rep-exp" class="text-lg font-bold text-red-700">R$ 0,00</p>
+                        </div>
+                        <div class="bg-blue-50 p-4 rounded-xl text-center border border-blue-100">
+                            <p class="text-xs text-gray-500 uppercase font-bold">Sobrou</p>
+                            <p id="rep-bal" class="text-lg font-bold text-blue-700">R$ 0,00</p>
+                        </div>
+                    </div>
+                    <button onclick="shareReport()"
+                        class="w-full bg-green-600 text-white py-3 rounded-xl font-bold hover:bg-green-700 flex justify-center items-center gap-2">
+                        <i data-lucide="share-2" class="w-4 h-4"></i> Enviar para WhatsApp
+                    </button>
+                </div>
+            </section>
+
+            <section id="view-settings" class="view-section hide fade-in">
+                <div class="grid grid-cols-1 lg:grid-cols-2 gap-6">
+                    <div class="bg-white p-6 rounded-2xl shadow-sm border border-gray-100">
+                        <div class="flex justify-between mb-4">
+                            <h3 class="font-bold text-gray-800">Minhas Categorias</h3>
+                            <button onclick="toggleCatForm()"
+                                class="text-xs bg-plena-orange text-white px-2 py-1 rounded">Criar Nova</button>
+                        </div>
+
+                        <div id="cat-form-box" class="hidden mb-4 bg-gray-50 p-3 rounded-lg border border-gray-200">
+                            <input type="text" id="new-cat-name" placeholder="Nome (Ex: Academia)"
+                                class="w-full border p-2 rounded mb-2 text-sm">
+                            <div class="flex gap-2 mb-2">
+                                <select id="new-cat-type" class="flex-1 border p-2 rounded text-sm">
+                                    <option value="expense">Despesa</option>
+                                    <option value="income">Receita</option>
+                                </select>
+                                <input type="color" id="new-cat-color" value="#10B981"
+                                    class="h-9 w-9 p-0 border-0 rounded">
+                            </div>
+                            <button onclick="addCategory()"
+                                class="w-full bg-gray-800 text-white py-2 rounded text-sm font-bold">Adicionar</button>
+                        </div>
+
+                        <div id="cat-list" class="space-y-2 max-h-60 overflow-y-auto"></div>
+                    </div>
+
+                    <div class="bg-white p-6 rounded-2xl shadow-sm border border-gray-100">
+                        <h3 class="font-bold text-gray-800 mb-4 flex items-center"><i data-lucide="shield-check"
+                                class="w-4 h-4 mr-2"></i> Meus Dados</h3>
+
+                        <div class="bg-blue-50 border border-blue-200 p-3 rounded-lg text-sm text-blue-800 mb-4">
+                            <strong>Segurança Total:</strong> Seus dados ficam salvos apenas neste aparelho. Ninguém
+                            mais tem acesso.
+                            Lembre-se de fazer backup!
+                        </div>
+
+                        <button onclick="downloadBackup()"
+                            class="w-full border border-gray-300 py-3 rounded-lg text-sm font-medium hover:bg-gray-50 mb-3 flex justify-center gap-2">
+                            <i data-lucide="download" class="w-4 h-4"></i> Salvar Backup
+                        </button>
+                        <div class="relative mb-6">
+                            <button
+                                class="w-full bg-gray-800 text-white py-3 rounded-lg text-sm font-medium flex justify-center gap-2">
+                                <i data-lucide="upload" class="w-4 h-4"></i> Carregar Backup
+                            </button>
+                            <input type="file" onchange="restoreBackup(this)"
+                                class="absolute inset-0 opacity-0 cursor-pointer">
+                        </div>
+
+                        <div class="border-t pt-4">
+                            <button onclick="factoryReset()"
+                                class="text-red-500 text-sm hover:underline w-full text-center">Apagar tudo e começar do
+                                zero</button>
+                        </div>
+                    </div>
+                </div>
+            </section>
+
+            <section id="view-instructions" class="view-section hide fade-in">
+                <div class="max-w-3xl mx-auto space-y-6">
+                    <div class="bg-white p-8 rounded-2xl shadow-sm border border-gray-100">
+                        <div class="text-center mb-8">
+                            <h2 class="text-2xl font-bold text-gray-800">Dicas e Manual de Uso</h2>
+                            <p class="text-gray-500">Aprenda a sair do vermelho e organizar sua vida financeira.</p>
+                        </div>
+
+                        <div class="space-y-4">
+                            <!-- ITEM 1: BACKUP -->
+                            <details
+                                class="group bg-blue-50 border border-blue-100 rounded-xl overflow-hidden transition-all duration-300 open:shadow-md">
+                                <summary
+                                    class="flex items-center justify-between p-4 cursor-pointer select-none text-blue-900 font-bold">
+                                    <div class="flex items-center gap-3">
+                                        <div
+                                            class="w-8 h-8 rounded-full bg-blue-200 flex items-center justify-center text-blue-700">
+                                            <i data-lucide="shield-check" class="w-4 h-4"></i>
+                                        </div>
+                                        1. Como salvar meus dados? (Backup)
+                                    </div>
+                                    <i data-lucide="chevron-down"
+                                        class="w-5 h-5 transition-transform group-open:rotate-180 text-blue-400"></i>
+                                </summary>
+                                <div
+                                    class="p-4 pt-0 text-sm text-gray-600 bg-blue-50 leading-relaxed border-t border-blue-100/50">
+                                    <p class="mb-2">Seus dados ficam 100% no seu celular/PC. Para não perder tudo se
+                                        formatar:</p>
+                                    <ol class="list-decimal pl-5 space-y-2 mt-2 font-medium text-gray-700">
+                                        <li>Vá em <strong>Configurações</strong>.</li>
+                                        <li>Clique em <span class="text-blue-600"><i data-lucide="download"
+                                                    class="w-3 h-3 inline"></i> Baixar Backup</span>.</li>
+                                        <li>Salve o arquivo no Google Drive ou envie por e-mail para você mesmo.</li>
+                                        <li>Faça isso toda vez que fizer grandes lançamentos!</li>
+                                    </ol>
+                                </div>
+                            </details>
+
+                            <!-- ITEM 2: TRANSACTIONS -->
+                            <details
+                                class="group bg-white border border-gray-200 rounded-xl overflow-hidden transition-all duration-300 open:shadow-md hover:border-green-500">
+                                <summary
+                                    class="flex items-center justify-between p-4 cursor-pointer select-none text-gray-800 font-bold">
+                                    <div class="flex items-center gap-3">
+                                        <div
+                                            class="w-8 h-8 rounded-full bg-green-100 flex items-center justify-center text-green-600">
+                                            <i data-lucide="plus" class="w-4 h-4"></i>
+                                        </div>
+                                        2. Como lançar gastos do dia a dia?
+                                    </div>
+                                    <i data-lucide="chevron-down"
+                                        class="w-5 h-5 transition-transform group-open:rotate-180 text-gray-400"></i>
+                                </summary>
+                                <div class="p-4 pt-0 text-sm text-gray-600 leading-relaxed">
+                                    <p class="mb-2">Não deixe passar nada, nem o cafezinho:</p>
+                                    <ul class="list-disc pl-5 space-y-2 mt-2">
+                                        <li>Clique em <strong>"+ Lançar"</strong> (Seta Verde/Vermelha).</li>
+                                        <li>Para Salário ou Renda Extra: Escolha <strong>Entrada</strong>.</li>
+                                        <li>Para Contas de Luz, Mercado, Lazer: Escolha <strong>Saída</strong>.</li>
+                                        <li><strong>Tipo:</strong> Marque se é Fixo (todo mês tem) ou Variável
+                                            (aconteceu só agora). Isso ajuda a saber onde cortar gastos!</li>
+                                    </ul>
+                                </div>
+                            </details>
+
+                            <!-- ITEM 3: ECONOMY TIPS -->
+                            <details
+                                class="group bg-white border border-gray-200 rounded-xl overflow-hidden transition-all duration-300 open:shadow-md hover:border-gray-300">
+                                <summary
+                                    class="flex items-center justify-between p-4 cursor-pointer select-none text-gray-800 font-bold">
+                                    <div class="flex items-center gap-3">
+                                        <div
+                                            class="w-8 h-8 rounded-full bg-gray-100 flex items-center justify-center text-gray-600">
+                                            <i data-lucide="trending-up" class="w-4 h-4"></i>
+                                        </div>
+                                        3. Como saber se estou economizando?
+                                    </div>
+                                    <i data-lucide="chevron-down"
+                                        class="w-5 h-5 transition-transform group-open:rotate-180 text-gray-400"></i>
+                                </summary>
+                                <div class="p-4 pt-0 text-sm text-gray-600 leading-relaxed">
+                                    <p>Na tela inicial (Dashboard), olhe sempre para o quadro <strong>"Economia do
+                                            Mês"</strong>:</p>
+                                    <ul class="list-disc pl-5 space-y-1 mt-2">
+                                        <li>Se estiver <span class="text-green-600 font-bold">Verde</span>: Parabéns,
+                                            você gastou menos do que ganhou!</li>
+                                        <li>Se estiver <span class="text-red-600 font-bold">Vermelho</span>: Cuidado,
+                                            você gastou mais do que recebeu. Revise os gastos "Variáveis" e veja onde
+                                            cortar.</li>
+                                    </ul>
+                                </div>
+                            </details>
+
+                            <!-- ITEM 4: APP INSTALL -->
+                            <details
+                                class="group bg-white border border-gray-200 rounded-xl overflow-hidden transition-all duration-300 open:shadow-md hover:border-gray-300">
+                                <summary
+                                    class="flex items-center justify-between p-4 cursor-pointer select-none text-gray-800 font-bold">
+                                    <div class="flex items-center gap-3">
+                                        <div
+                                            class="w-8 h-8 rounded-full bg-gray-100 flex items-center justify-center text-gray-600">
+                                            <i data-lucide="smartphone" class="w-4 h-4"></i>
+                                        </div>
+                                        4. Instalar no Celular (App)
+                                    </div>
+                                    <i data-lucide="chevron-down"
+                                        class="w-5 h-5 transition-transform group-open:rotate-180 text-gray-400"></i>
+                                </summary>
+                                <div class="p-4 pt-0 text-sm text-gray-600 leading-relaxed">
+                                    <p>Use o sistema sem internet como se fosse um aplicativo da loja:</p>
+                                    <div class="grid grid-cols-1 md:grid-cols-2 gap-4 mt-3">
+                                        <div class="bg-gray-50 p-3 rounded-lg">
+                                            <strong>Android:</strong> Menu do Chrome (3 pontinhos) > "Instalar
+                                            Aplicativo".
+                                        </div>
+                                        <div class="bg-gray-50 p-3 rounded-lg">
+                                            <strong>iPhone (iOS):</strong> Botão Compartilhar > "Adicionar à Tela de
+                                            Início".
+                                        </div>
+                                    </div>
+                                </div>
+                            </details>
+                        </div>
+
+                        <!-- SUPPORT -->
+                        <div class="mt-8 pt-6 border-t border-gray-100 text-center">
+                            <p class="text-sm text-gray-500 mb-2">Precisa de ajuda com finanças?</p>
+                            <a href="mailto:suporte@plenainformatica.com.br"
+                                class="text-green-600 font-bold hover:underline text-sm">Fale com o Suporte</a>
+                        </div>
+                    </div>
+                </div>
+            </section>
+
+            <section id="view-about" class="view-section hide fade-in">
+                <div class="max-w-3xl mx-auto space-y-6">
+                    <div class="bg-white p-8 rounded-2xl shadow-sm border border-gray-100">
+                        <h2 class="text-2xl font-bold text-gray-800 mb-6">Sobre a Plena</h2>
+
+                        <!-- DISCLAIMER / LEGAL -->
+                        <div class="bg-red-50 border-l-4 border-red-500 p-4 mb-8">
+                            <div class="flex items-start">
+                                <div class="flex-shrink-0">
+                                    <i data-lucide="alert-triangle" class="h-5 w-5 text-red-600"></i>
+                                </div>
+                                <div class="ml-3">
+                                    <h3 class="text-sm font-bold text-red-800 uppercase tracking-wide">Registro e
+                                        Distribuição</h3>
+                                    <div class="mt-2 text-sm text-red-700 space-y-2">
+                                        <p>Este software é um produto original desenvolvido pela <strong>Plena Soluções
+                                                Digitais</strong>. Sua comercialização é exclusiva através de canais
+                                            oficiais (Loja Oficial no Mercado Livre).</p>
+                                        <p>A revenda não autorizada, engenharia reversa, cópia parcial do código-fonte
+                                            ou distribuição em pacotes "piratas" constitui <strong>violação de
+                                                propriedade intelectual (Lei 9.610/98)</strong>. O infrator está sujeito
+                                            a sanções cíveis e criminais. Valorize o desenvolvimento nacional.</p>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+
+                        <div class="space-y-8 text-sm text-gray-600">
+                            <!-- MISSION -->
+                            <div>
+                                <h3 class="flex items-center text-lg font-bold text-gray-900 mb-2">
+                                    <i data-lucide="heart" class="w-5 h-5 mr-2 text-green-600"></i> Nossa Missão:
+                                    Tecnologia e Acessibilidade
+                                </h3>
+                                <p class="leading-relaxed">A Plena acredita que a tecnologia deve ser um direito, não um
+                                    privilégio exclusivo de grandes corporações. Nossa missão é democratizar ferramentas
+                                    de gestão de alta performance, simples e acessíveis.</p>
+                                <p class="mt-2 leading-relaxed">Desenvolvemos soluções <strong>Local-First</strong>
+                                    (seus dados ficam com você), garantindo que pequenos empreendedores, autônomos e
+                                    famílias brasileiras tenham controle total sobre suas informações, sem mensalidades
+                                    abusivas e sem depender de conexão constante com a internet.</p>
+                            </div>
+
+                            <!-- PRIVACY -->
+                            <div class="border-t border-gray-100 pt-6">
+                                <h3 class="font-bold text-gray-900 mb-2">Política de Privacidade</h3>
+                                <p>Ao utilizar este sistema, você concorda que:</p>
+                                <ul class="list-disc pl-5 mt-2 space-y-1">
+                                    <li><strong>100% Offline:</strong> Seus dados financeiros não saem deste
+                                        dispositivo.</li>
+                                    <li><strong>Responsabilidade:</strong> O backup (cópia de segurança) é
+                                        responsabilidade exclusiva do usuário.</li>
+                                    <li><strong>Isenção:</strong> A Plena não tem acesso aos seus dados e não pode
+                                        recuperá-los em caso de perda do equipamento.</li>
+                                </ul>
+                            </div>
+                        </div>
+
+                        <!-- CONTACT -->
+                        <div class="mt-8 bg-gray-50 p-6 rounded-xl border border-gray-200">
+                            <h3 class="font-bold text-gray-900 mb-2">Precisa de Suporte ou Personalização?</h3>
+                            <p class="text-sm text-gray-600 mb-4">Tem uma ideia de app ou precisa adaptar este sistema
+                                para seu negócio?</p>
+                            <a href="mailto:tecnologia@plenainformatica.com.br"
+                                class="inline-flex items-center text-green-600 font-bold hover:underline">
+                                <i data-lucide="mail" class="w-4 h-4 mr-2"></i> tecnologia@plenainformatica.com.br
+                            </a>
+                        </div>
+                    </div>
+                </div>
+            </section>
+
+        </div>
+    </main>
+
+    <div id="transactionModal" class="fixed inset-0 modal-backdrop hidden z-50 flex items-center justify-center p-4">
+        <div class="bg-white rounded-2xl shadow-2xl w-full max-w-md transform transition-all p-6">
+            <div class="flex justify-between items-center mb-6">
+                <h3 class="text-lg font-bold text-gray-800">Adicionar Conta</h3>
+                <button onclick="closeModal('transactionModal')" class="text-gray-400 hover:text-gray-600"><i
+                        data-lucide="x"></i></button>
+            </div>
+
+            <form onsubmit="submitTransaction(event)" class="space-y-4">
+                <div class="grid grid-cols-2 gap-3 p-1 bg-gray-100 rounded-lg">
+                    <label class="cursor-pointer text-center">
+                        <input type="radio" name="t-type" value="income" class="peer hidden"
+                            onchange="renderCatOptions()">
+                        <div
+                            class="py-2 text-sm font-bold text-gray-500 rounded-md peer-checked:bg-white peer-checked:text-green-600 shadow-sm transition-all">
+                            Receita (+)</div>
+                    </label>
+                    <label class="cursor-pointer text-center">
+                        <input type="radio" name="t-type" value="expense" class="peer hidden" checked
+                            onchange="renderCatOptions()">
+                        <div
+                            class="py-2 text-sm font-bold text-gray-500 rounded-md peer-checked:bg-white peer-checked:text-red-600 shadow-sm transition-all">
+                            Despesa (-)</div>
+                    </label>
+                </div>
+
+                <div>
+                    <label class="text-xs font-bold text-gray-500 uppercase">Valor (R$)</label>
+                    <input type="number" id="t-amount" step="0.01" required
+                        class="w-full border-2 border-gray-200 p-3 rounded-xl text-lg font-bold focus:border-plena-orange outline-none"
+                        placeholder="0,00">
+                </div>
+
+                <div>
+                    <label class="text-xs font-bold text-gray-500 uppercase">Descrição</label>
+                    <input type="text" id="t-desc" required placeholder="Ex: Conta de Luz"
+                        class="w-full border p-2 rounded-lg text-sm focus:border-plena-orange outline-none">
+                </div>
+
+                <div class="grid grid-cols-2 gap-4">
+                    <div>
+                        <label class="text-xs font-bold text-gray-500 uppercase">Categoria</label>
+                        <select id="t-cat" class="w-full border p-2 rounded-lg text-sm bg-white outline-none"></select>
+                    </div>
+                    <div>
+                        <label class="text-xs font-bold text-gray-500 uppercase">Tipo de Gasto</label>
+                        <select id="t-recurrence" class="w-full border p-2 rounded-lg text-sm bg-white outline-none">
+                            <option value="Variavel">Variável</option>
+                            <option value="Fixo">Fixo Mensal</option>
+                        </select>
+                    </div>
+                </div>
+
+                <div>
+                    <label class="text-xs font-bold text-gray-500 uppercase">Data</label>
+                    <input type="date" id="t-date" required
+                        class="w-full border p-2 rounded-lg text-sm bg-white outline-none">
+                </div>
+
+                <button type="submit"
+                    class="w-full bg-plena-orange text-white py-3 rounded-xl font-bold shadow-lg shadow-green-200 hover:bg-plena-dark transition-all mt-2">Salvar
+                    Lançamento</button>
+            </form>
+        </div>
+    </div>
+
+    <div id="closingModal" class="fixed inset-0 modal-backdrop hidden z-50 flex items-center justify-center p-4">
+        <div class="bg-white rounded-2xl shadow-2xl w-full max-w-sm overflow-hidden">
+            <div class="bg-gray-900 p-6 text-center text-white">
+                <h3 class="font-bold text-lg">Resumo Financeiro</h3>
+                <p id="close-date" class="text-xs text-gray-400 mt-1">Mês Atual</p>
+            </div>
+            <div class="p-6">
+                <div class="space-y-3 mb-6">
+                    <div class="flex justify-between p-3 bg-green-50 rounded-lg border border-green-100">
+                        <span class="text-sm">Ganhei</span>
+                        <span id="close-inc" class="font-bold text-green-700">R$ 0,00</span>
+                    </div>
+                    <div class="flex justify-between p-3 bg-red-50 rounded-lg border border-red-100">
+                        <span class="text-sm">Gastei</span>
+                        <span id="close-exp" class="font-bold text-red-700">R$ 0,00</span>
+                    </div>
+                    <div class="flex justify-between pt-3 border-t">
+                        <span class="font-bold">Economia</span>
+                        <span id="close-bal" class="font-bold text-xl">R$ 0,00</span>
+                    </div>
+                </div>
+
+                <div class="grid grid-cols-2 gap-3">
+                    <button onclick="shareClosing()"
+                        class="bg-[#25D366] text-white py-2 rounded-lg font-bold text-sm hover:bg-[#128C7E] flex justify-center items-center gap-2">
+                        <i data-lucide="message-circle" class="w-4 h-4"></i> WhatsApp
+                    </button>
+                    <button onclick="closeModal('closingModal')"
+                        class="border border-gray-300 py-2 rounded-lg font-bold text-sm hover:bg-gray-50">Fechar</button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        // ESTADO GLOBAL
+        const DB_KEY = 'plena_financas_v1';
+        const defaultDB = {
+            transactions: [],
+            categories: [
+                { id: '1', name: 'Salário', type: 'income', color: '#10B981' }, // Green
+                { id: '2', name: 'Extra', type: 'income', color: '#3B82F6' }, // Blue
+                { id: '3', name: 'Aluguel', type: 'expense', color: '#EF4444' }, // Red
+                { id: '4', name: 'Mercado', type: 'expense', color: '#F59E0B' }, // Amber
+                { id: '5', name: 'Lazer', type: 'expense', color: '#8B5CF6' }, // Violet
+                { id: '6', name: 'Saúde', type: 'expense', color: '#EC4899' }  // Pink
+            ]
+        };
+
+        let db = JSON.parse(localStorage.getItem(DB_KEY)) || defaultDB;
+
+        // UTILITÁRIOS
+        const save = () => localStorage.setItem(DB_KEY, JSON.stringify(db));
+        const fmtMoney = (v) => v.toLocaleString('pt-BR', { style: 'currency', currency: 'BRL' });
+        const fmtDate = (d) => { const p = d.split('-'); return `${p[2]}/${p[1]}/${p[0]}`; };
+        const getID = () => Date.now().toString(36) + Math.random().toString(36).substr(2);
+
+        // INICIALIZAÇÃO
+        function init() {
+            lucide.createIcons();
+            const today = new Date().toISOString().split('T')[0];
+            document.getElementById('t-date').value = today;
+
+            // Datas padrão relatório (Mês atual)
+            const date = new Date();
+            const first = new Date(date.getFullYear(), date.getMonth(), 1).toISOString().split('T')[0];
+            document.getElementById('rep-start').value = first;
+            document.getElementById('rep-end').value = today;
+
+            renderDashboard();
+        }
+
+        // ROTEAMENTO
+        function router(view) {
+            document.querySelectorAll('.view-section').forEach(el => el.classList.add('hide'));
+            document.querySelectorAll('.nav-item').forEach(el => {
+                el.classList.remove('bg-white/10', 'text-white');
+                el.classList.add('text-gray-400');
+            });
+
+            document.getElementById(`view-${view}`).classList.remove('hide');
+            document.getElementById(`nav-${view}`).classList.add('bg-white/10', 'text-white');
+            document.getElementById(`nav-${view}`).classList.remove('text-gray-400');
+
+            const titles = {
+                dashboard: 'Visão Geral',
+                transactions: 'Lançamentos',
+                reports: 'Análise',
+                settings: 'Configurações',
+                settings: 'Configurações',
+                instructions: 'Dicas',
+                about: 'Informações Legais'
+            };
+            document.getElementById('page-title').innerText = titles[view];
+
+            if (view === 'dashboard') renderDashboard();
+            if (view === 'transactions') renderTransactions();
+            if (view === 'settings') renderCats();
+
+            if (window.innerWidth < 1024) toggleSidebar();
+        }
+
+        function toggleSidebar() {
+            document.getElementById('sidebar').classList.toggle('open');
+            document.getElementById('overlay').classList.toggle('hidden');
+        }
+
+        // DASHBOARD
+        function renderDashboard() {
+            const today = new Date();
+            const currentMonth = today.toISOString().slice(0, 7);
+
+            // Totais
+            const monthTrans = db.transactions.filter(t => t.date.startsWith(currentMonth));
+            const inc = monthTrans.filter(t => t.type === 'income').reduce((a, b) => a + b.amount, 0);
+            const exp = monthTrans.filter(t => t.type === 'expense').reduce((a, b) => a + b.amount, 0);
+
+            // Economia do Mês
+            const economy = inc - exp;
+
+            document.getElementById('dash-economy').innerText = fmtMoney(economy);
+            document.getElementById('dash-income').innerText = fmtMoney(inc);
+            document.getElementById('dash-expense').innerText = fmtMoney(exp);
+
+            // Cores dinâmicas para economia
+            const elEconomy = document.getElementById('dash-economy');
+            if (economy >= 0) { elEconomy.classList.remove('text-red-600'); elEconomy.classList.add('text-gray-900'); }
+            else { elEconomy.classList.remove('text-gray-900'); elEconomy.classList.add('text-red-600'); }
+
+            // Gráfico
+            const chartArea = document.getElementById('chart-area');
+            let chartHTML = '';
+            const dataChart = [];
+
+            for (let i = 6; i >= 0; i--) {
+                const d = new Date(); d.setDate(today.getDate() - i);
+                const ds = d.toISOString().split('T')[0];
+                const dayTrans = db.transactions.filter(t => t.date === ds);
+                dataChart.push({
+                    lbl: `${d.getDate()}/${d.getMonth() + 1}`,
+                    inc: dayTrans.filter(t => t.type === 'income').reduce((a, b) => a + b.amount, 0),
+                    exp: dayTrans.filter(t => t.type === 'expense').reduce((a, b) => a + b.amount, 0)
+                });
+            }
+
+            const max = Math.max(...dataChart.map(d => Math.max(d.inc, d.exp))) || 100;
+
+            dataChart.forEach(d => {
+                chartHTML += `
+                <div class="bar-group">
+                    <div class="bar-wrapper">
+                        <div class="bar bg-green-500" style="height:${(d.inc / max) * 100}%"></div>
+                        <div class="bar bg-red-500" style="height:${(d.exp / max) * 100}%"></div>
+                    </div>
+                    <div class="x-label">${d.lbl}</div>
+                </div>`;
+            });
+            chartArea.innerHTML = chartHTML;
+
+            // Top Despesas
+            const expMap = {};
+            db.transactions.filter(t => t.type === 'expense').forEach(t => {
+                const cName = db.categories.find(c => c.id === t.catId)?.name || 'Geral';
+                expMap[cName] = (expMap[cName] || 0) + t.amount;
+            });
+
+            const top = Object.entries(expMap).sort((a, b) => b[1] - a[1]).slice(0, 4);
+            document.getElementById('top-expenses').innerHTML = top.length ? top.map(([n, v]) => `
+                <div class="flex justify-between text-sm items-center">
+                    <span class="font-medium">${n}</span>
+                    <span class="font-bold text-gray-600">${fmtMoney(v)}</span>
+                </div>
+                <div class="w-full bg-gray-100 h-1.5 rounded-full overflow-hidden">
+                    <div class="bg-red-400 h-full" style="width:${(v / top[0][1]) * 100}%"></div>
+                </div>
+            `).join('') : '<p class="text-sm text-gray-400">Sem gastos ainda.</p>';
+        }
+
+        // TRANSAÇÕES
+        function renderTransactions() {
+            const term = document.getElementById('search-term').value.toLowerCase();
+            const filter = document.getElementById('filter-type').value;
+
+            const list = db.transactions.filter(t => {
+                return (filter === 'all' || t.type === filter) && (t.desc.toLowerCase().includes(term) || t.recurrence?.toLowerCase().includes(term));
+            }).sort((a, b) => new Date(b.date) - new Date(a.date));
+
+            const tbody = document.getElementById('trans-table-body');
+            tbody.innerHTML = '';
+            document.getElementById('empty-msg').classList.toggle('hidden', list.length > 0);
+
+            list.forEach(t => {
+                const cat = db.categories.find(c => c.id === t.catId);
+                const isInc = t.type === 'income';
+                tbody.innerHTML += `
+                    <tr class="hover:bg-gray-50 group border-b border-gray-50">
+                        <td class="px-6 py-4 text-gray-500">${fmtDate(t.date)}</td>
+                        <td class="px-6 py-4 font-medium">
+                            ${t.desc}
+                        </td>
+                        <td class="px-6 py-4"><span class="px-2 py-1 rounded text-xs" style="background:${cat?.color}20; color:${cat?.color}">${cat?.name || 'Geral'}</span></td>
+                        <td class="px-6 py-4 text-sm text-gray-500">${t.recurrence || 'Variável'}</td>
+                        <td class="px-6 py-4 text-right font-bold ${isInc ? 'text-green-600' : 'text-red-600'}">${isInc ? '+' : '-'} ${fmtMoney(t.amount)}</td>
+                        <td class="px-6 py-4 text-center">
+                            <button onclick="delTrans('${t.id}')" class="text-gray-300 hover:text-red-500"><i data-lucide="trash-2" class="w-4 h-4"></i></button>
+                        </td>
+                    </tr>
+                `;
+            });
+            lucide.createIcons();
+        }
+
+        // FUNÇÕES DE MODAL E AÇÃO
+        function openTransactionModal() {
+            renderCatOptions();
+            document.getElementById('transactionModal').classList.remove('hidden');
+        }
+
+        function openClosingModal() {
+            const today = new Date();
+            const currentMonth = today.toISOString().slice(0, 7);
+
+            const trans = db.transactions.filter(t => t.date.startsWith(currentMonth));
+            const inc = trans.filter(t => t.type === 'income').reduce((a, b) => a + b.amount, 0);
+            const exp = trans.filter(t => t.type === 'expense').reduce((a, b) => a + b.amount, 0);
+
+            document.getElementById('close-inc').innerText = fmtMoney(inc);
+            document.getElementById('close-exp').innerText = fmtMoney(exp);
+            document.getElementById('close-bal').innerText = fmtMoney(inc - exp);
+            document.getElementById('close-date').innerText = "Resumo do Mês";
+            document.getElementById('closingModal').classList.remove('hidden');
+        }
+
+        function closeModal(id) {
+            document.getElementById(id).classList.add('hidden');
+        }
+
+        // LÓGICA DE DADOS
+        function submitTransaction(e) {
+            e.preventDefault();
+            const type = document.querySelector('input[name="t-type"]:checked').value;
+            const amount = parseFloat(document.getElementById('t-amount').value);
+            const desc = document.getElementById('t-desc').value;
+            const catId = document.getElementById('t-cat').value;
+            const recurrence = document.getElementById('t-recurrence').value;
+            const date = document.getElementById('t-date').value;
+
+            db.transactions.push({ id: getID(), type, amount, desc, catId, recurrence, date });
+            save();
+
+            closeModal('transactionModal');
+            document.querySelector('form').reset();
+            document.getElementById('t-date').value = new Date().toISOString().split('T')[0];
+
+            renderDashboard();
+            renderTransactions();
+        }
+
+        function delTrans(id) {
+            if (confirm('Apagar registro?')) {
+                db.transactions = db.transactions.filter(t => t.id !== id);
+                save();
+                renderTransactions();
+                renderDashboard();
+            }
+        }
+
+        function renderCatOptions() {
+            const type = document.querySelector('input[name="t-type"]:checked').value;
+            const sel = document.getElementById('t-cat');
+            sel.innerHTML = db.categories.filter(c => c.type === type).map(c => `<option value="${c.id}">${c.name}</option>`).join('');
+        }
+
+        // RELATÓRIOS INTELIGENTES (WHATSAPP)
+        function generateReport() {
+            const s = document.getElementById('rep-start').value;
+            const e = document.getElementById('rep-end').value;
+            const list = db.transactions.filter(t => t.date >= s && t.date <= e);
+
+            const inc = list.filter(t => t.type === 'income').reduce((a, b) => a + b.amount, 0);
+            const exp = list.filter(t => t.type === 'expense').reduce((a, b) => a + b.amount, 0);
+
+            document.getElementById('rep-inc').innerText = fmtMoney(inc);
+            document.getElementById('rep-exp').innerText = fmtMoney(exp);
+            document.getElementById('rep-bal').innerText = fmtMoney(inc - exp);
+            document.getElementById('report-result').classList.remove('hide');
+        }
+
+        function getCatSummary(list, type) {
+            const map = {};
+            list.filter(t => t.type === type).forEach(t => {
+                const cName = db.categories.find(c => c.id === t.catId)?.name || 'Geral';
+                map[cName] = (map[cName] || 0) + t.amount;
+            });
+            return Object.entries(map).map(([k, v]) => `• ${k}: ${fmtMoney(v)}`).join('%0A');
+        }
+
+        function shareReport() {
+            const bal = document.getElementById('rep-bal').innerText;
+            const s = document.getElementById('rep-start').value;
+            const e = document.getElementById('rep-end').value;
+            const list = db.transactions.filter(t => t.date >= s && t.date <= e);
+
+            const incSummary = getCatSummary(list, 'income');
+            const expSummary = getCatSummary(list, 'expense');
+
+            const msg = `*🏡 Controle Financeiro - Plena*%0A` +
+                `🗓 De: ${fmtDate(s)} até ${fmtDate(e)}%0A%0A` +
+                `✅ *GANHOS*:%0A${incSummary || 'Zero'}%0A%0A` +
+                `🔻 *GASTOS*:%0A${expSummary || 'Zero'}%0A%0A` +
+                `💰 *SOBRA FINAL: ${bal}*`;
+
+            window.open(`https://wa.me/?text=${msg}`);
+        }
+
+        function shareClosing() {
+            const today = new Date();
+            const currentMonth = today.toISOString().slice(0, 7);
+            const list = db.transactions.filter(t => t.date.startsWith(currentMonth));
+
+            const inc = list.filter(t => t.type === 'income').reduce((a, b) => a + b.amount, 0);
+            const exp = list.filter(t => t.type === 'expense').reduce((a, b) => a + b.amount, 0);
+            const diff = inc - exp;
+
+            const msg = `*🔒 Fechamento do Mês - Plena*%0A` +
+                `✅ *Receitas*: ${fmtMoney(inc)}%0A` +
+                `🔻 *Despesas*: ${fmtMoney(exp)}%0A` +
+                `💰 *Economia*: ${fmtMoney(diff)}`;
+
+            window.open(`https://wa.me/?text=${msg}`);
+        }
+
+        // CONFIGURAÇÕES (Categorias + Backup)
+        function toggleCatForm() { document.getElementById('cat-form-box').classList.toggle('hidden'); }
+
+        function renderCats() {
+            const el = document.getElementById('cat-list');
+            el.innerHTML = db.categories.map(c => `
+                <div class="flex justify-between items-center p-2 border rounded bg-gray-50 text-sm">
+                    <div class="flex items-center gap-2"><div class="w-3 h-3 rounded-full" style="background:${c.color}"></div>${c.name}</div>
+                    <button onclick="delCat('${c.id}')" class="text-gray-400 hover:text-red-500">×</button>
+                </div>
+            `).join('');
+        }
+
+        function addCategory() {
+            const name = document.getElementById('new-cat-name').value;
+            if (!name) return;
+            db.categories.push({
+                id: getID(),
+                name,
+                type: document.getElementById('new-cat-type').value,
+                color: document.getElementById('new-cat-color').value
+            });
+            save(); renderCats();
+            document.getElementById('new-cat-name').value = '';
+        }
+
+        function delCat(id) {
+            if (confirm('Remover categoria?')) {
+                db.categories = db.categories.filter(c => c.id !== id);
+                save(); renderCats();
+            }
+        }
+
+        function downloadBackup() {
+            const a = document.createElement('a');
+            a.href = "data:text/json;charset=utf-8," + encodeURIComponent(JSON.stringify(db));
+            a.download = `plena_financas_backup_${new Date().toISOString().slice(0, 10)}.json`;
+            a.click();
+        }
+
+        function restoreBackup(input) {
+            const f = input.files[0];
+            const r = new FileReader();
+            r.onload = (e) => {
+                try {
+                    const d = JSON.parse(e.target.result);
+                    if (d.transactions) {
+                        const ids = new Set(db.transactions.map(t => t.id));
+                        d.transactions.forEach(t => !ids.has(t.id) && db.transactions.push(t));
+                        save(); location.reload();
+                    }
+                } catch (err) { alert('Erro no arquivo'); }
+            };
+            r.readAsText(f);
+        }
+
+        function factoryReset() {
+            if (confirm('ATENÇÃO: Você perderá todo seu histórico financeiro. Continuar?')) {
+                localStorage.removeItem(DB_KEY); location.reload();
+            }
+        }
+
+        // SECURITY: BRAND INTEGRITY LOCK
+        setInterval(() => {
+            const footer = document.querySelector('.sidebar .border-t');
+            if (footer) {
+                const text = footer.innerText || "";
+                if (!text.includes('Plena')) {
+                    document.body.innerHTML = `
+                        <div style="height:100vh;background:#1a1a1a;color:#ef4444;display:flex;flex-direction:column;align-items:center;justify-content:center;text-align:center;font-family:sans-serif;padding:20px;">
+                            <h1 style="font-size:2rem;margin-bottom:20px;font-weight:bold;">⚠️ VIOLAÇÃO DE SEGURANÇA</h1>
+                            <p style="font-size:1.2rem;">A assinatura digital deste software foi modificada ilegalmente.</p>
+                            <p style="margin-top:20px;color:white;font-size:0.9rem;">Entre em contato com o suporte oficial: tecnologia@plenainformatica.com.br</p>
+                        </div>
+                    `;
+                    throw new Error("PIRACY DETECTED");
+                }
+            }
+        }, 8000);
+
+        // START
+        init();
+    </script>
+</body>
+
+</html>

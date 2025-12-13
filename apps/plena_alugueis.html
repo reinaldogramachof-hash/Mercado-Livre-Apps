@@ -180,6 +180,45 @@
         ::-webkit-scrollbar-thumb:hover {
             background: #a1a1a1;
         }
+
+        @media print {
+
+            .sidebar,
+            #overlay,
+            button,
+            .header-buttons,
+            .no-print,
+            header,
+            #month-selector,
+            .view-section.hide {
+                display: none !important;
+            }
+
+            .main-content {
+                margin: 0 !important;
+                width: 100% !important;
+                padding: 0 !important;
+            }
+
+            body {
+                background: white !important;
+            }
+
+            /* Ensure modal content is visible if open */
+            .modal-backdrop {
+                position: absolute !important;
+                background: white !important;
+                z-index: 100 !important;
+            }
+
+            /* Hide inputs borders in print */
+            input,
+            select {
+                border: none !important;
+                appearance: none !important;
+                padding: 0 !important;
+            }
+        }
     </style>
 </head>
 
@@ -1300,29 +1339,38 @@
 
         // INICIALIZAÇÃO
         function init() {
-            lucide.createIcons();
+            try {
+                if (window.lucide) lucide.createIcons();
 
-            // Configurar datas padrão
-            const today = new Date().toISOString().split('T')[0];
-            const firstDay = new Date();
-            firstDay.setDate(1);
-            const firstDayStr = firstDay.toISOString().split('T')[0];
+                // Configurar datas padrão
+                const today = new Date().toISOString().split('T')[0];
+                const firstDay = new Date();
+                firstDay.setDate(1);
+                const firstDayStr = firstDay.toISOString().split('T')[0];
 
-            // Configurar inputs de data
-            document.getElementById('t-date').value = today;
-            document.getElementById('month-selector').value = today.slice(0, 7);
-            document.getElementById('rep-start').value = firstDayStr;
-            document.getElementById('rep-end').value = today;
-            document.getElementById('filter-start-date').value = firstDayStr;
-            document.getElementById('filter-end-date').value = today;
+                // Configurar inputs de data
+                const dateInput = document.getElementById('t-date');
+                if (dateInput) dateInput.value = today;
 
-            // Renderizar dados iniciais
-            renderDashboard();
-            renderCategories();
-            updateDataStatus();
+                const monthSelector = document.getElementById('month-selector');
+                if (monthSelector) monthSelector.value = today.slice(0, 7);
 
-            // Configurar periodicidade para salvar
-            setInterval(save, 30000); // Salva a cada 30 segundos
+                if (document.getElementById('rep-start')) document.getElementById('rep-start').value = firstDayStr;
+                if (document.getElementById('rep-end')) document.getElementById('rep-end').value = today;
+                if (document.getElementById('filter-start-date')) document.getElementById('filter-start-date').value = firstDayStr;
+                if (document.getElementById('filter-end-date')) document.getElementById('filter-end-date').value = today;
+
+                // Renderizar dados iniciais
+                renderDashboard();
+                renderCategories();
+                updateDataStatus();
+
+                // Configurar periodicidade para salvar
+                setInterval(save, 30000); // Salva a cada 30 segundos
+            } catch (error) {
+                console.error('Erro na inicialização:', error);
+                alert('Ocorreu um erro ao iniciar o aplicativo: ' + error.message);
+            }
         }
 
         // ROTEAMENTO E NAVEGAÇÃO
@@ -1395,6 +1443,10 @@
         }
 
         // DASHBOARD
+        function exportDashboardPDF() {
+            window.print();
+        }
+
         function renderDashboard() {
             const monthSelector = document.getElementById('month-selector').value;
             const currentMonth = monthSelector || getCurrentMonthKey();
@@ -1415,9 +1467,7 @@
 
             // Calcular pendente (imóveis ocupados não pagos este mês)
             occupiedProperties.forEach(p => {
-                const hasPayment = currentMonthTrans.some(t =>
-                    t.desc && t.desc.includes(p.name) && t.desc.includes(currentMonth.slice(5, 7))
-                );
+                const hasPayment = currentMonthTrans.some(t => t.propertyId === p.id);
                 if (!hasPayment) {
                     totalPending += p.value || 0;
                 }
@@ -1452,6 +1502,8 @@
 
             // Atualizar imóveis vagos
             renderVacantProperties();
+
+            if (window.lucide) lucide.createIcons();
         }
 
         function getPreviousMonthData(currentMonth) {
@@ -1484,9 +1536,7 @@
             const monthNumber = currentMonth.slice(5, 7);
 
             container.innerHTML = occupiedProperties.map(p => {
-                const hasPayment = monthTransactions.some(t =>
-                    t.desc && t.desc.includes(p.name) && t.desc.includes(monthNumber)
-                );
+                const hasPayment = monthTransactions.some(t => t.propertyId === p.id);
 
                 return `
                     <div class="flex items-center justify-between p-4 rounded-xl border ${hasPayment ? 'border-green-100 bg-green-50' : 'border-red-100 bg-red-50'}">
@@ -1499,7 +1549,7 @@
                                 ${fmtMoney(p.value || 0)}
                             </span>
                             ${hasPayment ?
-                        `<button onclick="sendReceipt('${p.id}', '${currentMonth}')" class="text-green-700 hover:bg-green-200 p-2 rounded-lg transition-colors" title="Enviar recibo">
+                        `<button onclick="sendReceipt('${p.id}', '${currentMonth}')" class="text-green-700 hover:bg-green-200 p-2 rounded-lg transition-colors" title="Enviar comprovante WhatsApp">
                                     <i data-lucide="share-2" class="w-4 h-4"></i>
                                 </button>` :
                         `<div class="flex gap-2">
@@ -1515,8 +1565,6 @@
                     </div>
                 `;
             }).join('');
-
-            lucide.createIcons();
         }
 
         function renderUpcomingPayments() {
@@ -1753,6 +1801,8 @@
                     </div>
                 </div>
             `).join('');
+
+            if (window.lucide) lucide.createIcons();
         }
 
         // INQUILINOS
@@ -1808,7 +1858,7 @@
                 </tr>
             `).join('');
 
-            lucide.createIcons();
+            if (window.lucide) lucide.createIcons();
         }
 
         // PAGAMENTOS
@@ -1856,12 +1906,19 @@
                 return;
             }
 
-            const msg = `Olá ${property.tenant}, passando para lembrar do aluguel do imóvel *${property.name}*.%0A%0A` +
-                `💵 *Valor:* ${fmtMoney(property.value || 0)}%0A` +
-                `📅 *Vencimento:* Dia ${property.dueDay || 5}%0A%0A` +
-                `_Enviado via Plena Aluguéis_`;
+            // Formatação visual "Card" com quebras de linha encoded (%0A)
+            const msg = `🏠 *LEMBRETE DE ALUGUEL*%0A` +
+                `----------------------------%0A` +
+                `👤 *Inquilino:* ${property.tenant}%0A` +
+                `📍 *Imóvel:* ${property.name}%0A` +
+                `----------------------------%0A` +
+                `💰 *Valor:* ${fmtMoney(property.value || 0)}%0A` +
+                `📅 *Vencimento:* Dia ${property.dueDay || 5}%0A` +
+                `----------------------------%0A` +
+                `🔔 *Status:* Aguardando pagamento%0A` +
+                `_Gerado por Plena Aluguéis_`;
 
-            window.open(`https://wa.me/55${property.phone.replace(/\D/g, '')}?text=${encodeURIComponent(msg)}`, '_blank');
+            window.open(`https://wa.me/55${property.phone.replace(/\D/g, '')}?text=${msg}`, '_blank');
         }
 
         function sendReceipt(propertyId, monthKey) {
@@ -1871,13 +1928,21 @@
             const monthNumber = monthKey.slice(5, 7);
             const yearNumber = monthKey.slice(0, 4);
 
-            const msg = `*RECIBO DE ALUGUEL* ✅%0A%0A` +
-                `Recebemos de *${property.tenant}* o valor de *${fmtMoney(property.value || 0)}* referente ao aluguel de *${property.name}*.%0A%0A` +
-                `📅 *Período:* ${monthNumber}/${yearNumber}%0A` +
-                `📝 *Data do pagamento:* ${new Date().toLocaleDateString('pt-BR')}%0A%0A` +
+            // Formatação visual "Card" (Recibo Padronizado)
+            const msg = `✅ *RECIBO DE PAGAMENTO*%0A` +
+                `----------------------------%0A` +
+                `👤 *Inquilino:* ${property.tenant}%0A` +
+                `📍 *Imóvel:* ${property.name}%0A` +
+                `----------------------------%0A` +
+                `💰 *Valor Pago:* ${fmtMoney(property.value || 0)}%0A` +
+                `📅 *Referência:* ${monthNumber}/${yearNumber}%0A` +
+                `📝 *Data:* ${new Date().toLocaleDateString('pt-BR')}%0A` +
+                `----------------------------%0A` +
+                `✨ *Status:* PAGO%0A` +
                 `_Gerado por Plena Aluguéis_`;
 
-            window.open(`https://wa.me/55${property.phone.replace(/\D/g, '')}?text=${encodeURIComponent(msg)}`, '_blank');
+            // Envio direto sem encodeURIComponent adicional (evita duplo encode dos %0A)
+            window.open(`https://wa.me/55${property.phone.replace(/\D/g, '')}?text=${msg}`, '_blank');
         }
 
         // TRANSAÇÕES
@@ -2130,7 +2195,7 @@
                 </div>
             `).join('');
 
-            lucide.createIcons();
+            if (window.lucide) lucide.createIcons();
         }
 
         function toggleCatForm() {
@@ -2217,9 +2282,7 @@
 
             let totalPending = 0;
             occupiedProperties.forEach(p => {
-                const hasPayment = currentMonthTrans.some(t =>
-                    t.desc && t.desc.includes(p.name) && t.desc.includes(currentMonth.slice(5, 7))
-                );
+                const hasPayment = currentMonthTrans.some(t => t.propertyId === p.id);
                 if (!hasPayment) {
                     totalPending += p.value || 0;
                 }
@@ -2530,41 +2593,14 @@
             document.getElementById(modalId).classList.add('hidden');
         }
 
+
+
         function printMonthReport() {
-            const printContent = document.getElementById('monthReportModal').innerHTML;
-            const originalContent = document.body.innerHTML;
-
-            document.body.innerHTML = `
-                <div style="padding: 20px; font-family: sans-serif;">
-                    <h1 style="text-align: center; color: #7C3AED;">Relatório Mensal - Plena Aluguéis</h1>
-                    <div style="margin: 20px 0;">${printContent}</div>
-                    <p style="text-align: center; color: #666; font-size: 12px; margin-top: 30px;">
-                        Gerado por Plena Aluguéis • ${new Date().toLocaleDateString('pt-BR')}
-                    </p>
-                </div>
-            `;
-
             window.print();
-            document.body.innerHTML = originalContent;
         }
 
         function printReport() {
-            const printContent = document.getElementById('report-result').innerHTML;
-            const originalContent = document.body.innerHTML;
-
-            document.body.innerHTML = `
-                <div style="padding: 20px; font-family: sans-serif;">
-                    <h1 style="text-align: center; color: #7C3AED;">Relatório Financeiro - Plena Aluguéis</h1>
-                    <div style="margin: 20px 0;">${printContent}</div>
-                    <p style="text-align: center; color: #666; font-size: 12px; margin-top: 30px;">
-                        Gerado por Plena Aluguéis • ${new Date().toLocaleDateString('pt-BR')}
-                    </p>
-                </div>
-            `;
-
             window.print();
-            document.body.innerHTML = originalContent;
-            router('reports');
         }
 
         // PWA INSTALL PROMPT
@@ -2587,7 +2623,7 @@
             };
 
             document.body.appendChild(installButton);
-            lucide.createIcons();
+            if (window.lucide) lucide.createIcons();
         });
 
         // OFFLINE SUPPORT

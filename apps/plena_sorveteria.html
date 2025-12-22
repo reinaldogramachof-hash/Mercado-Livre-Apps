@@ -229,6 +229,85 @@
             animation: fadeIn 0.2s ease;
         }
 
+        /* STANDARDIZED UI KIT CSS */
+        .step-number {
+            width: 32px;
+            height: 32px;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-weight: bold;
+            font-size: 14px;
+            flex-shrink: 0;
+        }
+
+        .checklist-item {
+            transition: all 0.2s ease;
+        }
+
+        .checklist-item:hover {
+            background-color: #f9fafb;
+        }
+
+        .checklist-item input:checked+div {
+            background-color: #3b82f6;
+            /* Blue-500 or Theme Color */
+            border-color: #3b82f6;
+        }
+
+        .progress-bar {
+            width: 100%;
+            background-color: #f3f4f6;
+            border-radius: 9999px;
+            height: 8px;
+            overflow: hidden;
+        }
+
+        .progress-fill {
+            height: 100%;
+            background: linear-gradient(90deg, #a855f7, #ec4899);
+            /* Default Gradient */
+            border-radius: 9999px;
+            transition: width 0.5s ease-in-out;
+        }
+
+        /* ANIMAÇÕES */
+        @keyframes slideIn {
+            from {
+                opacity: 0;
+                transform: translateY(10px);
+            }
+
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+
+        .fade-in {
+            animation: slideIn 0.3s ease-out forwards;
+        }
+
+        @keyframes iceSpin {
+            0% {
+                transform: rotate(0deg);
+            }
+
+            25% {
+                transform: rotate(-10deg);
+            }
+
+            75% {
+                transform: rotate(10deg);
+            }
+
+            100% {
+                transform: rotate(0deg);
+            }
+
+        }
+
         /* Sidebar Mobile */
         @media (max-width: 1024px) {
             .sidebar {
@@ -506,13 +585,13 @@
                 class="nav-item w-full flex items-center px-4 py-3 rounded-xl hover:bg-white/10 transition-all group"
                 id="nav-instructions">
                 <i data-lucide="help-circle" class="w-5 h-5 mr-3 text-gray-300 group-hover:text-white"></i>
-                Manual
+                Manual de Uso
             </button>
             <button onclick="router('about')"
                 class="nav-item w-full flex items-center px-4 py-3 rounded-xl hover:bg-white/10 transition-all group"
                 id="nav-about">
                 <i data-lucide="info" class="w-5 h-5 mr-3 text-gray-300 group-hover:text-white"></i>
-                Saiba Mais
+                Sobre a Plena
             </button>
         </nav>
 
@@ -1421,12 +1500,586 @@
 
             <!-- Instructions View -->
             <section id="view-instructions" class="view-section hide fade-in">
-                <!-- Conteúdo adaptado para sorveteria -->
+                <div class="max-w-6xl mx-auto pb-12">
+                    <!-- Cabeçalho Hero -->
+                    <div class="text-center mb-10 pt-4">
+                        <div
+                            class="inline-flex items-center justify-center p-4 bg-gradient-to-r from-plena-iceblue to-plena-blue rounded-2xl mb-4 shadow-lg">
+                            <i data-lucide="ice-cream" class="w-12 h-12 text-white"></i>
+                        </div>
+                        <h1 class="text-3xl font-bold text-gray-800 mb-2">Manual de Gestão de Sorveteria</h1>
+                        <p class="text-gray-600 text-lg max-w-2xl mx-auto">Guia completo para produção, vendas e
+                            controle de estoque</p>
+                        <div class="mt-4 flex flex-wrap justify-center gap-2">
+                            <span class="px-3 py-1 bg-green-100 text-green-700 rounded-full text-xs font-bold">✓ Para
+                                Iniciantes</span>
+                            <span class="px-3 py-1 bg-blue-100 text-blue-700 rounded-full text-xs font-bold">📱 Mobile e
+                                Desktop</span>
+                            <span class="px-3 py-1 bg-purple-100 text-purple-700 rounded-full text-xs font-bold">⚡
+                                Rápido e Prático</span>
+                        </div>
+                    </div>
+
+                    <!-- Barra de Progresso do Tutorial -->
+                    <div class="bg-white rounded-2xl p-6 shadow-sm border border-gray-100 mb-8">
+                        <h3 class="font-bold text-gray-800 mb-4 flex items-center">
+                            <i data-lucide="compass" class="w-5 h-5 mr-2 text-plena-iceblue"></i>
+                            Seu Progresso no Aprendizado
+                        </h3>
+                        <div class="mb-4">
+                            <div class="progress-bar">
+                                <div id="tutorial-progress"
+                                    class="progress-fill bg-gradient-to-r from-plena-iceblue to-plena-blue"
+                                    style="width: 0%"></div>
+                            </div>
+                            <div class="flex justify-between text-xs text-gray-500 mt-2">
+                                <span>0% Concluído</span>
+                                <span id="completed-steps">0/7 etapas</span>
+                            </div>
+                        </div>
+                        <div class="grid grid-cols-2 md:grid-cols-7 gap-2">
+                            <button onclick="scrollToSection('instalacao')"
+                                class="tutorial-step text-center p-2 rounded-lg border border-gray-200 hover:bg-gray-50 text-xs">
+                                1. Instalação
+                            </button>
+                            <button onclick="scrollToSection('primeiro-cadastro')"
+                                class="tutorial-step text-center p-2 rounded-lg border border-gray-200 hover:bg-gray-50 text-xs">
+                                2. Produtos
+                            </button>
+                            <button onclick="scrollToSection('producao')"
+                                class="tutorial-step text-center p-2 rounded-lg border border-gray-200 hover:bg-gray-50 text-xs">
+                                3. Produção
+                            </button>
+                            <button onclick="scrollToSection('vendas')"
+                                class="tutorial-step text-center p-2 rounded-lg border border-gray-200 hover:bg-gray-50 text-xs">
+                                4. Vendas
+                            </button>
+                            <button onclick="scrollToSection('backup')"
+                                class="tutorial-step text-center p-2 rounded-lg border border-gray-200 hover:bg-gray-50 text-xs">
+                                5. Backup
+                            </button>
+                            <button onclick="scrollToSection('duvidas')"
+                                class="tutorial-step text-center p-2 rounded-lg border border-gray-200 hover:bg-gray-50 text-xs">
+                                6. Dúvidas
+                            </button>
+                            <button onclick="scrollToSection('checklist')"
+                                class="tutorial-step text-center p-2 rounded-lg border border-gray-200 hover:bg-gray-50 text-xs">
+                                7. Checklist
+                            </button>
+                        </div>
+                    </div>
+
+                    <!-- Seção 1: Instalação -->
+                    <div id="instalacao"
+                        class="bg-white border border-gray-200 rounded-2xl p-6 shadow-sm mb-8 scroll-mt-24">
+                        <div class="flex items-center justify-between mb-6">
+                            <div class="flex items-center">
+                                <div class="step-number bg-gradient-to-r from-plena-iceblue to-plena-blue text-white">1
+                                </div>
+                                <h3 class="text-xl font-bold text-gray-800 ml-3">Instalação do App no Celular</h3>
+                            </div>
+                            <button onclick="markSectionComplete('instalacao')"
+                                class="text-xs text-gray-500 hover:text-green-600 flex items-center">
+                                <i data-lucide="check-circle" class="w-4 h-4 mr-1"></i> Marcar como concluído
+                            </button>
+                        </div>
+
+                        <div class="bg-gray-900 rounded-2xl p-6 text-white shadow-lg mb-6">
+                            <h4 class="font-bold text-lg mb-4 flex items-center">
+                                <i data-lucide="download" class="w-5 h-5 mr-2 text-green-400"></i>
+                                Torne o App Disponível OFFLINE
+                            </h4>
+                            <p class="text-gray-300 mb-4">Instale no celular para vender sem internet, igual um app
+                                normal:</p>
+                            <div class="grid grid-cols-1 md:grid-cols-2 gap-6 text-sm">
+                                <div class="bg-white/10 p-4 rounded-xl border border-white/10">
+                                    <div class="font-bold text-white mb-3 flex items-center">
+                                        <div
+                                            class="w-8 h-8 rounded-full bg-blue-600 flex items-center justify-center mr-2">
+                                            <i data-lucide="smartphone" class="w-4 h-4"></i>
+                                        </div>
+                                        Android (Chrome)
+                                    </div>
+                                    <ol class="list-decimal pl-5 space-y-3 text-gray-300">
+                                        <li>Abra esta página no <strong>Chrome</strong>.</li>
+                                        <li>Toque nos <strong>3 pontinhos</strong> (menu).</li>
+                                        <li>Toque em <strong>"Instalar app"</strong> ou "Adicionar à tela inicial".</li>
+                                    </ol>
+                                </div>
+                                <div class="bg-white/10 p-4 rounded-xl border border-white/10">
+                                    <div class="font-bold text-white mb-3 flex items-center">
+                                        <div
+                                            class="w-8 h-8 rounded-full bg-gray-800 flex items-center justify-center mr-2">
+                                            <i data-lucide="apple" class="w-4 h-4"></i>
+                                        </div>
+                                        iPhone (Safari)
+                                    </div>
+                                    <ol class="list-decimal pl-5 space-y-3 text-gray-300">
+                                        <li>Abra esta página no <strong>Safari</strong>.</li>
+                                        <li>Toque no ícone de <strong>Compartilhar</strong> (quadrado com seta).</li>
+                                        <li>Toque em <strong>"Adicionar à Tela de Início"</strong>.</li>
+                                    </ol>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Seção 2: Cadastro de Produtos -->
+                    <div id="primeiro-cadastro"
+                        class="bg-white border border-gray-200 rounded-2xl p-6 shadow-sm mb-8 scroll-mt-24">
+                        <div class="flex items-center justify-between mb-6">
+                            <div class="flex items-center">
+                                <div class="step-number bg-gradient-to-r from-plena-iceblue to-plena-blue text-white">2
+                                </div>
+                                <h3 class="text-xl font-bold text-gray-800 ml-3">Cadastro de Produtos e Sabores</h3>
+                            </div>
+                            <button onclick="markSectionComplete('primeiro-cadastro')"
+                                class="text-xs text-gray-500 hover:text-green-600 flex items-center">
+                                <i data-lucide="check-circle" class="w-4 h-4 mr-1"></i> Marcar como concluído
+                            </button>
+                        </div>
+
+                        <div class="bg-blue-50 p-5 rounded-xl border border-blue-100 mb-4">
+                            <h4 class="font-bold text-blue-700 mb-3 flex items-center">
+                                <i data-lucide="tag" class="w-5 h-5 mr-2"></i>
+                                Categorias Essenciais
+                            </h4>
+                            <p class="text-sm text-gray-700 mb-3">O sistema já vem com categorias padrão:</p>
+                            <div class="flex flex-wrap gap-2 mb-4">
+                                <span class="px-2 py-1 bg-white border border-blue-200 rounded text-xs">Sorvetes de
+                                    Massa</span>
+                                <span class="px-2 py-1 bg-white border border-blue-200 rounded text-xs">Picolés</span>
+                                <span class="px-2 py-1 bg-white border border-blue-200 rounded text-xs">Açaí</span>
+                                <span class="px-2 py-1 bg-white border border-blue-200 rounded text-xs">Bebidas</span>
+                            </div>
+                            <p class="text-sm text-gray-700">Para cadastrar um novo sabor:</p>
+                            <ol class="list-decimal pl-5 space-y-2 text-sm text-gray-700 font-bold mt-2">
+                                <li>Vá em "Produtos" no menu lateral.</li>
+                                <li>Clique em "Novo Produto".</li>
+                                <li>Defina o Nome (ex: "Chocolate Belga").</li>
+                                <li>Preencha o Custo (para relatório de lucro) e Preço de Venda.</li>
+                            </ol>
+                        </div>
+                    </div>
+
+                    <!-- Seção 3: Produção -->
+                    <div id="producao"
+                        class="bg-white border border-gray-200 rounded-2xl p-6 shadow-sm mb-8 scroll-mt-24">
+                        <div class="flex items-center justify-between mb-6">
+                            <div class="flex items-center">
+                                <div class="step-number bg-gradient-to-r from-plena-iceblue to-plena-blue text-white">3
+                                </div>
+                                <h3 class="text-xl font-bold text-gray-800 ml-3">Controle de Produção</h3>
+                            </div>
+                            <button onclick="markSectionComplete('producao')"
+                                class="text-xs text-gray-500 hover:text-green-600 flex items-center">
+                                <i data-lucide="check-circle" class="w-4 h-4 mr-1"></i> Marcar como concluído
+                            </button>
+                        </div>
+
+                        <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+                            <div class="bg-purple-50 p-4 rounded-xl border border-purple-100">
+                                <h4 class="font-bold text-purple-800 mb-2 flex items-center"><i data-lucide="factory"
+                                        class="w-4 h-4 mr-2"></i> Registrar Baldes</h4>
+                                <p class="text-sm text-gray-600">Sempre que produzir um lote de sorvete, registre na aba
+                                    <strong>Produção</strong>. Isso alimenta seu estoque automaticamente.
+                                </p>
+                            </div>
+                            <div class="bg-orange-50 p-4 rounded-xl border border-orange-100">
+                                <h4 class="font-bold text-orange-800 mb-2 flex items-center"><i
+                                        data-lucide="thermometer" class="w-4 h-4 mr-2"></i> Temperaturas</h4>
+                                <p class="text-sm text-gray-600">Monitore diariamente as temperaturas dos freezers na
+                                    aba <strong>Temperaturas</strong> para evitar perda de mercadoria.</p>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Seção 4: Relatórios -->
+                    <div id="relatorios"
+                        class="bg-white border border-gray-200 rounded-2xl p-6 shadow-sm mb-8 scroll-mt-24">
+                        <div class="flex items-start gap-4">
+                            <div
+                                class="flex-shrink-0 w-10 h-10 rounded-full bg-plena-iceblue text-white flex items-center justify-center font-bold text-lg">
+                                4</div>
+                            <div class="flex-1">
+                                <div class="flex justify-between items-start mb-4">
+                                    <h3 class="text-xl font-bold text-gray-800">Análise de Vendas e Sabores</h3>
+                                    <button onclick="markSectionComplete('relatorios')"
+                                        class="text-xs bg-green-50 text-green-700 px-3 py-1 rounded-full font-bold hover:bg-green-100 transition-colors flex items-center gap-1">
+                                        <i data-lucide="check" class="w-3 h-3"></i> Marcar como concluído
+                                    </button>
+                                </div>
+                                <p class="text-gray-600 mb-4">Descubra quais sabores vendem mais e onde está seu lucro.
+                                </p>
+                                <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                                    <div class="bg-orange-50 p-4 rounded-xl border border-orange-100">
+                                        <h4 class="font-bold text-orange-800 mb-2">Relatório de Sabores</h4>
+                                        <p class="text-xs text-orange-700">Veja o ranking dos sabores mais populares
+                                            (Chocolate, Morango, etc.) para planejar a produção.</p>
+                                    </div>
+                                    <div class="bg-blue-50 p-4 rounded-xl border border-blue-100">
+                                        <h4 class="font-bold text-blue-800 mb-2">Relatório Financeiro</h4>
+                                        <p class="text-xs text-blue-700">Acompanhe faturamento diário, mensal e ticket
+                                            médio por cliente.</p>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Seção 4: Vendas e Caixa -->
+                    <div id="vendas"
+                        class="bg-white border border-gray-200 rounded-2xl p-6 shadow-sm mb-8 scroll-mt-24">
+                        <div class="flex items-center justify-between mb-6">
+                            <div class="flex items-center">
+                                <div class="step-number bg-gradient-to-r from-plena-iceblue to-plena-blue text-white">4
+                                </div>
+                                <h3 class="text-xl font-bold text-gray-800 ml-3">Vendas e Frente de Caixa</h3>
+                            </div>
+                            <button onclick="markSectionComplete('vendas')"
+                                class="text-xs text-gray-500 hover:text-green-600 flex items-center">
+                                <i data-lucide="check-circle" class="w-4 h-4 mr-1"></i> Marcar como concluído
+                            </button>
+                        </div>
+
+                        <div class="bg-green-50 p-5 rounded-xl border border-green-100 mb-4">
+                            <h4 class="font-bold text-green-700 flex items-center mb-3">
+                                <i data-lucide="shopping-cart" class="w-5 h-5 mr-2"></i>
+                                Como realizar uma venda
+                            </h4>
+                            <ol class="space-y-3 text-sm text-gray-700">
+                                <li class="flex items-start">
+                                    <span class="font-bold mr-2">1.</span>
+                                    Acesse <strong>"Caixa"</strong> no menu.
+                                </li>
+                                <li class="flex items-start">
+                                    <span class="font-bold mr-2">2.</span>
+                                    Clique nos produtos (sorvetes, picolés) para adicionar à comanda.
+                                </li>
+                                <li class="flex items-start">
+                                    <span class="font-bold mr-2">3.</span>
+                                    Clique em <strong>"Finalizar Venda"</strong>.
+                                </li>
+                                <li class="flex items-start">
+                                    <span class="font-bold mr-2">4.</span>
+                                    Escolha a forma de pagamento (Dinheiro, PIX, Cartão).
+                                </li>
+                            </ol>
+                            <div class="mt-3 p-3 bg-white rounded border border-green-200 text-xs text-green-800">
+                                <strong>Dica:</strong> O sistema calcula o troco automaticamente e baixa o estoque dos
+                                itens vendidos.
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Seção 5: Backup e Segurança -->
+                    <div id="backup"
+                        class="bg-white border border-gray-200 rounded-2xl p-6 shadow-sm mb-8 scroll-mt-24">
+                        <div class="flex items-center justify-between mb-6">
+                            <div class="flex items-center">
+                                <div class="step-number bg-gradient-to-r from-plena-iceblue to-plena-blue text-white">5
+                                </div>
+                                <h3 class="text-xl font-bold text-gray-800 ml-3">Backup e Segurança dos Dados</h3>
+                            </div>
+                            <button onclick="markSectionComplete('backup')"
+                                class="text-xs text-gray-500 hover:text-green-600 flex items-center">
+                                <i data-lucide="check-circle" class="w-4 h-4 mr-1"></i> Marcar como concluído
+                            </button>
+                        </div>
+
+                        <div class="bg-red-50 border-l-4 border-red-500 p-6 rounded-r-xl mb-6">
+                            <h4 class="font-bold text-red-800 mb-3 flex items-center">
+                                <i data-lucide="alert-octagon" class="w-5 h-5 mr-2"></i>
+                                ATENÇÃO CRÍTICA
+                            </h4>
+                            <div class="text-sm text-red-800 space-y-2">
+                                <p>📱 <strong>Seus dados ficam APENAS no seu dispositivo.</strong></p>
+                                <p>💾 <strong>Você deve fazer backup todo o fim de expediente.</strong></p>
+                                <button onclick="downloadBackup()"
+                                    class="mt-2 bg-red-600 text-white px-4 py-2 rounded-lg text-sm font-bold hover:bg-red-700">
+                                    <i data-lucide="download" class="w-4 h-4 inline mr-1"></i> Fazer Backup Agora
+                                </button>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Seção 6: Dúvidas (FAQ) -->
+                    <div id="duvidas"
+                        class="bg-white border border-gray-200 rounded-2xl p-6 shadow-sm mb-8 scroll-mt-24">
+                        <div class="flex items-center justify-between mb-6">
+                            <div class="flex items-center">
+                                <div class="step-number bg-gradient-to-r from-plena-iceblue to-plena-blue text-white">6
+                                </div>
+                                <h3 class="text-xl font-bold text-gray-800 ml-3">Dúvidas Frequentes</h3>
+                            </div>
+                            <button onclick="markSectionComplete('duvidas')"
+                                class="text-xs text-gray-500 hover:text-green-600 flex items-center">
+                                <i data-lucide="check-circle" class="w-4 h-4 mr-1"></i> Marcar como concluído
+                            </button>
+                        </div>
+
+                        <div class="space-y-4">
+                            <details class="group bg-gray-50 border border-gray-200 rounded-xl overflow-hidden">
+                                <summary
+                                    class="flex items-center justify-between p-4 cursor-pointer hover:bg-gray-100 font-bold text-gray-700">
+                                    Posso usar impressora térmica?
+                                    <i data-lucide="chevron-down"
+                                        class="w-5 h-5 text-gray-400 group-open:rotate-180 transition-transform"></i>
+                                </summary>
+                                <div class="p-4 border-t border-gray-100 text-sm text-gray-600">
+                                    Sim! Ao finalizar uma venda, clique em "Imprimir". O sistema gera um cupom
+                                    não-fiscal formatado para impressoras térmicas (58mm ou 80mm) conectadas via
+                                    Bluetooth ou USB.
+                                </div>
+                            </details>
+                            <details class="group bg-gray-50 border border-gray-200 rounded-xl overflow-hidden">
+                                <summary
+                                    class="flex items-center justify-between p-4 cursor-pointer hover:bg-gray-100 font-bold text-gray-700">
+                                    Funciona sem internet?
+                                    <i data-lucide="chevron-down"
+                                        class="w-5 h-5 text-gray-400 group-open:rotate-180 transition-transform"></i>
+                                </summary>
+                                <div class="p-4 border-t border-gray-100 text-sm text-gray-600">
+                                    Sim, 100% offline. Você pode vender, cadastrar e consultar relatórios sem conexão.
+                                    Lembre-se que o backup na nuvem (Google Drive/Email) exige internet.
+                                </div>
+                            </details>
+                        </div>
+                    </div>
+
+                    <!-- Seção 7: Checklist -->
+                    <div id="checklist"
+                        class="bg-white border border-gray-200 rounded-2xl p-6 shadow-sm mb-8 scroll-mt-24">
+                        <div class="flex items-center justify-between mb-6">
+                            <div class="flex items-center">
+                                <div class="step-number bg-gradient-to-r from-plena-iceblue to-plena-blue text-white">7
+                                </div>
+                                <h3 class="text-xl font-bold text-gray-800 ml-3">Checklist Diário de Loja</h3>
+                            </div>
+                            <button onclick="markSectionComplete('checklist')"
+                                class="text-xs text-gray-500 hover:text-green-600 flex items-center">
+                                <i data-lucide="check-circle" class="w-4 h-4 mr-1"></i> Marcar como concluído
+                            </button>
+                        </div>
+
+                        <div class="grid grid-cols-1 lg:grid-cols-2 gap-6">
+                            <div class="space-y-4">
+                                <!-- Abertura -->
+                                <div class="bg-blue-50 p-5 rounded-xl border border-blue-100">
+                                    <h4 class="font-bold text-blue-600 uppercase text-sm mb-3">Abertura</h4>
+                                    <div class="space-y-3">
+                                        <div class="checklist-item flex items-center">
+                                            <input type="checkbox" id="check-temp"
+                                                class="w-5 h-5 text-blue-600 rounded border-gray-300 focus:ring-blue-500"
+                                                onchange="updateChecklist()">
+                                            <label for="check-temp"
+                                                class="ml-3 text-sm text-gray-700 cursor-pointer">Verificar Freezers
+                                                (-18°C a -22°C)</label>
+                                        </div>
+                                        <div class="checklist-item flex items-center">
+                                            <input type="checkbox" id="check-cash"
+                                                class="w-5 h-5 text-blue-600 rounded border-gray-300 focus:ring-blue-500"
+                                                onchange="updateChecklist()">
+                                            <label for="check-cash"
+                                                class="ml-3 text-sm text-gray-700 cursor-pointer">Conferir fundo de
+                                                troco</label>
+                                        </div>
+                                    </div>
+                                </div>
+                                <!-- Abertura -->
+                                <div class="bg-green-50 p-5 rounded-xl border border-green-100">
+                                    <h4 class="font-bold text-green-600 uppercase text-sm mb-3">Durante o dia</h4>
+                                    <div class="space-y-3">
+                                        <div class="checklist-item flex items-center">
+                                            <input type="checkbox" id="check-prod"
+                                                class="w-5 h-5 text-green-600 rounded border-gray-300 focus:ring-green-500"
+                                                onchange="updateChecklist()">
+                                            <label for="check-prod"
+                                                class="ml-3 text-sm text-gray-700 cursor-pointer">Registrar produções de
+                                                sorvete</label>
+                                        </div>
+                                        <div class="checklist-item flex items-center">
+                                            <input type="checkbox" id="check-stock"
+                                                class="w-5 h-5 text-green-600 rounded border-gray-300 focus:ring-green-500"
+                                                onchange="updateChecklist()">
+                                            <label for="check-stock"
+                                                class="ml-3 text-sm text-gray-700 cursor-pointer">Monitorar estoque de
+                                                casquinhas/copos</label>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+
+                            <div class="space-y-4">
+                                <!-- Fechamento -->
+                                <div class="bg-purple-50 p-5 rounded-xl border border-purple-100">
+                                    <h4 class="font-bold text-purple-600 uppercase text-sm mb-3">Fechamento</h4>
+                                    <div class="space-y-3">
+                                        <div class="checklist-item flex items-center">
+                                            <input type="checkbox" id="check-close"
+                                                class="w-5 h-5 text-purple-600 rounded border-gray-300 focus:ring-purple-500"
+                                                onchange="updateChecklist()">
+                                            <label for="check-close"
+                                                class="ml-3 text-sm text-gray-700 cursor-pointer">Fechar Caixa e
+                                                conferir valores</label>
+                                        </div>
+                                        <div class="checklist-item flex items-center">
+                                            <input type="checkbox" id="check-clean"
+                                                class="w-5 h-5 text-purple-600 rounded border-gray-300 focus:ring-purple-500"
+                                                onchange="updateChecklist()">
+                                            <label for="check-clean"
+                                                class="ml-3 text-sm text-gray-700 cursor-pointer">Limpeza das máquinas e
+                                                bancada</label>
+                                        </div>
+                                        <div class="checklist-item flex items-center">
+                                            <input type="checkbox" id="check-backup"
+                                                class="w-5 h-5 text-purple-600 rounded border-gray-300 focus:ring-purple-500"
+                                                onchange="updateChecklist()">
+                                            <label for="check-backup"
+                                                class="ml-3 text-sm text-gray-700 cursor-pointer font-bold">FAZER BACKUP
+                                                DOS DADOS</label>
+                                        </div>
+                                    </div>
+                                </div>
+
+                                <div class="bg-gray-900 text-white p-5 rounded-xl shadow-lg">
+                                    <div class="flex justify-between items-center mb-2">
+                                        <span class="text-sm font-bold">Progresso Diário</span>
+                                        <span id="checklist-percent"
+                                            class="text-lg font-bold text-plena-iceblue">0%</span>
+                                    </div>
+                                    <div class="progress-bar bg-gray-700">
+                                        <div id="checklist-progress" class="progress-fill bg-plena-iceblue"
+                                            style="width: 0%"></div>
+                                    </div>
+                                    <button onclick="resetChecklist()"
+                                        class="w-full mt-4 bg-white/20 hover:bg-white/30 text-white py-2 rounded-lg text-sm transition-colors">
+                                        Reiniciar Checklist
+                                    </button>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Footer Manual -->
+                    <div class="text-center text-gray-500 text-sm mt-12 pb-6">
+                        <p class="mb-2">Plena Sorveteria - Versão 3.0</p>
+                        <p>Precisa de ajuda avançada? <a href="mailto:tecnologia@plenainformatica.com.br"
+                                class="text-plena-iceblue hover:underline">tecnologia@plenainformatica.com.br</a></p>
+                    </div>
+                </div>
             </section>
 
             <!-- About View -->
             <section id="view-about" class="view-section hide fade-in">
-                <!-- Conteúdo adaptado para sorveteria -->
+                <div class="max-w-4xl mx-auto">
+                    <div class="bg-white p-8 rounded-2xl shadow-sm border border-gray-100">
+                        <!-- Company Header -->
+                        <div class="text-center mb-8">
+                            <div
+                                class="w-20 h-20 bg-gradient-to-br from-plena-iceblue to-plena-mint rounded-2xl flex items-center justify-center mx-auto mb-4 shadow-lg shadow-blue-200">
+                                <i data-lucide="ice-cream" class="w-10 h-10 text-white"></i>
+                            </div>
+                            <h2 class="text-3xl font-bold text-gray-800 mb-2">Plena Sorveteria</h2>
+                            <p class="text-gray-500 font-medium">Soluções Digitais & Inteligência Artificial</p>
+                            <div class="mt-4 flex justify-center gap-2">
+                                <span class="px-3 py-1 bg-gray-100 rounded-full text-xs font-bold text-gray-600">v3.0.1
+                                    Pro</span>
+                                <span
+                                    class="px-3 py-1 bg-green-50 rounded-full text-xs font-bold text-green-700">Sistema
+                                    Oficial</span>
+                            </div>
+                        </div>
+
+                        <!-- Legal Notice -->
+                        <div class="bg-red-50 border-l-4 border-red-500 p-4 mb-8">
+                            <div class="flex items-start">
+                                <i data-lucide="shield-alert" class="w-5 h-5 text-red-600 mr-3 mt-0.5"></i>
+                                <div>
+                                    <h3 class="text-sm font-bold text-red-800 uppercase mb-1">Aviso Legal de Propriedade
+                                    </h3>
+                                    <p class="text-sm text-red-700 leading-relaxed">
+                                        Este software é protegido por leis de direitos autorais e tratados
+                                        internacionais. A
+                                        reprodução ou distribuição não autorizada deste programa, ou de qualquer parte
+                                        dele,
+                                        pode resultar em severas penalidades civis e criminais, e será processada na
+                                        máxima
+                                        extensão possível sob a lei.
+                                    </p>
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- Mission & Values -->
+                        <div class="grid grid-cols-1 md:grid-cols-2 gap-8 mb-8">
+                            <div>
+                                <h3 class="font-bold text-gray-800 mb-4 flex items-center">
+                                    <i data-lucide="target" class="w-5 h-5 mr-2 text-plena-iceblue"></i>
+                                    Nossa Missão
+                                </h3>
+                                <div class="bg-gray-50 p-6 rounded-xl border border-gray-100 h-full">
+                                    <p class="text-gray-600 leading-relaxed">
+                                        Democratizar a tecnologia de gestão para pequenas e médias sorveterias,
+                                        fornecendo
+                                        ferramentas poderosas, simples e offline que permitam ao empreendedor focar no
+                                        que
+                                        importa: a qualidade do seu produto e a satisfação do cliente.
+                                    </p>
+                                </div>
+                            </div>
+                            <div>
+                                <h3 class="font-bold text-gray-800 mb-4 flex items-center">
+                                    <i data-lucide="users" class="w-5 h-5 mr-2 text-plena-mint"></i>
+                                    Para Quem Desenvolvemos
+                                </h3>
+                                <div class="bg-gray-50 p-6 rounded-xl border border-gray-100 h-full">
+                                    <ul class="space-y-3">
+                                        <li class="flex items-center text-gray-600">
+                                            <div class="w-2 h-2 bg-plena-iceblue rounded-full mr-3"></div>
+                                            Sorveterias Artesanais & Industriais
+                                        </li>
+                                        <li class="flex items-center text-gray-600">
+                                            <div class="w-2 h-2 bg-plena-mint rounded-full mr-3"></div>
+                                            Açaiterias & Gelaterias
+                                        </li>
+                                        <li class="flex items-center text-gray-600">
+                                            <div class="w-2 h-2 bg-plena-purple rounded-full mr-3"></div>
+                                            Fabricantes de Picolés
+                                        </li>
+                                        <li class="flex items-center text-gray-600">
+                                            <div class="w-2 h-2 bg-plena-pink rounded-full mr-3"></div>
+                                            Quiosques de Sobremesa
+                                        </li>
+                                    </ul>
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- Contact -->
+                        <div class="bg-gray-50 p-6 rounded-xl border border-gray-200">
+                            <h3 class="font-bold text-gray-800 mb-4">Fale Conosco</h3>
+                            <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+                                <div>
+                                    <p class="text-sm text-gray-600 mb-3">Para suporte técnico ou parcerias:</p>
+                                    <a href="mailto:tecnologia@plenainformatica.com.br"
+                                        class="inline-flex items-center text-plena-iceblue font-bold hover:underline">
+                                        <i data-lucide="mail" class="w-4 h-4 mr-2"></i>
+                                        tecnologia@plenainformatica.com.br
+                                    </a>
+                                </div>
+                                <div>
+                                    <p class="text-sm text-gray-600 mb-3">Conheça nossos outros produtos:</p>
+                                    <a href="https://www.plenaaplicativos.com.br" target="_blank"
+                                        class="inline-flex items-center text-plena-iceblue font-bold hover:underline">
+                                        <i data-lucide="globe" class="w-4 h-4 mr-2"></i>
+                                        www.plenaaplicativos.com.br
+                                    </a>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
             </section>
 
         </div>
@@ -1796,6 +2449,8 @@
             // Renderizar dados iniciais
             renderDashboard();
             updateDataStatus();
+            updateTutorialProgress();
+            loadChecklistState();
 
             // Configurar periodicidade
             setInterval(save, 30000);
@@ -2415,6 +3070,93 @@
                 notification.style.transform = 'translateX(100%)';
                 setTimeout(() => notification.remove(), 300);
             }, 3000);
+        }
+
+        // MANUAL FUNCTIONS - PADRONIZAÇÃO PLENA
+        function scrollToSection(sectionId) {
+            const el = document.getElementById(sectionId);
+            if (el) {
+                el.scrollIntoView({ behavior: 'smooth', block: 'start' });
+            }
+        }
+
+        function markSectionComplete(id) {
+            const completed = JSON.parse(localStorage.getItem('sorveteria-manual-progress') || '[]');
+            if (!completed.includes(id)) {
+                completed.push(id);
+                localStorage.setItem('sorveteria-manual-progress', JSON.stringify(completed));
+                updateTutorialProgress();
+                showNotification('Seção concluída!', 'success');
+            }
+        }
+
+        function updateTutorialProgress() {
+            // IDs atualizados conforme novo Manual
+            const sections = ['instalacao', 'primeiro-cadastro', 'producao', 'vendas', 'backup', 'duvidas', 'checklist'];
+            const completed = JSON.parse(localStorage.getItem('sorveteria-manual-progress') || '[]');
+            const progress = (completed.length / sections.length) * 100;
+
+            const progressBar = document.getElementById('tutorial-progress');
+            const completedSteps = document.getElementById('completed-steps');
+
+            if (progressBar) progressBar.style.width = `${progress}%`;
+            if (completedSteps) completedSteps.textContent = `${completed.length}/${sections.length} etapas`;
+        }
+
+        function updateChecklist() {
+            const checkboxes = document.querySelectorAll('#checklist input[type="checkbox"]');
+            const total = checkboxes.length;
+            const checked = document.querySelectorAll('#checklist input[type="checkbox"]:checked').length;
+            const percent = Math.round((checked / total) * 100);
+
+            const percentEl = document.getElementById('checklist-percent');
+            const progressEl = document.getElementById('checklist-progress');
+            const completedEl = document.getElementById('checklist-completed');
+            const totalEl = document.getElementById('checklist-total');
+
+            if (percentEl) percentEl.textContent = `${percent}%`;
+            if (progressEl) progressEl.style.width = `${percent}%`;
+            if (completedEl) completedEl.textContent = checked;
+            if (totalEl) totalEl.textContent = total;
+
+            // Visual style update
+            checkboxes.forEach(cb => {
+                const item = cb.closest('.checklist-item');
+                if (cb.checked) {
+                    item.classList.add('bg-blue-50', 'border-plena-iceblue');
+                    item.classList.remove('border-gray-200');
+                } else {
+                    item.classList.remove('bg-blue-50', 'border-plena-iceblue');
+                    item.classList.add('border-gray-200');
+                }
+            });
+
+            // Save state
+            const state = {};
+            checkboxes.forEach(cb => state[cb.id] = cb.checked);
+            localStorage.setItem('sorveteria-checklist-state', JSON.stringify(state));
+        }
+
+        function resetChecklist() {
+            if (confirm('Deseja reiniciar seu checklist diário?')) {
+                localStorage.removeItem('sorveteria-checklist-state');
+                document.querySelectorAll('#checklist input[type="checkbox"]').forEach(cb => cb.checked = false);
+                updateChecklist();
+                showNotification('Checklist reiniciado', 'info');
+            }
+        }
+
+        function loadChecklistState() {
+            const state = JSON.parse(localStorage.getItem('sorveteria-checklist-state') || '{}');
+            Object.keys(state).forEach(id => {
+                const cb = document.getElementById(id);
+                if (cb) cb.checked = state[id];
+            });
+            updateChecklist();
+        }
+
+        function showExample(type) {
+            showNotification(`Dica: Veja a seção ${type} no menu lateral`, 'info');
         }
 
         // PWA INSTALL PROMPT

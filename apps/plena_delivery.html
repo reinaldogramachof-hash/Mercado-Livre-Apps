@@ -269,6 +269,51 @@
             text-shadow: 1px 1px 2px rgba(0, 0, 0, 0.3);
             z-index: 2;
         }
+
+        /* MANUAL STYLES */
+        .step-number {
+            width: 36px;
+            height: 36px;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-weight: bold;
+            margin-right: 12px;
+            flex-shrink: 0
+        }
+
+        .checklist-item input[type="checkbox"]:checked+label {
+            text-decoration: line-through;
+            opacity: 0.6
+        }
+
+        .checklist-item.completed {
+            opacity: 0.7
+        }
+
+        .code-block {
+            background: #1f2937;
+            color: #10b981;
+            padding: 8px 12px;
+            border-radius: 6px;
+            font-family: monospace;
+            font-size: 12px
+        }
+
+        .progress-bar {
+            width: 100%;
+            height: 8px;
+            border-radius: 999px;
+            background: #e5e7eb;
+            overflow: hidden
+        }
+
+        .progress-fill {
+            height: 100%;
+            background: linear-gradient(90deg, #10B981, #059669);
+            transition: width 0.5s ease
+        }
     </style>
 </head>
 
@@ -324,6 +369,18 @@
                 id="nav-reports">
                 <i data-lucide="bar-chart-3" class="w-5 h-5 mr-3 text-gray-400 group-hover:text-white"></i>
                 Relatórios
+            </button>
+            <button onclick="router('instructions')"
+                class="nav-item w-full flex items-center px-4 py-3 rounded-xl hover:bg-white/10 transition-all group"
+                id="nav-instructions">
+                <i data-lucide="book-open" class="w-5 h-5 mr-3 text-gray-400 group-hover:text-white"></i>
+                Manual
+            </button>
+            <button onclick="router('about')"
+                class="nav-item w-full flex items-center px-4 py-3 rounded-xl hover:bg-white/10 transition-all group"
+                id="nav-about">
+                <i data-lucide="info" class="w-5 h-5 mr-3 text-gray-400 group-hover:text-white"></i>
+                Sobre
             </button>
             <button onclick="router('settings')"
                 class="nav-item w-full flex items-center px-4 py-3 rounded-xl hover:bg-white/10 transition-all group"
@@ -1140,7 +1197,324 @@
                                     <input type="file" onchange="restoreBackup(this)" accept=".json"
                                         class="absolute inset-0 opacity-0 cursor-pointer">
                                 </div>
+
+                                <button onclick="syncToCloud()" id="sync-button"
+                                    class="w-full bg-green-600 text-white py-3 rounded-lg text-sm font-medium hover:bg-green-700 flex justify-center items-center gap-2">
+                                    <i data-lucide="cloud" class="w-4 h-4"></i>
+                                    Sincronizar com Nuvem
+                                </button>
                             </div>
+                        </div>
+
+                        <!-- Danger Zone -->
+                        <div class="bg-white p-6 rounded-2xl shadow-sm border border-gray-100">
+                            <h3 class="font-bold text-gray-800 mb-4 flex items-center text-red-600">
+                                <i data-lucide="alert-triangle" class="w-5 h-5 mr-2"></i>
+                                Zona de Perigo
+                            </h3>
+
+                            <div class="bg-red-50 p-4 rounded-lg border border-red-100 mb-4">
+                                <p class="text-sm text-red-600"><strong>Atenção:</strong> Estas ações são irreversíveis.
+                                </p>
+                            </div>
+
+                            <button onclick="factoryReset()"
+                                class="w-full py-2.5 bg-red-600 text-white rounded-lg text-sm hover:bg-red-700 transition-colors font-medium">
+                                Resetar Sistema de Fábrica
+            </section>
+
+            <!-- Manual/Instructions View -->
+            <section id="view-instructions" class="view-section hide fade-in">
+                <div class="max-w-6xl mx-auto pb-12">
+                    <div class="text-center mb-10 pt-4">
+                        <div
+                            class="inline-flex items-center justify-center p-4 bg-gradient-to-r from-plena-green to-emerald-600 rounded-2xl mb-4 shadow-lg">
+                            <i data-lucide="motorcycle" class="w-12 h-12 text-white"></i>
+                        </div>
+                        <h1 class="text-3xl font-bold text-gray-800 mb-2">Manual Completo de Uso</h1>
+                        <p class="text-gray-600 text-lg">Guia para motoboys profissionais</p>
+                        <div class="mt-4 flex flex-wrap justify-center gap-2">
+                            <span class="px-3 py-1 bg-green-100 text-green-700 rounded-full text-xs font-bold">🏍️
+                                Entregas</span>
+                            <span class="px-3 py-1 bg-blue-100 text-blue-700 rounded-full text-xs font-bold">📍
+                                Rotas</span>
+                            <span class="px-3 py-1 bg-yellow-100 text-yellow-700 rounded-full text-xs font-bold">💰
+                                Financeiro</span>
+                        </div>
+                    </div>
+
+                    <div class="bg-white rounded-2xl p-6 shadow-sm border border-gray-100 mb-8">
+                        <h3 class="font-bold text-gray-800 mb-4 flex items-center">
+                            <i data-lucide="compass" class="w-5 h-5 mr-2 text-plena-green"></i>
+                            Progresso
+                        </h3>
+                        <div class="progress-bar mb-2">
+                            <div id="tutorial-progress" class="progress-fill" style="width:0%"></div>
+                        </div>
+                        <div class="flex justify-between text-xs text-gray-500">
+                            <span>0% Concluído</span>
+                            <span id="completed-steps">0/8</span>
+                        </div>
+                    </div>
+
+                    <div id="instalacao" class="bg-white border rounded-2xl p-6 shadow-sm mb-6 scroll-mt-24">
+                        <div class="flex items-center justify-between mb-4">
+                            <div class="flex items-center">
+                                <div class="step-number bg-gradient-to-r from-plena-green to-emerald-600 text-white">1
+                                </div>
+                                <h3 class="text-xl font-bold">Instalação no Celular</h3>
+                            </div>
+                            <button onclick="markSectionComplete('instalacao')" class="text-xs text-gray-500"><i
+                                    data-lucide="check-circle" class="w-4 h-4"></i></button>
+                        </div>
+                        <div class="bg-gray-900 rounded-xl p-6 text-white">
+                            <h4 class="font-bold mb-3 flex items-center"><i data-lucide="download"
+                                    class="w-5 h-5 mr-2 text-green-400"></i>Funciona OFFLINE!</h4>
+                            <p class="text-gray-300 text-sm mb-4">Instale para trabalhar sem internet:</p>
+                            <div class="grid md:grid-cols-2 gap-4 text-sm">
+                                <div class="bg-white/10 p-3 rounded-lg">
+                                    <div class="font-bold mb-2">📱 Android</div>
+                                    <ol class="list-decimal pl-4 space-y-1 text-gray-300 text-xs">
+                                        <li>Chrome > Menu > "Instalar app"</li>
+                                    </ol>
+                                </div>
+                                <div class="bg-white/10 p-3 rounded-lg">
+                                    <div class="font-bold mb-2">🍎 iPhone</div>
+                                    <ol class="list-decimal pl-4 space-y-1 text-gray-300 text-xs">
+                                        <li>Safari > Compartilhar > "Tela Início"</li>
+                                    </ol>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div id="config" class="bg-white border rounded-2xl p-6 shadow-sm mb-6">
+                        <div class="flex items-center justify-between mb-4">
+                            <div class="flex items-center">
+                                <div class="step-number bg-gradient-to-r from-plena-green to-emerald-600 text-white">2
+                                </div>
+                                <h3 class="text-xl font-bold">Configuração</h3>
+                            </div><button onclick="markSectionComplete('config')"><i data-lucide="check-circle"
+                                    class="w-4 h-4"></i></button>
+                        </div>
+                        <p class="text-sm text-gray-600">Configure perfil, telefone e taxa média.</p>
+                    </div>
+
+                    <div id="entregas" class="bg-white border rounded-2xl p-6 shadow-sm mb-6">
+                        <div class="flex items-center justify-between mb-4">
+                            <div class="flex items-center">
+                                <div class="step-number bg-gradient-to-r from-plena-green to-emerald-600 text-white">3
+                                </div>
+                                <h3 class="text-xl font-bold">Gestão Entregas</h3>
+                            </div><button onclick="markSectionComplete('entregas')"><i data-lucide="check-circle"
+                                    class="w-4 h-4"></i></button>
+                        </div>
+                        <p class="text-sm text-gray-600">Cadastre cliente, endereço, valor e status.</p>
+                    </div>
+
+                    <div id="rotas" class="bg-white border rounded-2xl p-6 shadow-sm mb-6">
+                        <div class="flex items-center justify-between mb-4">
+                            <div class="flex items-center">
+                                <div class="step-number bg-gradient-to-r from-plena-green to-emerald-600 text-white">4
+                                </div>
+                                <h3 class="text-xl font-bold">Navegação/Rotas</h3>
+                            </div><button onclick="markSectionComplete('rotas')"><i data-lucide="check-circle"
+                                    class="w-4 h-4"></i></button>
+                        </div>
+                        <p class="text-sm text-gray-600">Abre Google Maps/Waze automaticamente.</p>
+                    </div>
+
+                    <div id="financeiro" class="bg-white border rounded-2xl p-6 shadow-sm mb-6">
+                        <div class="flex items-center justify-between mb-4">
+                            <div class="flex items-center">
+                                <div class="step-number bg-gradient-to-r from-plena-green to-emerald-600 text-white">5
+                                </div>
+                                <h3 class="text-xl font-bold">Financeiro</h3>
+                            </div><button onclick="markSectionComplete('financeiro')"><i data-lucide="check-circle"
+                                    class="w-4 h-4"></i></button>
+                        </div>
+                        <p class="text-sm text-gray-600">Registre combustível e despesas.</p>
+                    </div>
+
+                    <div id="backup" class="bg-white border rounded-2xl p-6 shadow-sm mb-6 border-l-4 border-l-red-500">
+                        <div class="flex items-center justify-between mb-4">
+                            <div class="flex items-center">
+                                <div class="step-number bg-gradient-to-r from-plena-green to-emerald-600 text-white">6
+                                </div>
+                                <h3 class="text-xl font-bold">Backup</h3>
+                            </div><button onclick="markSectionComplete('backup')"><i data-lucide="check-circle"
+                                    class="w-4 h-4"></i></button>
+                        </div>
+                        <div class="text-sm text-red-800 space-y-1 mb-3">
+                            <p>🏍️ <strong>Suas corridas valem dinheiro!</strong></p>
+                            <p>💾 <strong>Backup semanal obrigatório.</strong></p>
+                        </div><button onclick="router('settings')"
+                            class="w-full py-3 bg-red-600 text-white rounded-lg text-sm font-bold hover:bg-red-700"><i
+                                data-lucide="download" class="w-4 h-4 inline mr-2"></i>Fazer Agora</button>
+                    </div>
+
+                    <div id="faq" class="bg-white border rounded-2xl p-6 shadow-sm mb-6">
+                        <div class="flex items-center justify-between mb-4">
+                            <div class="flex items-center">
+                                <div class="step-number bg-gradient-to-r from-plena-green to-emerald-600 text-white">7
+                                </div>
+                                <h3 class="text-xl font-bold">FAQ</h3>
+                            </div><button onclick="markSectionComplete('faq')"><i data-lucide="check-circle"
+                                    class="w-4 h-4"></i></button>
+                        </div>
+                        <details class="mb-2 border p-3 rounded-lg">
+                            <summary class="font-bold cursor-pointer text-sm">Funciona sem internet?</summary>
+                            <p class="mt-2 text-xs text-gray-600">Sim! 100% offline.</p>
+                        </details>
+                        <details class="mb-2 border p-3 rounded-lg">
+                            <summary class="font-bold cursor-pointer text-sm">Perdi celular. Como recupero?</summary>
+                            <p class="mt-2 text-xs text-gray-600">Se fez backup, restaure em outro.</p>
+                        </details>
+                        <details class="border p-3 rounded-lg">
+                            <summary class="font-bold cursor-pointer text-sm">Vários celulares?</summary>
+                            <p class="mt-2 text-xs text-gray-600">Sim! Backup > Restaurar.</p>
+                        </details>
+                    </div>
+
+                    <div id="checklist" class="bg-white border rounded-2xl p-6 shadow-sm mb-8">
+                        <div class="flex items-center justify-between mb-4">
+                            <div class="flex items-center">
+                                <div class="step-number bg-gradient-to-r from-plena-green to-emerald-600 text-white">8
+                                </div>
+                                <h3 class="text-xl font-bold">Checklist Diário</h3>
+                            </div><button onclick="markSectionComplete('checklist')"><i data-lucide="check-circle"
+                                    class="w-4 h-4"></i></button>
+                        </div>
+                        <div
+                            class="bg-gradient-to-r from-green-600 to-emerald-600 p-4 rounded-xl text-white mb-4 text-center">
+                            <div class="text-4xl font-bold mb-1" id="checklist-percent">0%</div>
+                            <div class="progress-bar mb-2">
+                                <div id="checklist-progress" class="progress-fill" style="width:0%"></div>
+                            </div>
+                            <p class="text-xs"><span id="checklist-completed">0</span>/<span
+                                    id="checklist-total">12</span> tarefas</p>
+                        </div>
+                        <div class="grid md:grid-cols-3 gap-4">
+                            <div class="bg-blue-50 p-4 rounded-xl">
+                                <h4 class="font-bold text-blue-600 text-sm mb-3">🏍️ Diário</h4>
+                                <div class="space-y-2">
+                                    <div class="checklist-item flex items-center"><input type="checkbox" id="check-1-1"
+                                            class="w-4 h-4" onchange="updateChecklist()"><label for="check-1-1"
+                                            class="ml-2 text-xs cursor-pointer">Conferir entregas</label></div>
+                                    <div class="checklist-item flex items-center"><input type="checkbox" id="check-1-2"
+                                            class="w-4 h-4" onchange="updateChecklist()"><label for="check-1-2"
+                                            class="ml-2 text-xs cursor-pointer">Verificar combustível</label></div>
+                                    <div class="checklist-item flex items-center"><input type="checkbox" id="check-1-3"
+                                            class="w-4 h-4" onchange="updateChecklist()"><label for="check-1-3"
+                                            class="ml-2 text-xs cursor-pointer">Revisar rotas</label></div>
+                                    <div class="checklist-item flex items-center"><input type="checkbox" id="check-1-4"
+                                            class="w-4 h-4" onchange="updateChecklist()"><label for="check-1-4"
+                                            class="ml-2 text-xs cursor-pointer">Lançar ganhos</label></div>
+                                </div>
+                            </div>
+                            <div class="bg-green-50 p-4 rounded-xl">
+                                <h4 class="font-bold text-green-600 text-sm mb-3">📅 Semanal</h4>
+                                <div class="space-y-2">
+                                    <div class="checklist-item flex items-center"><input type="checkbox" id="check-2-1"
+                                            class="w-4 h-4" onchange="updateChecklist()"><label for="check-2-1"
+                                            class="ml-2 text-xs cursor-pointer">Analisar ganhos</label></div>
+                                    <div class="checklist-item flex items-center"><input type="checkbox" id="check-2-2"
+                                            class="w-4 h-4" onchange="updateChecklist()"><label for="check-2-2"
+                                            class="ml-2 text-xs cursor-pointer">Revisar despesas</label></div>
+                                    <div class="checklist-item flex items-center"><input type="checkbox" id="check-2-3"
+                                            class="w-4 h-4" onchange="updateChecklist()"><label for="check-2-3"
+                                            class="ml-2 text-xs cursor-pointer">Atualizar clientes</label></div>
+                                    <div class="checklist-item flex items-center"><input type="checkbox" id="check-2-4"
+                                            class="w-4 h-4" onchange="updateChecklist()"><label for="check-2-4"
+                                            class="ml-2 text-xs cursor-pointer">Planejar semana</label></div>
+                                </div>
+                            </div>
+                            <div class="bg-yellow-50 p-4 rounded-xl">
+                                <h4 class="font-bold text-yellow-600 text-sm mb-3">🔧 Mensal</h4>
+                                <div class="space-y-2">
+                                    <div class="checklist-item flex items-center"><input type="checkbox" id="check-3-1"
+                                            class="w-4 h-4" onchange="updateChecklist()"><label for="check-3-1"
+                                            class="ml-2 text-xs cursor-pointer">Backup</label></div>
+                                    <div class="checklist-item flex items-center"><input type="checkbox" id="check-3-2"
+                                            class="w-4 h-4" onchange="updateChecklist()"><label for="check-3-2"
+                                            class="ml-2 text-xs cursor-pointer">Relatório</label></div>
+                                    <div class="checklist-item flex items-center"><input type="checkbox" id="check-3-3"
+                                            class="w-4 h-4" onchange="updateChecklist()"><label for="check-3-3"
+                                            class="ml-2 text-xs cursor-pointer">Revisão moto</label></div>
+                                    <div class="checklist-item flex items-center"><input type="checkbox" id="check-3-4"
+                                            class="w-4 h-4" onchange="updateChecklist()"><label for="check-3-4"
+                                            class="ml-2 text-xs cursor-pointer">Performance</label></div>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="mt-4 text-center"><button onclick="resetChecklist()"
+                                class="px-4 py-2 bg-red-600 text-white rounded-lg text-xs font-bold hover:bg-red-700"><i
+                                    data-lucide="rotate-ccw" class="w-3 h-3 inline mr-1"></i>Reiniciar</button></div>
+                    </div>
+
+                    <div class="text-center text-gray-500 text-sm mt-8 pb-6">
+                        <p>💡 Dúvidas?</p><a href="mailto:tecnologia@plenainformatica.com.br"
+                            class="text-plena-green font-bold hover:underline">tecnologia@plenainformatica.com.br</a>
+                        <p class="mt-2 text-xs">Plena Delivery v4.1 Pro</p>
+                    </div>
+                </div>
+            </section>
+
+            <!-- About View -->
+            <section id="view-about" class="view-section hide fade-in">
+                <div class="max-w-4xl mx-auto pb-12">
+                    <div class="bg-white p-8 rounded-2xl shadow-sm border border-gray-100">
+                        <div class="text-center mb-8">
+                            <div
+                                class="w-20 h-20 rounded-full bg-gradient-to-r from-plena-green to-emerald-600 flex items-center justify-center mx-auto mb-4">
+                                <i data-lucide="rocket" class="w-10 h-10 text-white"></i>
+                            </div>
+                            <h2 class="text-2xl font-bold text-gray-800 mb-2">Sobre a Plena</h2>
+                            <p class="text-gray-600">Democratizando tecnologia</p>
+                            <p class="text-xs text-gray-500 mt-2">v4.1 Pro • CNPJ: 17.347.919/0001-59</p>
+                        </div>
+
+                        <div class="mb-8 border-b pb-6">
+                            <h3 class="font-bold text-gray-800 mb-4 flex items-center">
+                                <i data-lucide="scale" class="w-5 h-5 mr-2 text-plena-green"></i>
+                                Licença de Uso
+                            </h3>
+                            <div class="text-sm text-gray-700 space-y-3 bg-gray-50 p-4 rounded-xl">
+                                <p>Software protegido pela <strong>Lei 9.610/98</strong>.</p>
+                                <p><strong>Uso Pessoal:</strong> Licença individual. Proibida redistribuição.</p>
+                                <p><strong>Propriedade:</strong> Plena Soluções Digitais LTDA.</p>
+                            </div>
+                        </div>
+
+                        <div class="mb-8 border-b pb-6">
+                            <h3 class="font-bold text-gray-800 mb-4 flex items-center">
+                                <i data-lucide="shield-check" class="w-5 h-5 mr-2 text-green-600"></i>
+                                Privacidade e LGPD
+                            </h3>
+                            <div class="text-sm text-gray-700 space-y-3 bg-green-50 p-4 rounded-xl">
+                                <p><strong>🔒 Local-First:</strong> Dados só no seu dispositivo.</p>
+                                <p><strong>🛡️ Privacy by Design:</strong> Você controla tudo.</p>
+                                <p><strong>📱 Seus Dados:</strong> Exporte quando quiser.</p>
+                            </div>
+                        </div>
+
+                        <div class="mb-8">
+                            <h3 class="font-bold text-gray-800 mb-4 flex items-center">
+                                <i data-lucide="alert-triangle" class="w-5 h-5 mr-2 text-red-600"></i>
+                                Termo de Isenção
+                            </h3>
+                            <div class="text-sm text-gray-700 space-y-3 bg-red-50 p-4 rounded-xl">
+                                <p><strong>🏍️ Ferramenta:</strong> Não substitui serviços profissionais.</p>
+                                <p><strong>💾 Backup:</strong> Sua responsabilidade.</p>
+                                <p><strong>🎯 Uso:</strong> Por sua conta e risco.</p>
+                            </div>
+                        </div>
+
+                        <div class="text-center pt-6 border-t">
+                            <p class="text-sm text-gray-600 mb-3">Contato:</p>
+                            <a href="mailto:tecnologia@plenainformatica.com.br"
+                                class="text-plena-green font-bold hover:underline">tecnologia@plenainformatica.com.br</a>
+                            <p class="text-xs text-gray-500 mt-4">© 2025 Plena Soluções Digitais LTDA</p>
                         </div>
                     </div>
                 </div>
@@ -3322,6 +3696,15 @@
             db.settings.online = false;
             updateOnlineStatus();
         });
+
+        // MANUAL FUNCTIONS
+        function scrollToSection(sectionId) { const el = document.getElementById(sectionId); if (el) el.scrollIntoView({ behavior: 'smooth', block: 'start' }); }
+        function markSectionComplete(id) { const c = JSON.parse(localStorage.getItem('tutorial-completed') || '[]'); if (!c.includes(id)) { c.push(id); localStorage.setItem('tutorial-completed', JSON.stringify(c)); updateTutorialProgress(); showNotification('Seção concluída!', 'success'); } }
+        function updateTutorialProgress() { const s = ['instalacao', 'config', 'entregas', 'rotas', 'financeiro', 'backup', 'faq', 'checklist']; const c = JSON.parse(localStorage.getItem('tutorial-completed') || '[]'); const p = (c.length / s.length) * 100; const pb = document.getElementById('tutorial-progress'); const cs = document.getElementById('completed-steps'); if (pb) pb.style.width = `${p}%`; if (cs) cs.textContent = `${c.length}/${s.length} etapas`; }
+        function updateChecklist() { const cbs = document.querySelectorAll('#checklist input[type="checkbox"]'); const t = cbs.length; const ch = document.querySelectorAll('#checklist input[type="checkbox"]:checked').length; const pct = Math.round((ch / t) * 100); document.getElementById('checklist-percent').textContent = `${pct}%`; document.getElementById('checklist-progress').style.width = `${pct}%`; document.getElementById('checklist-completed').textContent = ch; document.getElementById('checklist-total').textContent = t; cbs.forEach(cb => { const it = cb.closest('.checklist-item'); const lbl = cb.nextElementSibling; if (cb.checked) { it.classList.add('completed'); if (lbl) lbl.style.textDecoration = 'line-through'; } else { it.classList.remove('completed'); if (lbl) lbl.style.textDecoration = 'none'; } }); const st = {}; cbs.forEach(cb => st[cb.id] = cb.checked); localStorage.setItem('checklist-state', JSON.stringify(st)); }
+        function resetChecklist() { if (confirm('Reiniciar checklist?')) { localStorage.removeItem('checklist-state'); document.querySelectorAll('#checklist input[type="checkbox"]').forEach(cb => cb.checked = false); updateChecklist(); } }
+        function loadChecklistState() { const st = JSON.parse(localStorage.getItem('checklist-state') || '{}'); Object.keys(st).forEach(id => { const cb = document.getElementById(id); if (cb) cb.checked = st[id]; }); updateChecklist(); }
+        function showExample(type) { showNotification('Exemplo: ' + type, 'info'); }
 
         // INICIALIZAR APLICATIVO
         document.addEventListener('DOMContentLoaded', init);

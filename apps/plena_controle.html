@@ -232,6 +232,51 @@
         ::-webkit-scrollbar-thumb:hover {
             background: #a1a1a1;
         }
+
+        /* MANUAL STYLES */
+        .step-number {
+            width: 36px;
+            height: 36px;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-weight: bold;
+            margin-right: 12px;
+            flex-shrink: 0
+        }
+
+        .checklist-item input[type="checkbox"]:checked+span {
+            text-decoration: line-through;
+            opacity: 0.6
+        }
+
+        .checklist-item.completed {
+            opacity: 0.7
+        }
+
+        .code-block {
+            background: #1f2937;
+            color: #10b981;
+            padding: 8px 12px;
+            border-radius: 6px;
+            font-family: monospace;
+            font-size: 12px
+        }
+
+        .progress-bar {
+            width: 100%;
+            height: 8px;
+            border-radius: 999px;
+            background: #e5e7eb;
+            overflow: hidden
+        }
+
+        .progress-fill {
+            height: 100%;
+            background: linear-gradient(90deg, #FF6600, #cc5200);
+            transition: width 0.5s ease
+        }
     </style>
 </head>
 
@@ -762,7 +807,452 @@
                 </div>
             </section>
 
-            <!-- Instructions View -->
+            <!-- INSTRUCTIONS View -->
+            <section id="view-instructions" class="view-section hide fade-in">
+                <div class="max-w-6xl mx-auto pb-12">
+                    <!-- Hero Header -->
+                    <div class="text-center mb-10 pt-4">
+                        <div
+                            class="inline-flex items-center justify-center p-4 bg-gradient-to-r from-plena-orange to-plena-dark rounded-2xl mb-4 shadow-lg">
+                            <i data-lucide="wallet" class="w-12 h-12 text-white"></i>
+                        </div>
+                        <h1 class="text-3xl font-bold text-gray-800 mb-2">Manual Completo de Uso</h1>
+                        <p class="text-gray-600 text-lg max-w-2xl mx-auto">Guia passo a passo para controlar suas
+                            finanças profissionalmente</p>
+                        <div class="mt-4 flex flex-wrap justify-center gap-2">
+                            <span class="px-3 py-1 bg-green-100 text-green-700 rounded-full text-xs font-bold">✓
+                                Controle Total</span>
+                            <span class="px-3 py-1 bg-orange-100 text-plena-orange rounded-full text-xs font-bold">📊
+                                Fluxo de Caixa</span>
+                            <span class="px-3 py-1 bg-blue-100 text-blue-700 rounded-full text-xs font-bold">💾 100%
+                                Offline</span>
+                        </div>
+                    </div>
+
+                    <!-- Progress Bar -->
+                    <div class="bg-white rounded-2xl p-6 shadow-sm border border-gray-100 mb-8">
+                        <h3 class="font-bold text-gray-800 mb-4 flex items-center">
+                            <i data-lucide="compass" class="w-5 h-5 mr-2 text-plena-orange"></i>
+                            Seu Progresso no Aprendizado
+                        </h3>
+                        <div class="mb-4">
+                            <div class="progress-bar">
+                                <div id="tutorial-progress" class="progress-fill" style="width:0%"></div>
+                            </div>
+                            <div class="flex justify-between text-xs text-gray-500 mt-2">
+                                <span>0% Concluído</span>
+                                <span id="completed-steps">0/7 etapas</span>
+                            </div>
+                        </div>
+                        <div class="grid grid-cols-2 md:grid-cols-7 gap-2">
+                            <button onclick="scrollToSection('instalacao')"
+                                class="text-center p-2 rounded-lg border border-gray-200 hover:bg-gray-50 text-xs">1.
+                                Instalação</button>
+                            <button onclick="scrollToSection('config')"
+                                class="text-center p-2 rounded-lg border border-gray-200 hover:bg-gray-50 text-xs">2.
+                                Configuração</button>
+                            <button onclick="scrollToSection('transacoes')"
+                                class="text-center p-2 rounded-lg border border-gray-200 hover:bg-gray-50 text-xs">3.
+                                Transações</button>
+                            <button onclick="scrollToSection('relatorios')"
+                                class="text-center p-2 rounded-lg border border-gray-200 hover:bg-gray-50 text-xs">4.
+                                Relatórios</button>
+                            <button onclick="scrollToSection('backup')"
+                                class="text-center p-2 rounded-lg border border-gray-200 hover:bg-gray-50 text-xs">5.
+                                Backup</button>
+                            <button onclick="scrollToSection('faq')"
+                                class="text-center p-2 rounded-lg border border-gray-200 hover:bg-gray-50 text-xs">6.
+                                FAQ</button>
+                            <button onclick="scrollToSection('checklist')"
+                                class="text-center p-2 rounded-lg border border-gray-200 hover:bg-gray-50 text-xs">7.
+                                Checklist</button>
+                        </div>
+                    </div>
+
+                    <!-- Seção 1: Instalação -->
+                    <div id="instalacao"
+                        class="bg-white border border-gray-200 rounded-2xl p-6 shadow-sm mb-8 scroll-mt-24">
+                        <div class="flex items-center justify-between mb-6">
+                            <div class="flex items-center">
+                                <div class="step-number bg-gradient-to-r from-plena-orange to-plena-dark text-white">1
+                                </div>
+                                <h3 class="text-xl font-bold text-gray-800">Instalação no Celular</h3>
+                            </div>
+                            <button onclick="markSectionComplete('instalacao')"
+                                class="text-xs text-gray-500 hover:text-green-600">
+                                <i data-lucide="check-circle" class="w-4 h-4"></i> Marcar como concluído
+                            </button>
+                        </div>
+                        <div class="bg-gray-900 rounded-2xl p-6 text-white shadow-lg mb-6">
+                            <h4 class="font-bold text-lg mb-4 flex items-center">
+                                <i data-lucide="download" class="w-5 h-5 mr-2 text-green-400"></i>
+                                Torne o App Disponível OFFLINE
+                            </h4>
+                            <p class="text-gray-300 mb-4">Instale no celular para usar sem internet:</p>
+                            <div class="grid grid-cols-1 md:grid-cols-2 gap-6 text-sm">
+                                <div class="bg-white/10 p-4 rounded-xl border border-white/10">
+                                    <div class="font-bold text-white mb-3 flex items-center">
+                                        <div
+                                            class="w-8 h-8 rounded-full bg-blue-600 flex items-center justify-center mr-2">
+                                            <i data-lucide="smartphone" class="w-4 h-4"></i>
+                                        </div>
+                                        Android (Chrome)
+                                    </div>
+                                    <ol class="list-decimal pl-5 space-y-3 text-gray-300">
+                                        <li>Abra no <strong>Chrome</strong></li>
+                                        <li>Toque nos <strong>3 pontinhos</strong> (menu)</li>
+                                        <li>Selecione <strong>"Instalar aplicativo"</strong></li>
+                                    </ol>
+                                </div>
+                                <div class="bg-white/10 p-4 rounded-xl border border-white/10">
+                                    <div class="font-bold text-white mb-3 flex items-center">
+                                        <div
+                                            class="w-8 h-8 rounded-full bg-gray-800 flex items-center justify-center mr-2">
+                                            <i data-lucide="apple" class="w-4 h-4"></i>
+                                        </div>
+                                        iPhone (Safari)
+                                    </div>
+                                    <ol class="list-decimal pl-5 space-y-3 text-gray-300">
+                                        <li>Abra no <strong>Safari</strong></li>
+                                        <li>Toque em <strong>Compartilhar</strong> (quadrado com seta)</li>
+                                        <li>Role e toque em <strong>"Adicionar à Tela de Início"</strong></li>
+                                    </ol>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Seção 2-7 Condensadas + Checklist + Footer -->
+                    <div id="config" class="bg-white border rounded-2xl p-6 shadow-sm mb-8 scroll-mt-24">
+                        <div class="flex items-center justify-between mb-6">
+                            <div class="flex items-center">
+                                <div class="step-number bg-gradient-to-r from-plena-orange to-plena-dark text-white">2
+                                </div>
+                                <h3 class="text-xl font-bold">Configuração Inicial</h3>
+                            </div>
+                            <button onclick="markSectionComplete('config')"
+                                class="text-xs text-gray-500 hover:text-green-600"><i data-lucide="check-circle"
+                                    class="w-4 h-4"></i></button>
+                        </div>
+                        <p class="text-gray-600">Configure categorias personalizadas para organizar suas entradas e
+                            saídas financeiras.</p>
+                    </div>
+
+                    <div id="transacoes" class="bg-white border rounded-2xl p-6 shadow-sm mb-8 scroll-mt-24">
+                        <div class="flex items-center justify-between mb-6">
+                            <div class="flex items-center">
+                                <div class="step-number bg-gradient-to-r from-plena-orange to-plena-dark text-white">3
+                                </div>
+                                <h3 class="text-xl font-bold">Registro de Transações</h3>
+                            </div>
+                            <button onclick="markSectionComplete('transacoes')"
+                                class="text-xs text-gray-500 hover:text-green-600"><i data-lucide="check-circle"
+                                    class="w-4 h-4"></i></button>
+                        </div>
+                        <p class="text-gray-600">Lance todas suas entradas (receitas) e saídas (despesas) para controle
+                            completo do fluxo de caixa.</p>
+                    </div>
+
+                    <div id="relatorios" class="bg-white border rounded-2xl p-6 shadow-sm mb-8 scroll-mt-24">
+                        <div class="flex items-center justify-between mb-6">
+                            <div class="flex items-center">
+                                <div class="step-number bg-gradient-to-r from-plena-orange to-plena-dark text-white">4
+                                </div>
+                                <h3 class="text-xl font-bold">Relatórios Financeiros</h3>
+                            </div>
+                            <button onclick="markSectionComplete('relatorios')"
+                                class="text-xs text-gray-500 hover:text-green-600"><i data-lucide="check-circle"
+                                    class="w-4 h-4"></i></button>
+                        </div>
+                        <p class="text-gray-600">Gere relatórios detalhados por período e categoria, exporte para Excel
+                            ou compartilhe via WhatsApp.</p>
+                    </div>
+
+                    <div id="backup"
+                        class="bg-white border rounded-2xl p-6 shadow-sm mb-8 scroll-mt-24 border-l-4 border-l-red-500">
+                        <div class="flex items-center justify-between mb-6">
+                            <div class="flex items-center">
+                                <div class="step-number bg-gradient-to-r from-plena-orange to-plena-dark text-white">5
+                                </div>
+                                <h3 class="text-xl font-bold">Backup e Segurança</h3>
+                            </div>
+                            <button onclick="markSectionComplete('backup')"
+                                class="text-xs text-gray-500 hover:text-green-600"><i data-lucide="check-circle"
+                                    class="w-4 h-4"></i></button>
+                        </div>
+                        <div class="text-sm text-red-800 space-y-2 mb-4">
+                            <p>📱 <strong>Seus dados ficam APENAS no seu navegador.</strong></p>
+                            <p>🔄 <strong>Se limpar cache ou perder aparelho, perderá os dados.</strong></p>
+                            <p>💾 <strong>Vá em Configurações > Baixar Backup semanalmente.</strong></p>
+                        </div>
+                        <button onclick="router('settings')"
+                            class="w-full py-3 bg-red-600 text-white rounded-lg text-sm font-bold hover:bg-red-700">
+                            <i data-lucide="download" class="w-4 h-4 inline mr-2"></i> Fazer Backup Agora
+                        </button>
+                    </div>
+
+                    <div id="faq" class="bg-white border rounded-2xl p-6 shadow-sm mb-8 scroll-mt-24">
+                        <div class="flex items-center justify-between mb-6">
+                            <div class="flex items-center">
+                                <div class="step-number bg-gradient-to-r from-plena-orange to-plena-dark text-white">6
+                                </div>
+                                <h3 class="text-xl font-bold">Dúvidas Frequentes</h3>
+                            </div>
+                            <button onclick="markSectionComplete('faq')"
+                                class="text-xs text-gray-500 hover:text-green-600"><i data-lucide="check-circle"
+                                    class="w-4 h-4"></i></button>
+                        </div>
+                        <details class="mb-3 border p-4 rounded-lg">
+                            <summary class="font-bold cursor-pointer">Como recuperar dados se perder o celular?
+                            </summary>
+                            <p class="mt-2 text-sm text-gray-600">Apenas se você tiver feito backup. Restaure o arquivo
+                                .json via Configurações.</p>
+                        </details>
+                        <details class="mb-3 border p-4 rounded-lg">
+                            <summary class="font-bold cursor-pointer">Posso usar em vários dispositivos?</summary>
+                            <p class="mt-2 text-sm text-gray-600">Sim! Faça backup em um, restaure no outro via
+                                Configurações.</p>
+                        </details>
+                        <details class="border p-4 rounded-lg">
+                            <summary class="font-bold cursor-pointer">Como categorizar minhas transações?</summary>
+                            <p class="mt-2 text-sm text-gray-600">Vá em Configurações > Categorias Personalizadas para
+                                criar suas próprias.</p>
+                        </details>
+                    </div>
+
+                    <!-- Checklist Interativo -->
+                    <div id="checklist" class="bg-white border rounded-2xl p-6 shadow-sm mb-8 scroll-mt-24">
+                        <div class="flex items-center justify-between mb-6">
+                            <div class="flex items-center">
+                                <div class="step-number bg-gradient-to-r from-plena-orange to-plena-dark text-white">7
+                                </div>
+                                <h3 class="text-xl font-bold">Checklist - Rotina Financeira</h3>
+                            </div>
+                            <button onclick="markSectionComplete('checklist')"
+                                class="text-xs text-gray-500 hover:text-green-600"><i data-lucide="check-circle"
+                                    class="w-4 h-4"></i></button>
+                        </div>
+
+                        <div class="bg-gradient-to-r from-orange-600 to-plena-dark p-6 rounded-xl text-white mb-6">
+                            <div class="text-center">
+                                <div class="text-5xl font-bold mb-2" id="checklist-percent">0%</div>
+                                <div class="progress-bar mb-3">
+                                    <div id="checklist-progress" class="progress-fill" style="width:0%"></div>
+                                </div>
+                                <p class="text-sm"><span id="checklist-completed">0</span>/<span
+                                        id="checklist-total">12</span> tarefas completadas</p>
+                            </div>
+                        </div>
+
+                        <div class="grid grid-cols-1 lg:grid-cols-3 gap-6">
+                            <div class="space-y-4">
+                                <div class="bg-blue-50 p-5 rounded-xl border border-blue-100">
+                                    <h4 class="font-bold text-blue-600 uppercase text-sm mb-3">📊 Diário</h4>
+                                    <div class="space-y-3">
+                                        <div class="checklist-item flex items-center">
+                                            <input type="checkbox" id="check-1-1" class="w-5 h-5 text-blue-600 rounded"
+                                                onchange="updateChecklist()">
+                                            <label for="check-1-1"
+                                                class="ml-3 text-sm text-gray-700 cursor-pointer">Lançar entradas do
+                                                dia</label>
+                                        </div>
+                                        <div class="checklist-item flex items-center">
+                                            <input type="checkbox" id="check-1-2" class="w-5 h-5 text-blue-600 rounded"
+                                                onchange="updateChecklist()">
+                                            <label for="check-1-2"
+                                                class="ml-3 text-sm text-gray-700 cursor-pointer">Lançar saídas do
+                                                dia</label>
+                                        </div>
+                                        <div class="checklist-item flex items-center">
+                                            <input type="checkbox" id="check-1-3" class="w-5 h-5 text-blue-600 rounded"
+                                                onchange="updateChecklist()">
+                                            <label for="check-1-3"
+                                                class="ml-3 text-sm text-gray-700 cursor-pointer">Verificar
+                                                saldo</label>
+                                        </div>
+                                        <div class="checklist-item flex items-center">
+                                            <input type="checkbox" id="check-1-4" class="w-5 h-5 text-blue-600 rounded"
+                                                onchange="updateChecklist()">
+                                            <label for="check-1-4"
+                                                class="ml-3 text-sm text-gray-700 cursor-pointer">Revisar
+                                                categorias</label>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+
+                            <div class="space-y-4">
+                                <div class="bg-orange-50 p-5 rounded-xl border border-orange-100">
+                                    <h4 class="font-bold text-plena-orange uppercase text-sm mb-3">📈 Semanal</h4>
+                                    <div class="space-y-3">
+                                        <div class="checklist-item flex items-center">
+                                            <input type="checkbox" id="check-2-1"
+                                                class="w-5 h-5 text-orange-600 rounded" onchange="updateChecklist()">
+                                            <label for="check-2-1"
+                                                class="ml-3 text-sm text-gray-700 cursor-pointer">Analisar fluxo de
+                                                caixa</label>
+                                        </div>
+                                        <div class="checklist-item flex items-center">
+                                            <input type="checkbox" id="check-2-2"
+                                                class="w-5 h-5 text-orange-600 rounded" onchange="updateChecklist()">
+                                            <label for="check-2-2"
+                                                class="ml-3 text-sm text-gray-700 cursor-pointer">Comparar com semana
+                                                anterior</label>
+                                        </div>
+                                        <div class="checklist-item flex items-center">
+                                            <input type="checkbox" id="check-2-3"
+                                                class="w-5 h-5 text-orange-600 rounded" onchange="updateChecklist()">
+                                            <label for="check-2-3"
+                                                class="ml-3 text-sm text-gray-700 cursor-pointer">Identificar despesas
+                                                altas</label>
+                                        </div>
+                                        <div class="checklist-item flex items-center">
+                                            <input type="checkbox" id="check-2-4"
+                                                class="w-5 h-5 text-orange-600 rounded" onchange="updateChecklist()">
+                                            <label for="check-2-4"
+                                                class="ml-3 text-sm text-gray-700 cursor-pointer">Planejar próxima
+                                                semana</label>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+
+                            <div class="space-y-4">
+                                <div class="bg-green-50 p-5 rounded-xl border border-green-100">
+                                    <h4 class="font-bold text-green-600 uppercase text-sm mb-3">🔒 Mensal</h4>
+                                    <div class="space-y-3">
+                                        <div class="checklist-item flex items-center">
+                                            <input type="checkbox" id="check-3-1" class="w-5 h-5 text-green-600 rounded"
+                                                onchange="updateChecklist()">
+                                            <label for="check-3-1"
+                                                class="ml-3 text-sm text-gray-700 cursor-pointer">Gerar relatório
+                                                completo</label>
+                                        </div>
+                                        <div class="checklist-item flex items-center">
+                                            <input type="checkbox" id="check-3-2" class="w-5 h-5 text-green-600 rounded"
+                                                onchange="updateChecklist()">
+                                            <label for="check-3-2"
+                                                class="ml-3 text-sm text-gray-700 cursor-pointer">Fazer backup dos
+                                                dados</label>
+                                        </div>
+                                        <div class="checklist-item flex items-center">
+                                            <input type="checkbox" id="check-3-3" class="w-5 h-5 text-green-600 rounded"
+                                                onchange="updateChecklist()">
+                                            <label for="check-3-3"
+                                                class="ml-3 text-sm text-gray-700 cursor-pointer">Enviar para
+                                                contador</label>
+                                        </div>
+                                        <div class="checklist-item flex items-center">
+                                            <input type="checkbox" id="check-3-4" class="w-5 h-5 text-green-600 rounded"
+                                                onchange="updateChecklist()">
+                                            <label for="check-3-4"
+                                                class="ml-3 text-sm text-gray-700 cursor-pointer">Planejar próximo
+                                                mês</label>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+
+                        <div class="mt-6 text-center">
+                            <button onclick="resetChecklist()"
+                                class="px-6 py-2 bg-red-600 text-white rounded-lg text-sm font-bold hover:bg-red-700">
+                                <i data-lucide="rotate-ccw" class="w-4 h-4 inline mr-2"></i> Reiniciar Checklist
+                            </button>
+                        </div>
+                    </div>
+
+                    <!-- Footer -->
+                    <div class="text-center text-gray-500 text-sm mt-12 pb-6">
+                        <p>💡 Dúvidas? Entre em contato:</p>
+                        <a href="mailto:tecnologia@plenainformatica.com.br"
+                            class="text-plena-orange font-bold hover:underline">tecnologia@plenainformatica.com.br</a>
+                        <p class="mt-2 text-xs">Plena Manager v4.1 Pro • Plena Soluções Digitais</p>
+                    </div>
+                </div>
+            </section>
+
+            <!-- ABOUT View -->
+            <section id="view-about" class="view-section hide fade-in">
+                <div class="max-w-4xl mx-auto pb-12">
+                    <div class="bg-white p-8 rounded-2xl shadow-sm border border-gray-100">
+                        <!-- Header -->
+                        <div class="text-center mb-8">
+                            <div
+                                class="w-20 h-20 rounded-full bg-gradient-to-r from-plena-orange to-plena-dark flex items-center justify-center mx-auto mb-4">
+                                <i data-lucide="rocket" class="w-10 h-10 text-white"></i>
+                            </div>
+                            <h2 class="text-2xl font-bold text-gray-800 mb-2">Sobre a Plena</h2>
+                            <p class="text-gray-600">Democratizando a tecnologia para pequenos negócios</p>
+                            <p class="text-xs text-gray-500 mt-2">Versão 4.1 Pro • CNPJ: 17.347.919/0001-59</p>
+                        </div>
+
+                        <!-- Licença -->
+                        <div class="mb-8 border-b pb-6">
+                            <h3 class="font-bold text-gray-800 mb-4 flex items-center">
+                                <i data-lucide="scale" class="w-5 h-5 mr-2 text-plena-orange"></i>
+                                Licença de Uso
+                            </h3>
+                            <div class="text-sm text-gray-700 space-y-3 bg-gray-50 p-4 rounded-xl">
+                                <p>Este software é protegido pela <strong>Lei 9.610/98 (Lei de Direitos
+                                        Autorais)</strong>.</p>
+                                <p><strong>Uso Pessoal Intransferível:</strong> Cada instalação é licenciada para uso
+                                    individual. É proibida a redistribuição, revenda ou uso comercial sem autorização
+                                    expressa.</p>
+                                <p><strong>Propriedade Intelectual:</strong> Todo o código-fonte, design e
+                                    funcionalidades são propriedade exclusiva da Plena Soluções Digitais LTDA.</p>
+                            </div>
+                        </div>
+
+                        <!-- LGPD -->
+                        <div class="mb-8 border-b pb-6">
+                            <h3 class="font-bold text-gray-800 mb-4 flex items-center">
+                                <i data-lucide="shield-check" class="w-5 h-5 mr-2 text-green-600"></i>
+                                Privacidade e LGPD
+                            </h3>
+                            <div class="text-sm text-gray-700 space-y-3 bg-green-50 p-4 rounded-xl">
+                                <p><strong>🔒 Local-First:</strong> Todos os seus dados ficam armazenados APENAS no seu
+                                    dispositivo (navegador). Não utilizamos servidores externos nem coletamos
+                                    informações pessoais.</p>
+                                <p><strong>🛡️ Privacy by Design:</strong> O sistema foi desenvolvido com privacidade
+                                    desde a concepção. Você é o único controlador dos seus dados.</p>
+                                <p><strong>📱 Seus Dados, Suas Regras:</strong> Você pode exportar, deletar ou
+                                    transferir seus dados a qualquer momento via backup.</p>
+                            </div>
+                        </div>
+
+                        <!-- Termo de Isenção -->
+                        <div class="mb-8">
+                            <h3 class="font-bold text-gray-800 mb-4 flex items-center">
+                                <i data-lucide="alert-triangle" class="w-5 h-5 mr-2 text-red-600"></i>
+                                Termo de Isenção de Responsabilidade
+                            </h3>
+                            <div class="text-sm text-gray-700 space-y-3 bg-red-50 p-4 rounded-xl">
+                                <p><strong>⚖️ Não Substitui Contador:</strong> Este sistema é uma ferramenta de gestão
+                                    financeira pessoal. Não substitui serviços de contabilidade profissional ou
+                                    consultoria fiscal.</p>
+                                <p><strong>💾 Backup é Sua Responsabilidade:</strong> Como os dados ficam apenas no seu
+                                    dispositivo, você é responsável por fazer backups regulares. A Plena não se
+                                    responsabiliza por perda de dados.</p>
+                                <p><strong>🎯 Uso por sua Conta e Risco:</strong> O software é fornecido "como está".
+                                    Use-o como ferramenta auxiliar para organização financeira.</p>
+                            </div>
+                        </div>
+
+                        <!-- Footer -->
+                        <div class="text-center pt-6 border-t">
+                            <p class="text-sm text-gray-600 mb-3">Entre em contato:</p>
+                            <a href="mailto:tecnologia@plenainformatica.com.br"
+                                class="text-plena-orange font-bold hover:underline">
+                                tecnologia@plenainformatica.com.br
+                            </a>
+                            <p class="text-xs text-gray-500 mt-4">© 2025 Plena Soluções Digitais LTDA • Todos os
+                                direitos reservados</p>
+                        </div>
+                    </div>
+                </div>
+            </section>
+
             <section id="view-instructions" class="view-section hide fade-in">
                 <div class="max-w-4xl mx-auto">
                     <div class="text-center mb-8">
@@ -2261,6 +2751,15 @@
         window.addEventListener('offline', () => {
             showNotification('Modo offline ativado. Seus dados estão seguros localmente.', 'warning');
         });
+
+        // MANUAL FUNCTIONS
+        function scrollToSection(sectionId) { const el = document.getElementById(sectionId); if (el) el.scrollIntoView({ behavior: 'smooth', block: 'start' }); }
+        function markSectionComplete(id) { const c = JSON.parse(localStorage.getItem('tutorial-completed') || '[]'); if (!c.includes(id)) { c.push(id); localStorage.setItem('tutorial-completed', JSON.stringify(c)); updateTutorialProgress(); showNotification('Seção concluída!', 'success'); } }
+        function updateTutorialProgress() { const s = ['instalacao', 'config', 'transacoes', 'relatorios', 'backup', 'faq', 'checklist']; const c = JSON.parse(localStorage.getItem('tutorial-completed') || '[]'); const p = (c.length / s.length) * 100; const pb = document.getElementById('tutorial-progress'); const cs = document.getElementById('completed-steps'); if (pb) pb.style.width = `${p}%`; if (cs) cs.textContent = `${c.length}/${s.length} etapas`; }
+        function updateChecklist() { const cbs = document.querySelectorAll('#checklist input[type="checkbox"]'); const t = cbs.length; const ch = document.querySelectorAll('#checklist input[type="checkbox"]:checked').length; const pct = Math.round((ch / t) * 100); document.getElementById('checklist-percent').textContent = `${pct}%`; document.getElementById('checklist-progress').style.width = `${pct}%`; document.getElementById('checklist-completed').textContent = ch; document.getElementById('checklist-total').textContent = t; cbs.forEach(cb => { const it = cb.closest('.checklist-item'); if (cb.checked) it.classList.add('completed'); else it.classList.remove('completed'); }); const st = {}; cbs.forEach(cb => st[cb.id] = cb.checked); localStorage.setItem('checklist-state', JSON.stringify(st)); }
+        function resetChecklist() { if (confirm('Reiniciar checklist?')) { localStorage.removeItem('checklist-state'); document.querySelectorAll('#checklist input[type="checkbox"]').forEach(cb => cb.checked = false); updateChecklist(); } }
+        function loadChecklistState() { const st = JSON.parse(localStorage.getItem('checklist-state') || '{}'); Object.keys(st).forEach(id => { const cb = document.getElementById(id); if (cb) cb.checked = st[id]; }); updateChecklist(); }
+        function showExample(type) { showNotification('Exemplo: ' + type, 'info'); }
 
         // INICIALIZAR APLICATIVO
         document.addEventListener('DOMContentLoaded', init);

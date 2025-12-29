@@ -1953,6 +1953,16 @@
         let db = JSON.parse(localStorage.getItem(DB_KEY)) || defaultDB;
 
         // UTILITÁRIOS
+        const sanitizeHTML = (str) => {
+            if (!str) return '';
+            return String(str)
+                .replace(/&/g, '&amp;')
+                .replace(/</g, '&lt;')
+                .replace(/>/g, '&gt;')
+                .replace(/"/g, '&quot;')
+                .replace(/'/g, '&#039;');
+        };
+
         const save = () => {
             localStorage.setItem(DB_KEY, JSON.stringify(db));
             updateDataStatus();
@@ -2563,6 +2573,10 @@
             });
 
             document.getElementById('closingModal').classList.remove('hidden');
+        }
+
+        function openModal(modalId) {
+            document.getElementById(modalId).classList.remove('hidden');
         }
 
         function closeModal(modalId) {
@@ -3262,15 +3276,37 @@
             reader.onload = function (e) {
                 try {
                     const backup = JSON.parse(e.target.result);
-                    if (backup.appointments && backup.settings) {
-                        db = backup;
+                    
+                    // Validação básica de integridade
+                    const requiredKeys = ['appointments', 'team', 'services', 'transactions', 'clients', 'settings'];
+                    const isValid = requiredKeys.every(key => Array.isArray(backup[key]) || typeof backup[key] === 'object');
+                    
+                    if (isValid) {
+                        // Sanitização profunda do backup antes de carregar
+                        // Evita que JSON malicioso injete scripts via innerHTML posteriormente
+                        const sanitizeObj = (obj) => {
+                            if (typeof obj === 'string') return sanitizeHTML(obj);
+                            if (Array.isArray(obj)) return obj.map(sanitizeObj);
+                            if (typeof obj === 'object' && obj !== null) {
+                                Object.keys(obj).forEach(key => {
+                                    obj[key] = sanitizeObj(obj[key]);
+                                });
+                                return obj;
+                            }
+                            return obj;
+                        };
+                        
+                        db = sanitizeObj(backup);
                         save();
                         alert('Backup restaurado com sucesso! A página será recarregada.');
                         location.reload();
                     } else {
-                        alert('Arquivo inválido.');
+                        alert('Arquivo de backup inválido ou corrompido.');
                     }
-                } catch (err) { alert('Erro ao ler arquivo.'); }
+                } catch (err) { 
+                    console.error(err);
+                    alert('Erro ao ler arquivo. Verifique se é um backup válido.'); 
+                }
             };
             reader.readAsText(file);
         }

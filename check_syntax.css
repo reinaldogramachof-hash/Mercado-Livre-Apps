@@ -1,0 +1,250 @@
+        /* CSS Otimizado Padronizado */
+        :root {
+            --plena-blue: #2563EB;
+            --plena-dark: #1e3a8a;
+            --plena-black: #0f172a;
+            --plena-orange: #f59e0b;
+            --barber-light: #F1F5F9;
+            --barber-soft: #E2E8F0;
+        }
+
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+            background-color: #F8FAFC;
+            -webkit-tap-highlight-color: transparent;
+        }
+
+        .hide {
+            display: none !important;
+        }
+
+        .fade-in {
+            animation: fadeIn 0.3s ease-out;
+        }
+
+        @keyframes fadeIn {
+            from {
+                opacity: 0;
+                transform: translateY(5px);
+            }
+
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+
+        @keyframes slideIn {
+            from {
+                transform: translateX(-10px);
+                opacity: 0;
+            }
+
+            to {
+                transform: translateX(0);
+                opacity: 1;
+            }
+        }
+
+        /* Modal Backdrop */
+        .modal-backdrop {
+            background-color: rgba(0, 0, 0, 0.7);
+            backdrop-filter: blur(4px);
+            animation: fadeIn 0.2s ease;
+        }
+
+        /* Sidebar Mobile Toggle */
+        .sidebar.open {
+            transform: translateX(0) !important;
+        }
+
+        /* Print Optimization V4 */
+        @media print {
+            @page {
+                margin: 1cm;
+                size: A4;
+            }
+
+            body {
+                background: white;
+                -webkit-print-color-adjust: exact;
+                print-color-adjust: exact;
+            }
+
+            .sidebar,
+            .no-print,
+            button,
+            .modal-backdrop,
+            header,
+            .hide {
+                display: none !important;
+            }
+
+            .main-content {
+                margin-left: 0 !important;
+                width: 100% !important;
+                height: auto !important;
+                overflow: visible !important;
+            }
+
+            .view-section {
+                display: none !important;
+            }
+
+            /* Show specific sections only when printing */
+            #view-reports,
+            #view-finance {
+                display: block !important;
+            }
+
+            /* Print Styles */
+            @media print {
+                body * {
+                    visibility: hidden;
+                    height: 0;
+                    overflow: hidden;
+                }
+
+                #print-area,
+                #print-area * {
+                    visibility: visible;
+                    height: auto;
+                    overflow: visible;
+                }
+
+                #print-area {
+                    position: absolute;
+                    left: 0;
+                    top: 0;
+                    width: 100%;
+                    padding: 20px;
+                    background: white;
+                }
+
+                @page {
+                    margin: 0;
+                    size: auto;
+                }
+
+                .no-print {
+                    display: none !important;
+                }
+            }
+
+            /* Badges */
+            .badge {
+                display: inline-flex;
+                align-items: center;
+                padding: 4px 12px;
+                border-radius: 20px;
+                font-size: 12px;
+                font-weight: 600;
+            }
+
+            .badge-pending {
+                background-color: #FEF3C7;
+                color: #92400E;
+            }
+
+            .badge-done {
+                background-color: #DCFCE7;
+                color: #166534;
+            }
+
+            .badge-canceled {
+                background-color: #FEE2E2;
+                color: #991B1B;
+            }
+
+            /* Status Colors */
+            .status-pending {
+                background-color: #FEF3C7;
+                border-color: #F59E0B;
+                color: #92400E;
+            }
+
+            .status-done {
+                background-color: #DCFCE7;
+                border-color: #10B981;
+                color: #166534;
+            }
+
+            .status-canceled {
+                background-color: #FEE2E2;
+                border-color: #EF4444;
+                color: #991B1B;
+            }
+
+            /* Custom Scrollbar */
+            ::-webkit-scrollbar {
+                width: 6px;
+                height: 6px;
+            }
+
+            ::-webkit-scrollbar-track {
+                background: #f1f1f1;
+                border-radius: 3px;
+            }
+
+            ::-webkit-scrollbar-thumb {
+                background: #c1c1c1;
+                border-radius: 3px;
+            }
+
+            ::-webkit-scrollbar-thumb:hover {
+                background: #a1a1a1;
+            }
+
+            /* Agenda Time Slot */
+            .time-slot {
+                transition: all 0.2s ease;
+            }
+
+            .time-slot:hover {
+                background-color: #E2E8F0 !important;
+            }
+
+            /* Service Card Gradient */
+            .service-gradient {
+                background: linear-gradient(135deg, #60A5FA 0%, #2563EB 100%);
+            }
+
+            /* Estilos para Manual Interativo */
+            .step-number {
+                width: 3rem;
+                height: 3rem;
+                border-radius: 50%;
+                display: inline-flex;
+                align-items: center;
+                justify-content: center;
+                font-size: 1.25rem;
+                font-weight: bold;
+                margin-right: 1rem;
+            }
+
+            .checklist-item input[type="checkbox"]:checked+span {
+                text-decoration: line-through;
+                opacity: 0.6;
+            }
+
+            .code-block {
+                background: #1e293b;
+                color: #e2e8f0;
+                padding: 0.75rem;
+                border-radius: 0.5rem;
+                font-family: monospace;
+                font-size: 0.875rem;
+            }
+
+            .progress-bar {
+                height: 8px;
+                background: #e2e8f0;
+                border-radius: 9999px;
+                overflow: hidden;
+            }
+
+            .progress-fill {
+                height: 100%;
+                background: linear-gradient(90deg, #2563EB 0%, #60A5FA 100%);
+                transition: width 0.3s ease;
+            }

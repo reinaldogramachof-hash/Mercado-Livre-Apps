@@ -1065,7 +1065,7 @@
                             <div class="flex items-center">
                                 <div class="step-number bg-gradient-to-r from-plena-blue to-plena-dark text-white">1
                                 </div>
-                                <h3 class="text-xl font-bold text-gray-800">Instalação do App no Celular</h3>
+                                <h3 class="text-xl font-bold text-gray-800">Instalação do Sistema</h3>
                             </div>
                             <button onclick="markSectionComplete('instalacao')"
                                 class="text-xs text-gray-500 hover:text-green-600">
@@ -2465,6 +2465,16 @@
         let db = JSON.parse(localStorage.getItem(DB_KEY)) || defaultDB;
 
         // UTILITÁRIOS
+        const sanitizeHTML = (str) => {
+            if (!str) return '';
+            return String(str)
+                .replace(/&/g, '&amp;')
+                .replace(/</g, '&lt;')
+                .replace(/>/g, '&gt;')
+                .replace(/"/g, '&quot;')
+                .replace(/'/g, '&#039;');
+        };
+
         const save = () => {
             localStorage.setItem(DB_KEY, JSON.stringify(db));
             updateDataStatus();
@@ -3843,6 +3853,10 @@
         }
 
         // MODAIS
+        function openModal(modalId) {
+            document.getElementById(modalId).classList.remove('hidden');
+        }
+
         function closeModal(modalId) {
             document.getElementById(modalId).classList.add('hidden');
         }
@@ -3875,19 +3889,37 @@
             reader.onload = function (e) {
                 try {
                     const backup = JSON.parse(e.target.result);
-
-                    // Validar backup
-                    if (!backup.orders || !backup.clients || !backup.transactions) {
-                        throw new Error('Arquivo de backup inválido');
+                    
+                    // Validação básica de integridade
+                    const requiredKeys = ['orders', 'clients', 'transactions', 'settings'];
+                    const isValid = requiredKeys.every(key => Array.isArray(backup[key]) || typeof backup[key] === 'object');
+                    
+                    if (isValid) {
+                        if (confirm('Restaurar backup substituirá todos os dados atuais. Tem certeza?')) {
+                            // Sanitização profunda do backup antes de carregar
+                            const sanitizeObj = (obj) => {
+                                if (typeof obj === 'string') return sanitizeHTML(obj);
+                                if (Array.isArray(obj)) return obj.map(sanitizeObj);
+                                if (typeof obj === 'object' && obj !== null) {
+                                    Object.keys(obj).forEach(key => {
+                                        obj[key] = sanitizeObj(obj[key]);
+                                    });
+                                    return obj;
+                                }
+                                return obj;
+                            };
+                            
+                            db = sanitizeObj(backup);
+                            save();
+                            alert('Backup restaurado com sucesso! A página será recarregada.');
+                            location.reload();
+                        }
+                    } else {
+                        alert('Arquivo de backup inválido ou corrompido.');
                     }
-
-                    if (confirm('Restaurar backup substituirá todos os dados atuais. Tem certeza?')) {
-                        db = backup;
-                        save();
-                        location.reload();
-                    }
-                } catch (error) {
-                    alert('Erro ao restaurar backup: ' + error.message);
+                } catch (err) { 
+                    console.error(err);
+                    alert('Erro ao ler arquivo. Verifique se é um backup válido.'); 
                 }
             };
             reader.readAsText(file);

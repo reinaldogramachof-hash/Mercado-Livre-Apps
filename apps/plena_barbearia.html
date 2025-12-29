@@ -11,8 +11,7 @@
     <meta name="apple-mobile-web-app-capable" content="yes">
     <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
     <meta name="description" content="Sistema de gestão completo para barbearias - Plena Aplicativos">
-    <link rel="manifest" href="data:application/manifest+json,{}">
-
+    
     <!-- Tailwind CSS -->
     <script src="https://cdn.tailwindcss.com"></script>
     <script>
@@ -43,7 +42,7 @@
     </script>
 
     <!-- Lucide Icons -->
-    <script src="https://unpkg.com/lucide@latest"></script>
+    <script src="https://unpkg.com/lucide@0.378.0/dist/umd/lucide.js"></script>
 
     <style>
         /* CSS Otimizado Padronizado */
@@ -144,40 +143,51 @@
             #view-finance {
                 display: block !important;
             }
+        }
 
-            /* Print Styles */
-            @media print {
-                body * {
-                    visibility: hidden;
-                    height: 0;
-                    overflow: hidden;
-                }
-
-                #print-area,
-                #print-area * {
-                    visibility: visible;
-                    height: auto;
-                    overflow: visible;
-                }
-
-                #print-area {
-                    position: absolute;
-                    left: 0;
-                    top: 0;
-                    width: 100%;
-                    padding: 20px;
-                    background: white;
-                }
-
-                @page {
-                    margin: 0;
-                    size: auto;
-                }
-
-                .no-print {
-                    display: none !important;
-                }
+        /* Enhanced Print Styles */
+        @media print {
+            #report-result {
+                display: block !important;
+                visibility: visible !important;
             }
+
+            #report-result .grid {
+                display: grid !important;
+                grid-template-columns: repeat(3, 1fr) !important;
+                gap: 1rem !important;
+            }
+
+            #report-result button {
+                display: none !important;
+            }
+
+            /* Finance Table Formatting */
+            #view-finance table {
+                width: 100% !important;
+                font-size: 10pt !important;
+                border-collapse: collapse !important;
+            }
+            
+            #view-finance th, #view-finance td {
+                border: 1px solid #e2e8f0 !important;
+                padding: 8px !important;
+                color: black !important;
+            }
+
+            /* Hide Actions column in print */
+            #view-finance th:last-child, 
+            #view-finance td:last-child {
+                display: none !important;
+            }
+
+            /* Hide inputs and filters */
+            #view-finance input,
+            #view-finance select,
+            #view-finance .flex.gap-2 {
+                display: none !important;
+            }
+        }
 
             /* Badges */
             .badge {
@@ -616,6 +626,7 @@
                                     <th class="px-6 py-3">Tipo</th>
                                     <th class="px-6 py-3 text-right">Valor</th>
                                     <th class="px-6 py-3 text-right">Comissão</th>
+                                    <th class="px-6 py-3 text-right">Ações</th>
                                 </tr>
                             </thead>
                             <tbody id="trans-list" class="divide-y divide-slate-100 text-sm"></tbody>
@@ -733,14 +744,10 @@
                     </div>
 
                     <!-- Action Buttons -->
-                    <div class="grid grid-cols-1 md:grid-cols-3 gap-4">
+                    <div class="flex justify-center">
                         <button onclick="shareReport()"
-                            class="bg-[#25D366] text-white py-3 rounded-xl font-bold hover:bg-[#128C7E] flex justify-center items-center gap-2">
-                            <i data-lucide="message-circle" class="w-4 h-4"></i> WhatsApp
-                        </button>
-                        <button onclick="printReport()"
-                            class="bg-blue-600 text-white py-3 rounded-xl font-bold hover:bg-blue-700 flex justify-center items-center gap-2">
-                            <i data-lucide="printer" class="w-4 h-4"></i> Imprimir
+                            class="bg-[#25D366] text-white py-3 px-8 rounded-xl font-bold hover:bg-[#128C7E] flex justify-center items-center gap-2">
+                            <i data-lucide="message-circle" class="w-4 h-4"></i> Compartilhar no WhatsApp
                         </button>
                     </div>
                 </div>
@@ -762,6 +769,16 @@
                                 <label class="text-xs font-bold text-slate-500 uppercase">Nome da Barbearia</label>
                                 <input type="text" id="biz-name" class="w-full border p-2 rounded-lg text-sm"
                                     placeholder="Ex: Barbearia do Zé">
+                            </div>
+                            <div>
+                                <label class="text-xs font-bold text-slate-500 uppercase">Nome do Responsável</label>
+                                <input type="text" id="biz-owner" class="w-full border p-2 rounded-lg text-sm"
+                                    placeholder="Ex: João Silva">
+                            </div>
+                            <div>
+                                <label class="text-xs font-bold text-slate-500 uppercase">CPF / CNPJ do Responsável</label>
+                                <input type="text" id="biz-doc" class="w-full border p-2 rounded-lg text-sm"
+                                    placeholder="000.000.000-00">
                             </div>
                             <div>
                                 <label class="text-xs font-bold text-slate-500 uppercase">Horário de
@@ -921,11 +938,11 @@
                         <div class="bg-gradient-to-r from-gray-800 to-gray-900 rounded-2xl p-6 text-white mb-6">
                             <h4 class="font-bold text-lg mb-4 flex items-center">
                                 <i data-lucide="download" class="w-5 h-5 mr-2 text-green-400"></i>
-                                Transforme em App no Seu Celular
+                                Instale o App (Android & Windows)
                             </h4>
                             <p class="text-sm text-gray-300 mb-6">
                                 O Plena Barbearia funciona como um aplicativo nativo. Siga os passos abaixo para
-                                instalar:
+                                instalar no seu dispositivo:
                             </p>
 
                             <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
@@ -954,45 +971,33 @@
                                                 3</div>
                                             <span>Selecione <strong>"Adicionar à tela inicial"</strong></span>
                                         </li>
-                                        <li class="flex items-start">
-                                            <div
-                                                class="w-6 h-6 rounded-full bg-blue-500 text-white flex items-center justify-center mr-2 text-xs font-bold">
-                                                4</div>
-                                            <span>Confirme e pronto! O ícone aparecerá na tela</span>
-                                        </li>
                                     </ol>
                                 </div>
 
-                                <!-- iPhone -->
+                                <!-- Windows -->
                                 <div class="bg-white/10 p-5 rounded-xl border border-white/20">
                                     <div class="font-bold text-white mb-3 flex items-center">
-                                        <i data-lucide="apple" class="w-5 h-5 mr-2"></i>
-                                        iPhone (Safari)
+                                        <i data-lucide="monitor" class="w-5 h-5 mr-2"></i>
+                                        Windows (Chrome/Edge)
                                     </div>
                                     <ol class="space-y-2 text-sm text-gray-200">
                                         <li class="flex items-start">
                                             <div
                                                 class="w-6 h-6 rounded-full bg-blue-500 text-white flex items-center justify-center mr-2 text-xs font-bold">
                                                 1</div>
-                                            <span>Abra este site no <strong>Safari</strong></span>
+                                            <span>Abra este site no <strong>Chrome</strong> ou <strong>Edge</strong></span>
                                         </li>
                                         <li class="flex items-start">
                                             <div
                                                 class="w-6 h-6 rounded-full bg-blue-500 text-white flex items-center justify-center mr-2 text-xs font-bold">
                                                 2</div>
-                                            <span>Toque no botão <strong>Compartilhar</strong> (seta para cima)</span>
+                                            <span>Clique no ícone de <strong>Instalar</strong> na barra de endereço</span>
                                         </li>
                                         <li class="flex items-start">
                                             <div
                                                 class="w-6 h-6 rounded-full bg-blue-500 text-white flex items-center justify-center mr-2 text-xs font-bold">
                                                 3</div>
-                                            <span>Role e toque em <strong>"Adicionar à Tela de Início"</strong></span>
-                                        </li>
-                                        <li class="flex items-start">
-                                            <div
-                                                class="w-6 h-6 rounded-full bg-blue-500 text-white flex items-center justify-center mr-2 text-xs font-bold">
-                                                4</div>
-                                            <span>Toque em <strong>"Adicionar"</strong> no canto superior</span>
+                                            <span>Confirme a instalação para criar o atalho</span>
                                         </li>
                                     </ol>
                                 </div>
@@ -1876,6 +1881,7 @@
                 </button>
             </div>
             <form onsubmit="submitExpense(event)" class="space-y-4">
+                <input type="hidden" id="exp-id">
                 <div>
                     <label class="text-xs font-bold text-slate-500 uppercase">Tipo</label>
                     <select id="exp-type" class="w-full border p-2 rounded-lg mt-1 font-bold">
@@ -2049,12 +2055,16 @@
 
     <!-- JavaScript -->
     <script>
-        // 🔒 DADOS DA LICENÇA
+        // 🔒 DADOS DA LICENÇA (INSTRUÇÕES PARA O GERADOR)
+        // O Gerador de Licenças deve localizar esta constante e preencher os dados abaixo:
         const LICENSE_DATA = {
-            active: false,
-            ownerName: "",
-            ownerDoc: ""
+            active: false,      // ALTERAR PARA true PARA ATIVAR A LICENÇA
+            businessName: "",   // NOME DA BARBEARIA (Ex: Barbearia do Zé)
+            ownerName: "",      // NOME DO RESPONSÁVEL (Ex: João Silva)
+            ownerDoc: ""        // CPF OU CNPJ (Ex: 123.456.789-00)
         };
+        // Protege contra modificações em tempo de execução via Console
+        Object.freeze(LICENSE_DATA);
 
         // ESTADO GLOBAL
         const DB_KEY = 'plena_barber_pro_v2';
@@ -2090,10 +2100,20 @@
         let db = JSON.parse(localStorage.getItem(DB_KEY)) || defaultDB;
 
         // UTILITÁRIOS
-        const save = () => {
-            localStorage.setItem(DB_KEY, JSON.stringify(db));
-            updateDataStatus();
-        };
+const sanitizeHTML = (str) => {
+    if (!str) return '';
+    return String(str)
+        .replace(/&/g, '&amp;')
+        .replace(/</g, '&lt;')
+        .replace(/>/g, '&gt;')
+        .replace(/"/g, '&quot;')
+        .replace(/'/g, '&#039;');
+};
+
+const save = () => {
+    localStorage.setItem(DB_KEY, JSON.stringify(db));
+    updateDataStatus();
+};
 
         const fmtMoney = (v) => {
             return v.toLocaleString('pt-BR', {
@@ -2144,33 +2164,58 @@
 
             // Configurar business info
             document.getElementById('biz-name').value = db.settings.businessName || '';
+            document.getElementById('biz-owner').value = db.settings.businessOwner || '';
+            document.getElementById('biz-doc').value = db.settings.businessDoc || '';
             document.getElementById('biz-hours').value = db.settings.businessHours || '';
 
             // 🔐 VERIFICAÇÃO DE LICENÇA (Hook V4)
             if (typeof LICENSE_DATA !== 'undefined' && LICENSE_DATA.active) {
+                // 0. Forçar dados no DB
+                // Se o gerador fornecer um nome de barbearia, ele será aplicado. Caso contrário, mantém-se a personalização.
+                if (LICENSE_DATA.businessName && LICENSE_DATA.businessName.trim() !== "") {
+                     db.settings.businessName = LICENSE_DATA.businessName;
+                }
+                db.settings.businessOwner = LICENSE_DATA.ownerName;
+                db.settings.businessDoc = LICENSE_DATA.ownerDoc;
+
                 // 1. Preencher e Travar Dados
                 const nameInput = document.getElementById('biz-name');
+                const ownerInput = document.getElementById('biz-owner');
+                const docInput = document.getElementById('biz-doc');
                 const hoursInput = document.getElementById('biz-hours');
 
-                if (nameInput) {
-                    nameInput.value = LICENSE_DATA.ownerName || db.settings.businessName;
+                if (nameInput && LICENSE_DATA.businessName && LICENSE_DATA.businessName.trim() !== "") {
+                    nameInput.value = LICENSE_DATA.businessName;
                     nameInput.disabled = true;
                     nameInput.classList.add('bg-slate-100', 'cursor-not-allowed');
                 }
-
-                // 2. Marca D'água Sidebar
-                const sidebar = document.querySelector('.sidebar h1');
-                if (sidebar) {
-                    const badge = document.createElement('span');
-                    badge.className = 'block text-[10px] bg-white/20 text-white px-2 py-0.5 rounded mt-1 w-max';
-                    badge.innerHTML = '🔒 Licenciado para ' + LICENSE_DATA.ownerName.split(' ')[0];
-                    sidebar.parentElement.appendChild(badge);
+                
+                if (ownerInput) {
+                    ownerInput.value = LICENSE_DATA.ownerName;
+                    ownerInput.disabled = true;
+                    ownerInput.classList.add('bg-slate-100', 'cursor-not-allowed');
                 }
 
-                // 3. Marca D'água Global (Rodapé)
-                const footer = document.querySelector('aside .border-t p');
-                if (footer) {
-                    footer.innerHTML += '<br><span class="text-plena-blue opacity-70">Licença Ativa V4 Pro</span>';
+                if (docInput) {
+                    docInput.value = LICENSE_DATA.ownerDoc;
+                    docInput.disabled = true;
+                    docInput.classList.add('bg-slate-100', 'cursor-not-allowed');
+                    
+                    // Adicionar indicador visual de licença
+                    if (!docInput.parentElement.querySelector('.lock-icon')) {
+                        docInput.parentElement.insertAdjacentHTML('beforeend', 
+                            `<span class="lock-icon text-[10px] text-plena-blue font-bold flex items-center mt-1"><i data-lucide="lock" class="w-3 h-3 mr-1"></i> Licença Vitalícia Ativa</span>`
+                        );
+                    }
+                }
+
+                // 2. Marca D'água Sidebar (Rodapé)
+                const sidebarFooter = document.querySelector('aside .border-t');
+                if (sidebarFooter && !sidebarFooter.querySelector('.license-watermark')) {
+                    const licenseDiv = document.createElement('div');
+                    licenseDiv.className = 'license-watermark mt-2 pt-2 border-t border-white/5 text-[10px] text-white/50 font-mono';
+                    licenseDiv.innerHTML = `Licenciado para:<br><strong class="text-white/80">${sanitizeHTML(LICENSE_DATA.ownerName)}</strong><br>CPF/CNPJ: ${sanitizeHTML(LICENSE_DATA.ownerDoc)}`;
+                    sidebarFooter.appendChild(licenseDiv);
                 }
             }
 
@@ -2307,9 +2352,9 @@
                                 <span class="block font-bold text-lg text-slate-800">${appt.time}</span>
                             </div>
                             <div>
-                                <h4 class="font-bold text-slate-900">${appt.client}</h4>
+                                <h4 class="font-bold text-slate-900">${sanitizeHTML(appt.client)}</h4>
                                 <p class="text-xs text-slate-500">
-                                    ${appt.serviceName} com <strong>${appt.proName}</strong>
+                                    ${sanitizeHTML(appt.serviceName)} com <strong>${sanitizeHTML(appt.proName)}</strong>
                                 </p>
                                 <span class="inline-block mt-1 px-2 py-1 text-xs rounded-full ${appt.status === 'pending' ? 'badge-pending' : appt.status === 'done' ? 'badge-done' : 'badge-canceled'}">
                                     ${appt.status === 'pending' ? 'Pendente' : appt.status === 'done' ? 'Concluído' : 'Cancelado'}
@@ -2346,10 +2391,10 @@
                 upcomingList.innerHTML = upcoming.map(appt => `
                     <div class="flex items-center justify-between p-3 hover:bg-slate-50 rounded-lg border border-slate-100">
                         <div>
-                            <p class="text-sm font-medium text-slate-800">${appt.client}</p>
+                            <p class="text-sm font-medium text-slate-800">${sanitizeHTML(appt.client)}</p>
                             <p class="text-xs text-slate-500">${fmtDate(appt.date)} às ${appt.time}</p>
                         </div>
-                        <span class="text-sm text-plena-blue font-bold">${appt.serviceName}</span>
+                        <span class="text-sm text-plena-blue font-bold">${sanitizeHTML(appt.serviceName)}</span>
                     </div>
                 `).join('');
             }
@@ -2390,7 +2435,7 @@
                                 Comissão: ${pro.commission}%
                             </span>
                         </div>
-                        <h3 class="font-bold text-lg text-slate-800 mb-2">${pro.name}</h3>
+                        <h3 class="font-bold text-lg text-slate-800 mb-2">${sanitizeHTML(pro.name)}</h3>
                         
                         <div class="mt-4 space-y-3">
                             <div class="flex justify-between text-sm">
@@ -2523,10 +2568,10 @@
                     <tr class="hover:bg-slate-50 group border-b border-slate-100">
                         <td class="px-6 py-4 text-slate-500 whitespace-nowrap">${fmtDate(t.date)}</td>
                         <td class="px-6 py-4">
-                            <div class="font-medium text-slate-800">${t.description}</div>
-                            ${t.category ? `<div class="text-xs text-slate-400">${t.category}</div>` : ''}
-                        </td>
-                        <td class="px-6 py-4">${t.proName || '-'}</td>
+                            <div class="font-medium text-slate-800">${sanitizeHTML(t.description)}</div>
+                        ${t.category ? `<div class="text-xs text-slate-400">${sanitizeHTML(t.category)}</div>` : ''}
+                    </td>
+                    <td class="px-6 py-4">${t.proName ? sanitizeHTML(t.proName) : '-'}</td>
                         <td class="px-6 py-4">
                             <span class="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium ${isIncome ? 'bg-green-100 text-green-800' : 'bg-red-100 text-red-800'}">
                                 ${isIncome ? 'Entrada' : 'Saída'}
@@ -2537,6 +2582,11 @@
                         </td>
                         <td class="px-6 py-4 text-right text-sm text-slate-500">
                             ${t.commission ? fmtMoney(t.commission) : '-'}
+                        </td>
+                        <td class="px-6 py-4 text-right">
+                            <button onclick="editTransaction('${t.id}')" class="text-slate-400 hover:text-blue-600 transition-colors">
+                                <i data-lucide="edit-2" class="w-4 h-4"></i>
+                            </button>
                         </td>
                     </tr>
                 `;
@@ -2572,8 +2622,8 @@
 
                 return `
                     <tr class="hover:bg-slate-50">
-                        <td class="px-6 py-4 font-medium text-slate-800">${client.name}</td>
-                        <td class="px-6 py-4 text-slate-600">${client.phone || '-'}</td>
+                        <td class="px-6 py-4 font-medium text-slate-800">${sanitizeHTML(client.name)}</td>
+                        <td class="px-6 py-4 text-slate-600">${client.phone ? sanitizeHTML(client.phone) : '-'}</td>
                         <td class="px-6 py-4 text-slate-500">${lastVisit ? fmtDate(lastVisit) : 'Nunca'}</td>
                         <td class="px-6 py-4 font-bold text-plena-blue">${fmtMoney(totalSpent)}</td>
                         <td class="px-6 py-4 text-center">
@@ -2653,7 +2703,27 @@
 
         function openExpenseModal() {
             document.querySelector('#expenseModal form').reset();
+            document.getElementById('exp-id').value = '';
             document.getElementById('exp-date').value = new Date().toISOString().split('T')[0];
+            document.querySelector('#expenseModal h3').textContent = 'Lançar Movimentação';
+            document.querySelector('#expenseModal button[type="submit"]').textContent = 'Salvar Lançamento';
+            document.getElementById('expenseModal').classList.remove('hidden');
+        }
+
+        function editTransaction(id) {
+            const transaction = db.transactions.find(t => t.id === id);
+            if (!transaction) return;
+
+            document.getElementById('exp-id').value = transaction.id;
+            document.getElementById('exp-type').value = transaction.type;
+            document.getElementById('exp-desc').value = transaction.description;
+            document.getElementById('exp-amount').value = transaction.amount;
+            document.getElementById('exp-date').value = transaction.date;
+            document.getElementById('exp-category').value = transaction.category || 'outros';
+
+            document.querySelector('#expenseModal h3').textContent = 'Editar Movimentação';
+            document.querySelector('#expenseModal button[type="submit"]').textContent = 'Atualizar Lançamento';
+            
             document.getElementById('expenseModal').classList.remove('hidden');
         }
 
@@ -2700,6 +2770,10 @@
             });
 
             document.getElementById('closingModal').classList.remove('hidden');
+        }
+
+        function openModal(modalId) {
+            document.getElementById(modalId).classList.remove('hidden');
         }
 
         function closeModal(modalId) {
@@ -2832,6 +2906,7 @@
         function submitExpense(e) {
             e.preventDefault();
 
+            const id = document.getElementById('exp-id').value;
             const type = document.getElementById('exp-type').value;
             const description = document.getElementById('exp-desc').value.trim();
             const amount = parseFloat(document.getElementById('exp-amount').value) || 0;
@@ -2844,7 +2919,7 @@
             }
 
             const transaction = {
-                id: getID(),
+                id: id || getID(),
                 type: type, // 'income' or 'expense'
                 description,
                 amount,
@@ -2852,7 +2927,15 @@
                 category
             };
 
-            db.transactions.push(transaction);
+            if (id) {
+                const index = db.transactions.findIndex(t => t.id === id);
+                if (index !== -1) {
+                    db.transactions[index] = { ...db.transactions[index], ...transaction };
+                }
+            } else {
+                db.transactions.push(transaction);
+            }
+
             save();
             closeModal('expenseModal');
 
@@ -2860,7 +2943,7 @@
                 renderFinance();
             }
 
-            const msg = type === 'income' ? 'Receita registrada!' : 'Despesa registrada!';
+            const msg = id ? 'Lançamento atualizado!' : (type === 'income' ? 'Receita registrada!' : 'Despesa registrada!');
             showNotification(msg, 'success');
         }
 
@@ -3371,6 +3454,8 @@
         // SETTINGS
         function saveBusinessInfo() {
             db.settings.businessName = document.getElementById('biz-name').value;
+            db.settings.businessOwner = document.getElementById('biz-owner').value;
+            db.settings.businessDoc = document.getElementById('biz-doc').value;
             db.settings.businessHours = document.getElementById('biz-hours').value;
             save();
             showNotification('Informações salvas com sucesso!', 'success');
@@ -3394,15 +3479,40 @@
             reader.onload = function (e) {
                 try {
                     const backup = JSON.parse(e.target.result);
-                    if (backup.appointments && backup.settings) {
-                        db = backup;
+                    
+                    // Validação rigorosa de tipos (Security Audit)
+                    const arrayKeys = ['appointments', 'team', 'services', 'transactions', 'clients'];
+                    const objectKeys = ['settings'];
+
+                    const isArraysValid = arrayKeys.every(key => Array.isArray(backup[key]));
+                    const isObjectsValid = objectKeys.every(key => typeof backup[key] === 'object' && !Array.isArray(backup[key]));
+                    
+                    if (isArraysValid && isObjectsValid) {
+                        // Sanitização profunda do backup antes de carregar
+                        // Evita que JSON malicioso injete scripts via innerHTML posteriormente
+                        const sanitizeObj = (obj) => {
+                            if (typeof obj === 'string') return sanitizeHTML(obj);
+                            if (Array.isArray(obj)) return obj.map(sanitizeObj);
+                            if (typeof obj === 'object' && obj !== null) {
+                                Object.keys(obj).forEach(key => {
+                                    obj[key] = sanitizeObj(obj[key]);
+                                });
+                                return obj;
+                            }
+                            return obj;
+                        };
+                        
+                        db = sanitizeObj(backup);
                         save();
                         alert('Backup restaurado com sucesso! A página será recarregada.');
                         location.reload();
                     } else {
-                        alert('Arquivo inválido.');
+                        alert('Arquivo de backup inválido ou corrompido.');
                     }
-                } catch (err) { alert('Erro ao ler arquivo.'); }
+                } catch (err) { 
+                    console.error(err);
+                    alert('Erro ao ler arquivo. Verifique se é um backup válido.'); 
+                }
             };
             reader.readAsText(file);
         }
@@ -3460,7 +3570,7 @@
                 <div class="flex items-center">
                     <i data-lucide="${type === 'success' ? 'check-circle' : type === 'error' ? 'alert-circle' : 'info'}" 
                        class="w-5 h-5 mr-2"></i>
-                    <span>${message}</span>
+                    <span>${sanitizeHTML(message)}</span>
                 </div>
             `;
 
@@ -3474,29 +3584,6 @@
                 setTimeout(() => notification.remove(), 300);
             }, 3000);
         }
-
-        // PWA INSTALL PROMPT
-        let deferredPrompt;
-
-        window.addEventListener('beforeinstallprompt', (e) => {
-            e.preventDefault();
-            deferredPrompt = e;
-
-            // Mostrar botão de instalação
-            const installButton = document.createElement('button');
-            installButton.className = 'fixed bottom-4 right-4 bg-plena-blue text-white px-4 py-2 rounded-lg shadow-lg z-40';
-            installButton.innerHTML = '<i data-lucide="download" class="w-4 h-4 inline mr-2"></i>Instalar App';
-            installButton.onclick = () => {
-                deferredPrompt.prompt();
-                deferredPrompt.userChoice.then(() => {
-                    deferredPrompt = null;
-                    installButton.remove();
-                });
-            };
-
-            document.body.appendChild(installButton);
-            lucide.createIcons();
-        });
 
         // OFFLINE SUPPORT
         window.addEventListener('online', () => {

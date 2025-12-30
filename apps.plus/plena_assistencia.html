@@ -42,6 +42,7 @@
 
     <!-- Lucide Icons -->
     <script src="https://unpkg.com/lucide@latest"></script>
+    <script src="../../Plena Aplicativos/assets/js/plena_downsell.js"></script>
 
     <style>
         /* CSS Padronizado */
@@ -373,6 +374,7 @@
             transition: width 0.5s ease;
         }
     </style>
+    <script src="../../Plena Aplicativos/assets/js/plena_demo.js"></script>
 </head>
 
 <body class="text-gray-800 antialiased">
@@ -3889,11 +3891,11 @@
             reader.onload = function (e) {
                 try {
                     const backup = JSON.parse(e.target.result);
-                    
+
                     // Validação básica de integridade
                     const requiredKeys = ['orders', 'clients', 'transactions', 'settings'];
                     const isValid = requiredKeys.every(key => Array.isArray(backup[key]) || typeof backup[key] === 'object');
-                    
+
                     if (isValid) {
                         if (confirm('Restaurar backup substituirá todos os dados atuais. Tem certeza?')) {
                             // Sanitização profunda do backup antes de carregar
@@ -3908,7 +3910,7 @@
                                 }
                                 return obj;
                             };
-                            
+
                             db = sanitizeObj(backup);
                             save();
                             alert('Backup restaurado com sucesso! A página será recarregada.');
@@ -3917,9 +3919,9 @@
                     } else {
                         alert('Arquivo de backup inválido ou corrompido.');
                     }
-                } catch (err) { 
+                } catch (err) {
                     console.error(err);
-                    alert('Erro ao ler arquivo. Verifique se é um backup válido.'); 
+                    alert('Erro ao ler arquivo. Verifique se é um backup válido.');
                 }
             };
             reader.readAsText(file);
@@ -4254,7 +4256,19 @@
         });
 
         // INICIALIZAR APLICATIVO
-        document.addEventListener('DOMContentLoaded', init);
+        document.addEventListener('DOMContentLoaded', () => {
+            init();
+
+            // Downsell Integration
+            if (window.PlenaDownsell) {
+                PlenaDownsell.init({
+                    appName: 'Plena Assistência',
+                    simpleName: 'OS Express',
+                    simpleLink: '../../Plena Aplicativos/apps/gestao/os/index.html',
+                    reason: 'Precisa apenas gerar ordens de serviço simples sem gestão financeira?'
+                });
+            }
+        });
     </script>
 </body>
 

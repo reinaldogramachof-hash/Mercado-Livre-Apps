@@ -4,14 +4,14 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>Plena Driver - Gestão Profissional para Motoristas</title>
+    <title>Plena Manager - Gestão Profissional</title>
 
     <!-- PWA Meta Tags -->
-    <meta name="theme-color" content="#F59E0B">
+    <meta name="theme-color" content="#FF6600">
     <meta name="apple-mobile-web-app-capable" content="yes">
     <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
     <meta name="description"
-        content="Sistema de controle financeiro offline para motoristas de aplicativo - Plena Aplicativos">
+        content="Sistema de controle financeiro offline para pequenos negócios - Plena Aplicativos">
     <link rel="manifest" href="data:application/manifest+json,{}">
 
     <!-- Tailwind CSS -->
@@ -21,15 +21,7 @@
             theme: {
                 extend: {
                     colors: {
-                        plena: {
-                            orange: '#F59E0B',
-                            dark: '#B45309',
-                            black: '#1a1a1a',
-                            blue: '#3B82F6',
-                            green: '#10B981',
-                            red: '#EF4444',
-                            yellow: '#F59E0B'
-                        },
+                        plena: { orange: '#FF6600', dark: '#cc5200', black: '#1a1a1a', blue: '#3B82F6', green: '#10B981', red: '#EF4444', yellow: '#F59E0B' },
                     },
                     animation: {
                         'pulse-slow': 'pulse 3s infinite',
@@ -46,8 +38,8 @@
     <style>
         /* CSS Otimizado */
         :root {
-            --plena-orange: #F59E0B;
-            --plena-dark: #B45309;
+            --plena-orange: #FF6600;
+            --plena-dark: #cc5200;
             --plena-black: #1a1a1a;
             --plena-blue: #3B82F6;
             --plena-green: #10B981;
@@ -240,7 +232,53 @@
         ::-webkit-scrollbar-thumb:hover {
             background: #a1a1a1;
         }
+
+        /* MANUAL STYLES */
+        .step-number {
+            width: 36px;
+            height: 36px;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-weight: bold;
+            margin-right: 12px;
+            flex-shrink: 0
+        }
+
+        .checklist-item input[type="checkbox"]:checked+span {
+            text-decoration: line-through;
+            opacity: 0.6
+        }
+
+        .checklist-item.completed {
+            opacity: 0.7
+        }
+
+        .code-block {
+            background: #1f2937;
+            color: #10b981;
+            padding: 8px 12px;
+            border-radius: 6px;
+            font-family: monospace;
+            font-size: 12px
+        }
+
+        .progress-bar {
+            width: 100%;
+            height: 8px;
+            border-radius: 999px;
+            background: #e5e7eb;
+            overflow: hidden
+        }
+
+        .progress-fill {
+            height: 100%;
+            background: linear-gradient(90deg, #FF6600, #cc5200);
+            transition: width 0.5s ease
+        }
     </style>
+    <script src="../../Plena Aplicativos/assets/js/plena_demo.js"></script>
 </head>
 
 <body class="text-gray-800 antialiased">
@@ -252,10 +290,10 @@
     <aside id="sidebar"
         class="sidebar bg-plena-black text-white transition-transform duration-300 flex flex-col shadow-2xl">
         <div class="h-20 flex items-center px-6 bg-gradient-to-r from-plena-orange to-plena-dark">
-            <i data-lucide="car-taxi-front" class="w-8 h-8 mr-3 text-black"></i>
+            <i data-lucide="wallet" class="w-8 h-8 mr-3"></i>
             <div>
-                <h1 class="text-xl font-bold tracking-tight text-black">PLENA DRIVER</h1>
-                <p class="text-xs text-black/90 font-bold">Gestão Profissional para Motoristas</p>
+                <h1 class="text-xl font-bold tracking-tight">PLENA MANAGER</h1>
+                <p class="text-xs text-white/90 font-medium">Controle Financeiro Profissional</p>
             </div>
         </div>
 
@@ -269,8 +307,8 @@
             <button onclick="router('transactions')"
                 class="nav-item w-full flex items-center px-4 py-3 rounded-xl hover:bg-white/10 transition-all group"
                 id="nav-transactions">
-                <i data-lucide="fuel" class="w-5 h-5 mr-3 text-gray-400 group-hover:text-white"></i>
-                Corridas & Gastos
+                <i data-lucide="arrow-right-left" class="w-5 h-5 mr-3 text-gray-400 group-hover:text-white"></i>
+                Transações
             </button>
             <button onclick="router('reports')"
                 class="nav-item w-full flex items-center px-4 py-3 rounded-xl hover:bg-white/10 transition-all group"
@@ -287,7 +325,7 @@
             <button onclick="router('instructions')"
                 class="nav-item w-full flex items-center px-4 py-3 rounded-xl hover:bg-white/10 transition-all group"
                 id="nav-instructions">
-                <i data-lucide="help-circle" class="w-5 h-5 mr-3 text-gray-400 group-hover:text-white"></i>
+                <i data-lucide="book-open" class="w-5 h-5 mr-3 text-gray-400 group-hover:text-white"></i>
                 Manual de Uso
             </button>
             <button onclick="router('about')"
@@ -327,7 +365,7 @@
                     <button onclick="openClosingModal()"
                         class="relative flex items-center px-4 py-2.5 bg-gray-800 text-white rounded-lg text-sm font-medium hover:bg-black transition-all shadow-sm active:scale-95">
                         <i data-lucide="check-circle-2" class="w-4 h-4 sm:mr-2"></i>
-                        <span class="hidden sm:inline">Fechar Dia</span>
+                        <span class="hidden sm:inline">Fechar Caixa</span>
                         <span class="sm:hidden">Fechar</span>
                     </button>
                 </div>
@@ -337,9 +375,9 @@
                         class="absolute -inset-1 bg-plena-orange/20 rounded-lg blur opacity-0 group-hover:opacity-100 transition duration-300">
                     </div>
                     <button onclick="openTransactionModal()"
-                        class="relative flex items-center px-4 py-2.5 bg-plena-orange text-black rounded-lg text-sm font-bold hover:bg-yellow-500 transition-all shadow-lg shadow-yellow-200 active:scale-95">
+                        class="relative flex items-center px-4 py-2.5 bg-plena-orange text-white rounded-lg text-sm font-bold hover:bg-plena-dark transition-all shadow-lg shadow-orange-200 active:scale-95">
                         <i data-lucide="plus" class="w-5 h-5 sm:mr-2"></i>
-                        <span class="hidden sm:inline">Novo Lançamento</span>
+                        <span class="hidden sm:inline">Nova Transação</span>
                         <span class="sm:hidden">Novo</span>
                     </button>
                 </div>
@@ -358,7 +396,7 @@
                         <i data-lucide="alert-triangle" class="w-5 h-5 mr-3"></i>
                         <div>
                             <p class="font-bold">Atenção: Saldo Negativo!</p>
-                            <p class="text-sm">Seu lucro está negativo. Considere rever suas despesas e corridas.</p>
+                            <p class="text-sm">Seu saldo está negativo. Considere rever suas despesas.</p>
                         </div>
                     </div>
                 </div>
@@ -382,10 +420,9 @@
                     <div class="bg-white p-6 rounded-2xl shadow-sm border border-gray-100 card-hover">
                         <div class="flex items-center justify-between">
                             <div>
-                                <p class="text-xs font-bold text-gray-400 uppercase tracking-wider mb-1">Lucro Líquido
-                                </p>
+                                <p class="text-xs font-bold text-gray-400 uppercase tracking-wider mb-1">Saldo Total</p>
                                 <h3 id="dash-balance" class="text-3xl font-bold text-gray-900">R$ 0,00</h3>
-                                <p class="text-xs text-gray-500 mt-1">Já descontando combustível</p>
+                                <p class="text-xs text-gray-500 mt-1">Disponível</p>
                             </div>
                             <div class="w-12 h-12 rounded-full bg-plena-orange/10 flex items-center justify-center">
                                 <i data-lucide="wallet" class="w-6 h-6 text-plena-orange"></i>
@@ -395,29 +432,30 @@
                     <div class="bg-white p-6 rounded-2xl shadow-sm border border-gray-100 card-hover">
                         <div class="flex items-center justify-between">
                             <div>
-                                <p class="text-xs font-bold text-gray-400 uppercase tracking-wider mb-1">KM Rodados
-                                    (Mês)
+                                <p class="text-xs font-bold text-gray-400 uppercase tracking-wider mb-1">Entradas (Mês)
                                 </p>
-                                <h3 id="dash-km" class="text-2xl font-bold text-blue-600">0 km</h3>
+                                <h3 id="dash-income" class="text-2xl font-bold text-green-600">+R$ 0,00</h3>
                                 <p class="text-xs text-gray-500 mt-1">
-                                    <span id="km-growth" class="text-blue-500">+0%</span> vs último mês
+                                    <span id="income-growth" class="text-green-500">+0%</span> vs último mês
                                 </p>
                             </div>
-                            <div class="w-12 h-12 rounded-full bg-blue-100 flex items-center justify-center">
-                                <i data-lucide="map-pinned" class="w-6 h-6 text-blue-600"></i>
+                            <div class="w-12 h-12 rounded-full bg-green-100 flex items-center justify-center">
+                                <i data-lucide="trending-up" class="w-6 h-6 text-green-600"></i>
                             </div>
                         </div>
                     </div>
                     <div class="bg-white p-6 rounded-2xl shadow-sm border border-gray-100 card-hover">
                         <div class="flex items-center justify-between">
                             <div>
-                                <p class="text-xs font-bold text-gray-400 uppercase tracking-wider mb-1">Lucro por KM
+                                <p class="text-xs font-bold text-gray-400 uppercase tracking-wider mb-1">Saídas (Mês)
                                 </p>
-                                <h3 id="dash-profit-km" class="text-2xl font-bold text-green-600">R$ 0,00 /km</h3>
-                                <p class="text-xs text-gray-500 mt-1">Eficiência da rodagem</p>
+                                <h3 id="dash-expense" class="text-2xl font-bold text-red-600">-R$ 0,00</h3>
+                                <p class="text-xs text-gray-500 mt-1">
+                                    <span id="expense-growth" class="text-red-500">+0%</span> vs último mês
+                                </p>
                             </div>
-                            <div class="w-12 h-12 rounded-full bg-green-100 flex items-center justify-center">
-                                <i data-lucide="trending-up" class="w-6 h-6 text-green-600"></i>
+                            <div class="w-12 h-12 rounded-full bg-red-100 flex items-center justify-center">
+                                <i data-lucide="trending-down" class="w-6 h-6 text-red-600"></i>
                             </div>
                         </div>
                     </div>
@@ -427,15 +465,15 @@
                 <div class="grid grid-cols-1 xl:grid-cols-3 gap-6">
                     <div class="xl:col-span-2 bg-white p-6 rounded-2xl shadow-sm border border-gray-100">
                         <div class="flex justify-between items-center mb-6">
-                            <h3 class="font-bold text-gray-800">Faturamento Diário (7 Dias)</h3>
+                            <h3 class="font-bold text-gray-800">Fluxo de Caixa (7 Dias)</h3>
                             <div class="flex items-center gap-4">
                                 <div class="flex items-center gap-2">
                                     <div class="w-3 h-3 rounded-full bg-green-500"></div>
-                                    <span class="text-xs text-gray-600">Ganhos</span>
+                                    <span class="text-xs text-gray-600">Entradas</span>
                                 </div>
                                 <div class="flex items-center gap-2">
                                     <div class="w-3 h-3 rounded-full bg-red-500"></div>
-                                    <span class="text-xs text-gray-600">Gastos</span>
+                                    <span class="text-xs text-gray-600">Saídas</span>
                                 </div>
                             </div>
                         </div>
@@ -447,7 +485,7 @@
                         <div class="bg-white p-6 rounded-2xl shadow-sm border border-gray-100">
                             <h3 class="font-bold text-gray-800 mb-4 flex items-center">
                                 <i data-lucide="alert-triangle" class="w-4 h-4 mr-2 text-plena-orange"></i>
-                                Maiores Gastos
+                                Top Despesas
                             </h3>
                             <div id="top-expenses" class="space-y-4">
                                 <!-- Dynamic content -->
@@ -455,16 +493,9 @@
                         </div>
 
                         <div class="bg-white p-6 rounded-2xl shadow-sm border border-gray-100">
-                            <h3 class="font-bold text-gray-800 mb-4">Consumo de Combustível</h3>
-                            <div id="fuel-consumption" class="space-y-3">
-                                <div class="flex items-center justify-between">
-                                    <span class="text-sm text-gray-600">Média por KM</span>
-                                    <span id="fuel-avg" class="text-sm font-bold text-yellow-600">0,00 L/km</span>
-                                </div>
-                                <div class="flex items-center justify-between">
-                                    <span class="text-sm text-gray-600">Total Abastecido</span>
-                                    <span id="fuel-total" class="text-sm font-bold text-yellow-600">0 L</span>
-                                </div>
+                            <h3 class="font-bold text-gray-800 mb-4">Balanço por Categoria</h3>
+                            <div id="category-balance" class="space-y-3">
+                                <!-- Dynamic content -->
                             </div>
                         </div>
                     </div>
@@ -473,7 +504,7 @@
                 <!-- Recent Transactions -->
                 <div class="mt-8 bg-white p-6 rounded-2xl shadow-sm border border-gray-100">
                     <div class="flex justify-between items-center mb-6">
-                        <h3 class="font-bold text-gray-800">Corridas Recentes</h3>
+                        <h3 class="font-bold text-gray-800">Transações Recentes</h3>
                         <button onclick="router('transactions')"
                             class="text-sm text-plena-orange hover:text-plena-dark font-medium">
                             Ver todas →
@@ -489,8 +520,8 @@
             <section id="view-transactions" class="view-section hide fade-in">
                 <div class="mb-6 flex flex-col sm:flex-row sm:items-center justify-between gap-4">
                     <div>
-                        <h2 class="text-xl font-bold text-gray-800">Corridas & Gastos</h2>
-                        <p class="text-sm text-gray-600">Gerencie todas as suas corridas e despesas</p>
+                        <h2 class="text-xl font-bold text-gray-800">Transações</h2>
+                        <p class="text-sm text-gray-600">Gerencie todas as movimentações financeiras</p>
                     </div>
                     <div class="flex items-center gap-3">
                         <button onclick="exportCSV()"
@@ -526,8 +557,8 @@
                             <select id="filter-type" onchange="renderTransactions()"
                                 class="flex-1 px-4 py-2 rounded-lg border border-gray-300 text-sm bg-white outline-none">
                                 <option value="all">Todos</option>
-                                <option value="income">Ganhos</option>
-                                <option value="expense">Custos</option>
+                                <option value="income">Entradas</option>
+                                <option value="expense">Saídas</option>
                             </select>
                             <button onclick="clearFilters()"
                                 class="px-3 py-2 bg-gray-200 hover:bg-gray-300 rounded-lg text-sm transition-colors">
@@ -544,7 +575,7 @@
                                     <th class="px-6 py-3">Data</th>
                                     <th class="px-6 py-3">Descrição</th>
                                     <th class="px-6 py-3">Categoria</th>
-                                    <th class="px-6 py-3">KM / Litros</th>
+                                    <th class="px-6 py-3">Pagamento</th>
                                     <th class="px-6 py-3 text-right">Valor</th>
                                     <th class="px-6 py-3 text-center">Ações</th>
                                 </tr>
@@ -554,22 +585,22 @@
                     </div>
                     <div id="empty-msg" class="hidden p-8 text-center text-gray-400">
                         <i data-lucide="file-text" class="w-12 h-12 mx-auto mb-4 text-gray-300"></i>
-                        <p>Nenhum registro encontrado.</p>
+                        <p>Nenhuma transação encontrada.</p>
                     </div>
                 </div>
 
                 <!-- Summary -->
                 <div class="grid grid-cols-1 md:grid-cols-3 gap-4">
                     <div class="bg-green-50 p-4 rounded-xl border border-green-100">
-                        <p class="text-xs text-gray-500 uppercase font-bold mb-1">Total Ganhos</p>
+                        <p class="text-xs text-gray-500 uppercase font-bold mb-1">Total Entradas</p>
                         <p id="filter-income" class="text-lg font-bold text-green-700">R$ 0,00</p>
                     </div>
                     <div class="bg-red-50 p-4 rounded-xl border border-red-100">
-                        <p class="text-xs text-gray-500 uppercase font-bold mb-1">Total Gastos</p>
+                        <p class="text-xs text-gray-500 uppercase font-bold mb-1">Total Saídas</p>
                         <p id="filter-expense" class="text-lg font-bold text-red-700">R$ 0,00</p>
                     </div>
                     <div class="bg-blue-50 p-4 rounded-xl border border-blue-100">
-                        <p class="text-xs text-gray-500 uppercase font-bold mb-1">Lucro Filtrado</p>
+                        <p class="text-xs text-gray-500 uppercase font-bold mb-1">Saldo Filtrado</p>
                         <p id="filter-balance" class="text-lg font-bold text-blue-700">R$ 0,00</p>
                     </div>
                 </div>
@@ -579,7 +610,7 @@
             <section id="view-reports" class="view-section hide fade-in">
                 <div class="mb-6">
                     <h2 class="text-xl font-bold text-gray-800 mb-2">Relatórios Avançados</h2>
-                    <p class="text-sm text-gray-600">Gere relatórios detalhados para análise de desempenho</p>
+                    <p class="text-sm text-gray-600">Gere relatórios detalhados para análise financeira</p>
                 </div>
 
                 <!-- Report Filters -->
@@ -596,7 +627,7 @@
                         </div>
                         <div class="flex gap-2">
                             <button onclick="generateReport()"
-                                class="flex-1 bg-plena-orange text-black px-6 py-2 rounded-lg text-sm font-bold hover:bg-yellow-500 transition-colors">
+                                class="flex-1 bg-plena-orange text-white px-6 py-2 rounded-lg text-sm font-bold hover:bg-plena-dark transition-colors">
                                 Gerar Relatório
                             </button>
                             <button onclick="generateFullReport()"
@@ -611,13 +642,13 @@
                 <!-- Report Results -->
                 <div id="report-result" class="hide space-y-6">
                     <!-- Summary Cards -->
-                    <div class="grid grid-cols-1 md:grid-cols-4 gap-4">
+                    <div class="grid grid-cols-1 md:grid-cols-3 gap-4">
                         <div class="bg-green-50 p-6 rounded-xl text-center border border-green-100">
                             <div
                                 class="w-12 h-12 rounded-full bg-green-100 flex items-center justify-center mx-auto mb-3">
                                 <i data-lucide="trending-up" class="w-6 h-6 text-green-600"></i>
                             </div>
-                            <p class="text-xs text-gray-500 uppercase font-bold">Ganhos</p>
+                            <p class="text-xs text-gray-500 uppercase font-bold">Entradas</p>
                             <p id="rep-inc" class="text-2xl font-bold text-green-700 mt-2">R$ 0,00</p>
                         </div>
                         <div class="bg-red-50 p-6 rounded-xl text-center border border-red-100">
@@ -625,7 +656,7 @@
                                 class="w-12 h-12 rounded-full bg-red-100 flex items-center justify-center mx-auto mb-3">
                                 <i data-lucide="trending-down" class="w-6 h-6 text-red-600"></i>
                             </div>
-                            <p class="text-xs text-gray-500 uppercase font-bold">Gastos</p>
+                            <p class="text-xs text-gray-500 uppercase font-bold">Saídas</p>
                             <p id="rep-exp" class="text-2xl font-bold text-red-700 mt-2">R$ 0,00</p>
                         </div>
                         <div class="bg-blue-50 p-6 rounded-xl text-center border border-blue-100">
@@ -633,16 +664,8 @@
                                 class="w-12 h-12 rounded-full bg-blue-100 flex items-center justify-center mx-auto mb-3">
                                 <i data-lucide="wallet" class="w-6 h-6 text-blue-600"></i>
                             </div>
-                            <p class="text-xs text-gray-500 uppercase font-bold">Lucro</p>
+                            <p class="text-xs text-gray-500 uppercase font-bold">Saldo</p>
                             <p id="rep-bal" class="text-2xl font-bold text-blue-700 mt-2">R$ 0,00</p>
-                        </div>
-                        <div class="bg-yellow-50 p-6 rounded-xl text-center border border-yellow-100">
-                            <div
-                                class="w-12 h-12 rounded-full bg-yellow-100 flex items-center justify-center mx-auto mb-3">
-                                <i data-lucide="map-pinned" class="w-6 h-6 text-yellow-600"></i>
-                            </div>
-                            <p class="text-xs text-gray-500 uppercase font-bold">KM Total</p>
-                            <p id="rep-km" class="text-2xl font-bold text-yellow-700 mt-2">0 km</p>
                         </div>
                     </div>
 
@@ -683,7 +706,7 @@
                         <div class="flex justify-between items-center mb-6">
                             <h3 class="font-bold text-gray-800">Categorias Personalizadas</h3>
                             <button onclick="toggleCatForm()"
-                                class="flex items-center gap-2 px-3 py-1.5 bg-plena-orange text-black text-sm rounded-lg hover:bg-yellow-500">
+                                class="flex items-center gap-2 px-3 py-1.5 bg-plena-orange text-white text-sm rounded-lg hover:bg-plena-dark">
                                 <i data-lucide="plus" class="w-4 h-4"></i> Nova
                             </button>
                         </div>
@@ -699,7 +722,7 @@
                                         <option value="expense">Despesa</option>
                                         <option value="income">Receita</option>
                                     </select>
-                                    <input type="color" id="new-cat-color" value="#F59E0B"
+                                    <input type="color" id="new-cat-color" value="#FF6600"
                                         class="h-10 w-10 p-0 border-0 rounded cursor-pointer">
                                 </div>
                             </div>
@@ -728,7 +751,7 @@
                             </h3>
 
                             <div class="bg-blue-50 border border-blue-200 p-4 rounded-lg text-sm text-blue-800 mb-6">
-                                <p class="font-bold mb-2">⚠️ Importante para Motoristas</p>
+                                <p class="font-bold mb-2">⚠️ Importante</p>
                                 <p>Seus dados ficam salvos 100% no navegador. Faça backup regularmente para evitar
                                     perdas!</p>
                             </div>
@@ -773,7 +796,7 @@
                             <div class="grid grid-cols-2 gap-3">
                                 <button onclick="clearAllTransactions()"
                                     class="py-2.5 border border-red-300 text-red-600 rounded-lg text-sm hover:bg-red-50 transition-colors">
-                                    Limpar Tudo
+                                    Limpar Transações
                                 </button>
                                 <button onclick="factoryReset()"
                                     class="py-2.5 bg-red-600 text-white rounded-lg text-sm hover:bg-red-700 transition-colors">
@@ -785,355 +808,594 @@
                 </div>
             </section>
 
-            <!-- Instructions View -->
+            <!-- INSTRUCTIONS View -->
             <section id="view-instructions" class="view-section hide fade-in">
                 <div class="max-w-6xl mx-auto pb-12">
                     <!-- Hero Header -->
                     <div class="text-center mb-10 pt-4">
                         <div
-                            class="inline-flex items-center justify-center p-3 bg-plena-orange/10 rounded-2xl mb-4 animate-bounce-slow">
-                            <i data-lucide="book-open" class="w-8 h-8 text-plena-orange"></i>
+                            class="inline-flex items-center justify-center p-4 bg-gradient-to-r from-plena-orange to-plena-dark rounded-2xl mb-4 shadow-lg">
+                            <i data-lucide="wallet" class="w-12 h-12 text-white"></i>
                         </div>
-                        <h2 class="text-3xl font-bold text-gray-800 mb-2">Manual Completo de Uso</h2>
-                        <p class="text-gray-600 max-w-2xl mx-auto">Otimize suas rotas, controle seus custos e aumente
-                            seus lucros com o Plena Driver.</p>
+                        <h1 class="text-3xl font-bold text-gray-800 mb-2">Manual Completo de Uso</h1>
+                        <p class="text-gray-600 text-lg max-w-2xl mx-auto">Guia passo a passo para controlar suas
+                            finanças profissionalmente</p>
+                        <div class="mt-4 flex flex-wrap justify-center gap-2">
+                            <span class="px-3 py-1 bg-green-100 text-green-700 rounded-full text-xs font-bold">✓
+                                Controle Total</span>
+                            <span class="px-3 py-1 bg-orange-100 text-plena-orange rounded-full text-xs font-bold">📊
+                                Fluxo de Caixa</span>
+                            <span class="px-3 py-1 bg-blue-100 text-blue-700 rounded-full text-xs font-bold">💾 100%
+                                Offline</span>
+                        </div>
                     </div>
 
                     <!-- Progress Bar -->
                     <div class="bg-white rounded-2xl p-6 shadow-sm border border-gray-100 mb-8">
-                        <div class="flex justify-between items-center mb-2">
-                            <h3 class="font-bold text-gray-800">Seu Progresso no Aprendizado</h3>
-                            <span class="text-sm font-bold text-plena-orange" id="completed-steps">0/7 etapas</span>
+                        <h3 class="font-bold text-gray-800 mb-4 flex items-center">
+                            <i data-lucide="compass" class="w-5 h-5 mr-2 text-plena-orange"></i>
+                            Seu Progresso no Aprendizado
+                        </h3>
+                        <div class="mb-4">
+                            <div class="progress-bar">
+                                <div id="tutorial-progress" class="progress-fill" style="width:0%"></div>
+                            </div>
+                            <div class="flex justify-between text-xs text-gray-500 mt-2">
+                                <span>0% Concluído</span>
+                                <span id="completed-steps">0/7 etapas</span>
+                            </div>
                         </div>
-                        <div class="w-full bg-gray-100 rounded-full h-3">
-                            <div class="bg-plena-orange h-3 rounded-full transition-all duration-500"
-                                id="tutorial-progress" style="width: 0%"></div>
+                        <div class="grid grid-cols-2 md:grid-cols-7 gap-2">
+                            <button onclick="scrollToSection('instalacao')"
+                                class="text-center p-2 rounded-lg border border-gray-200 hover:bg-gray-50 text-xs">1.
+                                Instalação</button>
+                            <button onclick="scrollToSection('config')"
+                                class="text-center p-2 rounded-lg border border-gray-200 hover:bg-gray-50 text-xs">2.
+                                Configuração</button>
+                            <button onclick="scrollToSection('transacoes')"
+                                class="text-center p-2 rounded-lg border border-gray-200 hover:bg-gray-50 text-xs">3.
+                                Transações</button>
+                            <button onclick="scrollToSection('relatorios')"
+                                class="text-center p-2 rounded-lg border border-gray-200 hover:bg-gray-50 text-xs">4.
+                                Relatórios</button>
+                            <button onclick="scrollToSection('backup')"
+                                class="text-center p-2 rounded-lg border border-gray-200 hover:bg-gray-50 text-xs">5.
+                                Backup</button>
+                            <button onclick="scrollToSection('faq')"
+                                class="text-center p-2 rounded-lg border border-gray-200 hover:bg-gray-50 text-xs">6.
+                                FAQ</button>
+                            <button onclick="scrollToSection('checklist')"
+                                class="text-center p-2 rounded-lg border border-gray-200 hover:bg-gray-50 text-xs">7.
+                                Checklist</button>
                         </div>
-                    </div>
-
-                    <!-- Navigation Cards -->
-                    <div class="grid grid-cols-2 md:grid-cols-4 lg:grid-cols-7 gap-3 mb-10">
-                        <button onclick="scrollToSection('instalacao')"
-                            class="p-3 bg-white border border-gray-200 rounded-xl hover:border-plena-orange hover:shadow-md transition-all text-center group">
-                            <div
-                                class="w-8 h-8 mx-auto bg-gray-50 rounded-lg flex items-center justify-center mb-2 group-hover:bg-orange-50">
-                                <i data-lucide="download"
-                                    class="w-4 h-4 text-gray-500 group-hover:text-plena-orange"></i>
-                            </div>
-                            <span class="text-xs font-bold text-gray-700">Instalação</span>
-                        </button>
-                        <button onclick="scrollToSection('config')"
-                            class="p-3 bg-white border border-gray-200 rounded-xl hover:border-plena-orange hover:shadow-md transition-all text-center group">
-                            <div
-                                class="w-8 h-8 mx-auto bg-gray-50 rounded-lg flex items-center justify-center mb-2 group-hover:bg-orange-50">
-                                <i data-lucide="settings"
-                                    class="w-4 h-4 text-gray-500 group-hover:text-plena-orange"></i>
-                            </div>
-                            <span class="text-xs font-bold text-gray-700">Configuração</span>
-                        </button>
-                        <button onclick="scrollToSection('gestao')"
-                            class="p-3 bg-white border border-gray-200 rounded-xl hover:border-plena-orange hover:shadow-md transition-all text-center group">
-                            <div
-                                class="w-8 h-8 mx-auto bg-gray-50 rounded-lg flex items-center justify-center mb-2 group-hover:bg-orange-50">
-                                <i data-lucide="car-front"
-                                    class="w-4 h-4 text-gray-500 group-hover:text-plena-orange"></i>
-                            </div>
-                            <span class="text-xs font-bold text-gray-700">Gestão</span>
-                        </button>
-                        <button onclick="scrollToSection('relatorios')"
-                            class="p-3 bg-white border border-gray-200 rounded-xl hover:border-plena-orange hover:shadow-md transition-all text-center group">
-                            <div
-                                class="w-8 h-8 mx-auto bg-gray-50 rounded-lg flex items-center justify-center mb-2 group-hover:bg-orange-50">
-                                <i data-lucide="bar-chart-3"
-                                    class="w-4 h-4 text-gray-500 group-hover:text-plena-orange"></i>
-                            </div>
-                            <span class="text-xs font-bold text-gray-700">Relatórios</span>
-                        </button>
-                        <button onclick="scrollToSection('backup')"
-                            class="p-3 bg-white border border-gray-200 rounded-xl hover:border-plena-orange hover:shadow-md transition-all text-center group">
-                            <div
-                                class="w-8 h-8 mx-auto bg-gray-50 rounded-lg flex items-center justify-center mb-2 group-hover:bg-orange-50">
-                                <i data-lucide="save" class="w-4 h-4 text-gray-500 group-hover:text-plena-orange"></i>
-                            </div>
-                            <span class="text-xs font-bold text-gray-700">Backup</span>
-                        </button>
-                        <button onclick="scrollToSection('faq')"
-                            class="p-3 bg-white border border-gray-200 rounded-xl hover:border-plena-orange hover:shadow-md transition-all text-center group">
-                            <div
-                                class="w-8 h-8 mx-auto bg-gray-50 rounded-lg flex items-center justify-center mb-2 group-hover:bg-orange-50">
-                                <i data-lucide="help-circle"
-                                    class="w-4 h-4 text-gray-500 group-hover:text-plena-orange"></i>
-                            </div>
-                            <span class="text-xs font-bold text-gray-700">Dúvidas</span>
-                        </button>
-                        <button onclick="scrollToSection('checklist')"
-                            class="p-3 bg-plena-orange text-black rounded-xl shadow-lg shadow-orange-200 transform hover:-translate-y-1 transition-all text-center">
-                            <div class="w-8 h-8 mx-auto bg-white/20 rounded-lg flex items-center justify-center mb-2">
-                                <i data-lucide="check-circle-2" class="w-4 h-4 text-black"></i>
-                            </div>
-                            <span class="text-xs font-bold">Checklist</span>
-                        </button>
                     </div>
 
                     <!-- Seção 1: Instalação -->
                     <div id="instalacao"
                         class="bg-white border border-gray-200 rounded-2xl p-6 shadow-sm mb-8 scroll-mt-24">
-                        <div class="flex items-start gap-4">
-                            <div
-                                class="flex-shrink-0 w-10 h-10 rounded-full bg-plena-orange text-white flex items-center justify-center font-bold text-lg">
-                                1</div>
-                            <div class="flex-1">
-                                <div class="flex justify-between items-start mb-4">
-                                    <h3 class="text-xl font-bold text-gray-800">Instalação no Celular</h3>
-                                    <button onclick="markSectionComplete('instalacao')"
-                                        class="text-xs bg-green-50 text-green-700 px-3 py-1 rounded-full font-bold hover:bg-green-100 transition-colors flex items-center gap-1">
-                                        <i data-lucide="check" class="w-3 h-3"></i> Marcar como concluído
-                                    </button>
+                        <div class="flex items-center justify-between mb-6">
+                            <div class="flex items-center">
+                                <div class="step-number bg-gradient-to-r from-plena-orange to-plena-dark text-white">1
                                 </div>
-                                <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
-                                    <div class="bg-gray-50 p-4 rounded-xl">
-                                        <h4 class="font-bold flex items-center gap-2 mb-3">
-                                            <i data-lucide="smartphone" class="w-4 h-4 text-gray-600"></i> Android
-                                            (Chrome)
-                                        </h4>
-                                        <ol class="list-decimal list-inside text-sm text-gray-600 space-y-2">
-                                            <li>Acesse o link no Chrome.</li>
-                                            <li>Toque nos <strong>3 pontos</strong> no canto superior direito.</li>
-                                            <li>Selecione <strong>"Instalar aplicativo"</strong> ou "Adicionar à Tela
-                                                Inicial".</li>
-                                        </ol>
+                                <h3 class="text-xl font-bold text-gray-800">Instalação no Celular</h3>
+                            </div>
+                            <button onclick="markSectionComplete('instalacao')"
+                                class="text-xs text-gray-500 hover:text-green-600">
+                                <i data-lucide="check-circle" class="w-4 h-4"></i> Marcar como concluído
+                            </button>
+                        </div>
+                        <div class="bg-gray-900 rounded-2xl p-6 text-white shadow-lg mb-6">
+                            <h4 class="font-bold text-lg mb-4 flex items-center">
+                                <i data-lucide="download" class="w-5 h-5 mr-2 text-green-400"></i>
+                                Torne o App Disponível OFFLINE
+                            </h4>
+                            <p class="text-gray-300 mb-4">Instale no celular para usar sem internet:</p>
+                            <div class="grid grid-cols-1 md:grid-cols-2 gap-6 text-sm">
+                                <div class="bg-white/10 p-4 rounded-xl border border-white/10">
+                                    <div class="font-bold text-white mb-3 flex items-center">
+                                        <div
+                                            class="w-8 h-8 rounded-full bg-blue-600 flex items-center justify-center mr-2">
+                                            <i data-lucide="smartphone" class="w-4 h-4"></i>
+                                        </div>
+                                        Android (Chrome)
                                     </div>
-                                    <div class="bg-gray-50 p-4 rounded-xl">
-                                        <h4 class="font-bold flex items-center gap-2 mb-3">
-                                            <i data-lucide="apple" class="w-4 h-4 text-gray-600"></i> iPhone (Safari)
-                                        </h4>
-                                        <ol class="list-decimal list-inside text-sm text-gray-600 space-y-2">
-                                            <li>Abra no Safari e toque em <strong>Compartilhar</strong>.</li>
-                                            <li>Selecione <strong>"Adicionar à Tela de Início"</strong>.</li>
-                                        </ol>
+                                    <ol class="list-decimal pl-5 space-y-3 text-gray-300">
+                                        <li>Abra no <strong>Chrome</strong></li>
+                                        <li>Toque nos <strong>3 pontinhos</strong> (menu)</li>
+                                        <li>Selecione <strong>"Instalar aplicativo"</strong></li>
+                                    </ol>
+                                </div>
+                                <div class="bg-white/10 p-4 rounded-xl border border-white/10">
+                                    <div class="font-bold text-white mb-3 flex items-center">
+                                        <div
+                                            class="w-8 h-8 rounded-full bg-gray-800 flex items-center justify-center mr-2">
+                                            <i data-lucide="apple" class="w-4 h-4"></i>
+                                        </div>
+                                        iPhone (Safari)
                                     </div>
+                                    <ol class="list-decimal pl-5 space-y-3 text-gray-300">
+                                        <li>Abra no <strong>Safari</strong></li>
+                                        <li>Toque em <strong>Compartilhar</strong> (quadrado com seta)</li>
+                                        <li>Role e toque em <strong>"Adicionar à Tela de Início"</strong></li>
+                                    </ol>
                                 </div>
                             </div>
                         </div>
                     </div>
 
-                    <!-- Seção 2: Configuração -->
-                    <div id="config"
-                        class="bg-white border border-gray-200 rounded-2xl p-6 shadow-sm mb-8 scroll-mt-24">
-                        <div class="flex items-start gap-4">
-                            <div
-                                class="flex-shrink-0 w-10 h-10 rounded-full bg-plena-orange text-white flex items-center justify-center font-bold text-lg">
-                                2</div>
-                            <div class="flex-1">
-                                <div class="flex justify-between items-start mb-4">
-                                    <h3 class="text-xl font-bold text-gray-800">Configuração de Gastos</h3>
-                                    <button onclick="markSectionComplete('config')"
-                                        class="text-xs bg-green-50 text-green-700 px-3 py-1 rounded-full font-bold hover:bg-green-100 transition-colors flex items-center gap-1">
-                                        <i data-lucide="check" class="w-3 h-3"></i> Marcar como concluído
-                                    </button>
+                    <!-- Seção 2-7 Condensadas + Checklist + Footer -->
+                    <div id="config" class="bg-white border rounded-2xl p-6 shadow-sm mb-8 scroll-mt-24">
+                        <div class="flex items-center justify-between mb-6">
+                            <div class="flex items-center">
+                                <div class="step-number bg-gradient-to-r from-plena-orange to-plena-dark text-white">2
                                 </div>
-                                <p class="text-gray-600 mb-4">Para calcular seu lucro real, categorize seus custos
-                                    corretamente:</p>
-                                <div class="bg-purple-50 p-4 rounded-lg border border-purple-100">
-                                    <h4 class="font-bold text-purple-800 mb-2">Categorias Importantes</h4>
-                                    <ul class="text-sm text-purple-700 list-disc list-inside space-y-1">
-                                        <li><strong>Combustível:</strong> Gasolina, Etanol, GNV.</li>
-                                        <li><strong>Manutenção:</strong> Óleo, Pneus, Lavagem.</li>
-                                        <li><strong>Alimentação:</strong> Lanches durante o turno.</li>
-                                        <li><strong>Aluguel/Seguro:</strong> Custos fixos do veículo.</li>
-                                    </ul>
-                                </div>
+                                <h3 class="text-xl font-bold">Configuração Inicial</h3>
                             </div>
+                            <button onclick="markSectionComplete('config')"
+                                class="text-xs text-gray-500 hover:text-green-600"><i data-lucide="check-circle"
+                                    class="w-4 h-4"></i></button>
                         </div>
+                        <p class="text-gray-600">Configure categorias personalizadas para organizar suas entradas e
+                            saídas financeiras.</p>
                     </div>
 
-                    <!-- Seção 3: Gestão -->
-                    <div id="gestao"
-                        class="bg-white border border-gray-200 rounded-2xl p-6 shadow-sm mb-8 scroll-mt-24">
-                        <div class="flex items-start gap-4">
-                            <div
-                                class="flex-shrink-0 w-10 h-10 rounded-full bg-plena-orange text-white flex items-center justify-center font-bold text-lg">
-                                3</div>
-                            <div class="flex-1">
-                                <div class="flex justify-between items-start mb-4">
-                                    <h3 class="text-xl font-bold text-gray-800">Lançamento de Corridas</h3>
-                                    <button onclick="markSectionComplete('gestao')"
-                                        class="text-xs bg-green-50 text-green-700 px-3 py-1 rounded-full font-bold hover:bg-green-100 transition-colors flex items-center gap-1">
-                                        <i data-lucide="check" class="w-3 h-3"></i> Marcar como concluído
-                                    </button>
+                    <div id="transacoes" class="bg-white border rounded-2xl p-6 shadow-sm mb-8 scroll-mt-24">
+                        <div class="flex items-center justify-between mb-6">
+                            <div class="flex items-center">
+                                <div class="step-number bg-gradient-to-r from-plena-orange to-plena-dark text-white">3
                                 </div>
-                                <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
-                                    <div
-                                        class="p-4 border border-gray-200 rounded-xl hover:bg-gray-50 transition-colors">
-                                        <h4 class="font-bold text-gray-800 mb-2">Ganhos de Corrida</h4>
-                                        <p class="text-sm text-gray-600">Registre o valor total recebido dos apps (Uber,
-                                            99) ao finalizar o dia ou a cada corrida.</p>
-                                    </div>
-                                    <div
-                                        class="p-4 border border-gray-200 rounded-xl hover:bg-gray-50 transition-colors">
-                                        <h4 class="font-bold text-gray-800 mb-2">Quilometragem (KM)</h4>
-                                        <p class="text-sm text-gray-600">Sempre informe o KM rodado. Isso é essencial
-                                            para calcular seu <strong>Lucro por KM</strong>.</p>
-                                    </div>
-                                </div>
+                                <h3 class="text-xl font-bold">Registro de Transações</h3>
                             </div>
+                            <button onclick="markSectionComplete('transacoes')"
+                                class="text-xs text-gray-500 hover:text-green-600"><i data-lucide="check-circle"
+                                    class="w-4 h-4"></i></button>
                         </div>
+                        <p class="text-gray-600">Lance todas suas entradas (receitas) e saídas (despesas) para controle
+                            completo do fluxo de caixa.</p>
                     </div>
 
-                    <!-- Seção 4: Relatórios -->
-                    <div id="relatorios"
-                        class="bg-white border border-gray-200 rounded-2xl p-6 shadow-sm mb-8 scroll-mt-24">
-                        <div class="flex items-start gap-4">
-                            <div
-                                class="flex-shrink-0 w-10 h-10 rounded-full bg-plena-orange text-white flex items-center justify-center font-bold text-lg">
-                                4</div>
-                            <div class="flex-1">
-                                <div class="flex justify-between items-start mb-4">
-                                    <h3 class="text-xl font-bold text-gray-800">Análise de Lucro</h3>
-                                    <button onclick="markSectionComplete('relatorios')"
-                                        class="text-xs bg-green-50 text-green-700 px-3 py-1 rounded-full font-bold hover:bg-green-100 transition-colors flex items-center gap-1">
-                                        <i data-lucide="check" class="w-3 h-3"></i> Marcar como concluído
-                                    </button>
+                    <div id="relatorios" class="bg-white border rounded-2xl p-6 shadow-sm mb-8 scroll-mt-24">
+                        <div class="flex items-center justify-between mb-6">
+                            <div class="flex items-center">
+                                <div class="step-number bg-gradient-to-r from-plena-orange to-plena-dark text-white">4
                                 </div>
-                                <p class="text-gray-600 mb-4">Entenda seus números:</p>
-                                <div class="bg-blue-50 p-4 rounded-xl border border-blue-100">
-                                    <h4 class="font-bold text-blue-800 mb-2">Resumo Financeiro</h4>
-                                    <p class="text-xs text-blue-700">O sistema deduz automaticamente seus gastos dos
-                                        seus ganhos para mostrar o <strong>Lucro Líquido Real</strong>.</p>
-                                </div>
+                                <h3 class="text-xl font-bold">Relatórios Financeiros</h3>
                             </div>
+                            <button onclick="markSectionComplete('relatorios')"
+                                class="text-xs text-gray-500 hover:text-green-600"><i data-lucide="check-circle"
+                                    class="w-4 h-4"></i></button>
                         </div>
+                        <p class="text-gray-600">Gere relatórios detalhados por período e categoria, exporte para Excel
+                            ou compartilhe via WhatsApp.</p>
                     </div>
 
-                    <!-- Seção 5: Backup -->
                     <div id="backup"
-                        class="bg-white border-2 border-red-100 rounded-2xl p-6 shadow-sm mb-8 scroll-mt-24 border-l-4 border-l-red-500">
-                        <div class="flex items-start gap-4">
-                            <div
-                                class="flex-shrink-0 w-10 h-10 rounded-full bg-red-500 text-white flex items-center justify-center font-bold text-lg">
-                                5</div>
-                            <div class="flex-1">
-                                <div class="flex justify-between items-start mb-4">
-                                    <h3 class="text-xl font-bold text-red-700">Backup e Segurança</h3>
-                                    <button onclick="markSectionComplete('backup')"
-                                        class="text-xs bg-green-50 text-green-700 px-3 py-1 rounded-full font-bold hover:bg-green-100 transition-colors flex items-center gap-1">
-                                        <i data-lucide="check" class="w-3 h-3"></i> Marcar como concluído
-                                    </button>
+                        class="bg-white border rounded-2xl p-6 shadow-sm mb-8 scroll-mt-24 border-l-4 border-l-red-500">
+                        <div class="flex items-center justify-between mb-6">
+                            <div class="flex items-center">
+                                <div class="step-number bg-gradient-to-r from-plena-orange to-plena-dark text-white">5
                                 </div>
-                                <p class="text-sm text-gray-700 mb-4">
-                                    Seus dados ficam salvos apenas neste celular. Se perder o aparelho, perde os dados.
-                                    <strong>Faça backup semanalmente!</strong>
-                                </p>
-                                <button onclick="router('settings')"
-                                    class="bg-red-600 text-white px-4 py-2 rounded-lg font-bold hover:bg-red-700 text-sm">
-                                    Fazer Backup Agora
-                                </button>
+                                <h3 class="text-xl font-bold">Backup e Segurança</h3>
                             </div>
+                            <button onclick="markSectionComplete('backup')"
+                                class="text-xs text-gray-500 hover:text-green-600"><i data-lucide="check-circle"
+                                    class="w-4 h-4"></i></button>
                         </div>
+                        <div class="text-sm text-red-800 space-y-2 mb-4">
+                            <p>📱 <strong>Seus dados ficam APENAS no seu navegador.</strong></p>
+                            <p>🔄 <strong>Se limpar cache ou perder aparelho, perderá os dados.</strong></p>
+                            <p>💾 <strong>Vá em Configurações > Baixar Backup semanalmente.</strong></p>
+                        </div>
+                        <button onclick="router('settings')"
+                            class="w-full py-3 bg-red-600 text-white rounded-lg text-sm font-bold hover:bg-red-700">
+                            <i data-lucide="download" class="w-4 h-4 inline mr-2"></i> Fazer Backup Agora
+                        </button>
                     </div>
 
-                    <!-- FAQ -->
-                    <div id="faq" class="bg-white border border-gray-200 rounded-2xl p-6 shadow-sm mb-8 scroll-mt-24">
-                        <div class="flex items-start gap-4">
-                            <div
-                                class="flex-shrink-0 w-10 h-10 rounded-full bg-plena-orange text-white flex items-center justify-center font-bold text-lg">
-                                6</div>
-                            <div class="flex-1">
-                                <h3 class="text-xl font-bold text-gray-800 mb-4">Dúvidas Frequentes</h3>
-                                <p class="text-sm text-gray-600">Precisa de internet? Não, funciona 100% offline.</p>
+                    <div id="faq" class="bg-white border rounded-2xl p-6 shadow-sm mb-8 scroll-mt-24">
+                        <div class="flex items-center justify-between mb-6">
+                            <div class="flex items-center">
+                                <div class="step-number bg-gradient-to-r from-plena-orange to-plena-dark text-white">6
+                                </div>
+                                <h3 class="text-xl font-bold">Dúvidas Frequentes</h3>
                             </div>
+                            <button onclick="markSectionComplete('faq')"
+                                class="text-xs text-gray-500 hover:text-green-600"><i data-lucide="check-circle"
+                                    class="w-4 h-4"></i></button>
                         </div>
+                        <details class="mb-3 border p-4 rounded-lg">
+                            <summary class="font-bold cursor-pointer">Como recuperar dados se perder o celular?
+                            </summary>
+                            <p class="mt-2 text-sm text-gray-600">Apenas se você tiver feito backup. Restaure o arquivo
+                                .json via Configurações.</p>
+                        </details>
+                        <details class="mb-3 border p-4 rounded-lg">
+                            <summary class="font-bold cursor-pointer">Posso usar em vários dispositivos?</summary>
+                            <p class="mt-2 text-sm text-gray-600">Sim! Faça backup em um, restaure no outro via
+                                Configurações.</p>
+                        </details>
+                        <details class="border p-4 rounded-lg">
+                            <summary class="font-bold cursor-pointer">Como categorizar minhas transações?</summary>
+                            <p class="mt-2 text-sm text-gray-600">Vá em Configurações > Categorias Personalizadas para
+                                criar suas próprias.</p>
+                        </details>
                     </div>
 
                     <!-- Checklist Interativo -->
-                    <div id="checklist"
-                        class="bg-white border border-gray-200 rounded-2xl p-6 shadow-sm mb-8 scroll-mt-24">
-                        <div class="flex flex-col md:flex-row justify-between items-center mb-6 gap-4">
-                            <div>
-                                <h3 class="text-2xl font-bold text-gray-800 flex items-center gap-2">
-                                    <i data-lucide="clipboard-check" class="w-6 h-6 text-plena-orange"></i>
-                                    Checklist Diário
-                                </h3>
-                                <p class="text-gray-500 text-sm">Rotina para antes e depois do trabalho.</p>
+                    <div id="checklist" class="bg-white border rounded-2xl p-6 shadow-sm mb-8 scroll-mt-24">
+                        <div class="flex items-center justify-between mb-6">
+                            <div class="flex items-center">
+                                <div class="step-number bg-gradient-to-r from-plena-orange to-plena-dark text-white">7
+                                </div>
+                                <h3 class="text-xl font-bold">Checklist - Rotina Financeira</h3>
                             </div>
-                            <div class="bg-orange-50 px-4 py-2 rounded-xl text-center">
-                                <span class="block text-2xl font-bold text-plena-orange"
-                                    id="checklist-percent">0%</span>
-                                <span class="text-xs font-bold text-orange-800 uppercase">Concluído</span>
+                            <button onclick="markSectionComplete('checklist')"
+                                class="text-xs text-gray-500 hover:text-green-600"><i data-lucide="check-circle"
+                                    class="w-4 h-4"></i></button>
+                        </div>
+
+                        <div class="bg-gradient-to-r from-orange-600 to-plena-dark p-6 rounded-xl text-white mb-6">
+                            <div class="text-center">
+                                <div class="text-5xl font-bold mb-2" id="checklist-percent">0%</div>
+                                <div class="progress-bar mb-3">
+                                    <div id="checklist-progress" class="progress-fill" style="width:0%"></div>
+                                </div>
+                                <p class="text-sm"><span id="checklist-completed">0</span>/<span
+                                        id="checklist-total">12</span> tarefas completadas</p>
                             </div>
                         </div>
 
-                        <div class="w-full bg-gray-100 rounded-full h-2 mb-6">
-                            <div class="bg-plena-orange h-2 rounded-full transition-all duration-300"
-                                id="checklist-progress" style="width: 0%"></div>
+                        <div class="grid grid-cols-1 lg:grid-cols-3 gap-6">
+                            <div class="space-y-4">
+                                <div class="bg-blue-50 p-5 rounded-xl border border-blue-100">
+                                    <h4 class="font-bold text-blue-600 uppercase text-sm mb-3">📊 Diário</h4>
+                                    <div class="space-y-3">
+                                        <div class="checklist-item flex items-center">
+                                            <input type="checkbox" id="check-1-1" class="w-5 h-5 text-blue-600 rounded"
+                                                onchange="updateChecklist()">
+                                            <label for="check-1-1"
+                                                class="ml-3 text-sm text-gray-700 cursor-pointer">Lançar entradas do
+                                                dia</label>
+                                        </div>
+                                        <div class="checklist-item flex items-center">
+                                            <input type="checkbox" id="check-1-2" class="w-5 h-5 text-blue-600 rounded"
+                                                onchange="updateChecklist()">
+                                            <label for="check-1-2"
+                                                class="ml-3 text-sm text-gray-700 cursor-pointer">Lançar saídas do
+                                                dia</label>
+                                        </div>
+                                        <div class="checklist-item flex items-center">
+                                            <input type="checkbox" id="check-1-3" class="w-5 h-5 text-blue-600 rounded"
+                                                onchange="updateChecklist()">
+                                            <label for="check-1-3"
+                                                class="ml-3 text-sm text-gray-700 cursor-pointer">Verificar
+                                                saldo</label>
+                                        </div>
+                                        <div class="checklist-item flex items-center">
+                                            <input type="checkbox" id="check-1-4" class="w-5 h-5 text-blue-600 rounded"
+                                                onchange="updateChecklist()">
+                                            <label for="check-1-4"
+                                                class="ml-3 text-sm text-gray-700 cursor-pointer">Revisar
+                                                categorias</label>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+
+                            <div class="space-y-4">
+                                <div class="bg-orange-50 p-5 rounded-xl border border-orange-100">
+                                    <h4 class="font-bold text-plena-orange uppercase text-sm mb-3">📈 Semanal</h4>
+                                    <div class="space-y-3">
+                                        <div class="checklist-item flex items-center">
+                                            <input type="checkbox" id="check-2-1"
+                                                class="w-5 h-5 text-orange-600 rounded" onchange="updateChecklist()">
+                                            <label for="check-2-1"
+                                                class="ml-3 text-sm text-gray-700 cursor-pointer">Analisar fluxo de
+                                                caixa</label>
+                                        </div>
+                                        <div class="checklist-item flex items-center">
+                                            <input type="checkbox" id="check-2-2"
+                                                class="w-5 h-5 text-orange-600 rounded" onchange="updateChecklist()">
+                                            <label for="check-2-2"
+                                                class="ml-3 text-sm text-gray-700 cursor-pointer">Comparar com semana
+                                                anterior</label>
+                                        </div>
+                                        <div class="checklist-item flex items-center">
+                                            <input type="checkbox" id="check-2-3"
+                                                class="w-5 h-5 text-orange-600 rounded" onchange="updateChecklist()">
+                                            <label for="check-2-3"
+                                                class="ml-3 text-sm text-gray-700 cursor-pointer">Identificar despesas
+                                                altas</label>
+                                        </div>
+                                        <div class="checklist-item flex items-center">
+                                            <input type="checkbox" id="check-2-4"
+                                                class="w-5 h-5 text-orange-600 rounded" onchange="updateChecklist()">
+                                            <label for="check-2-4"
+                                                class="ml-3 text-sm text-gray-700 cursor-pointer">Planejar próxima
+                                                semana</label>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+
+                            <div class="space-y-4">
+                                <div class="bg-green-50 p-5 rounded-xl border border-green-100">
+                                    <h4 class="font-bold text-green-600 uppercase text-sm mb-3">🔒 Mensal</h4>
+                                    <div class="space-y-3">
+                                        <div class="checklist-item flex items-center">
+                                            <input type="checkbox" id="check-3-1" class="w-5 h-5 text-green-600 rounded"
+                                                onchange="updateChecklist()">
+                                            <label for="check-3-1"
+                                                class="ml-3 text-sm text-gray-700 cursor-pointer">Gerar relatório
+                                                completo</label>
+                                        </div>
+                                        <div class="checklist-item flex items-center">
+                                            <input type="checkbox" id="check-3-2" class="w-5 h-5 text-green-600 rounded"
+                                                onchange="updateChecklist()">
+                                            <label for="check-3-2"
+                                                class="ml-3 text-sm text-gray-700 cursor-pointer">Fazer backup dos
+                                                dados</label>
+                                        </div>
+                                        <div class="checklist-item flex items-center">
+                                            <input type="checkbox" id="check-3-3" class="w-5 h-5 text-green-600 rounded"
+                                                onchange="updateChecklist()">
+                                            <label for="check-3-3"
+                                                class="ml-3 text-sm text-gray-700 cursor-pointer">Enviar para
+                                                contador</label>
+                                        </div>
+                                        <div class="checklist-item flex items-center">
+                                            <input type="checkbox" id="check-3-4" class="w-5 h-5 text-green-600 rounded"
+                                                onchange="updateChecklist()">
+                                            <label for="check-3-4"
+                                                class="ml-3 text-sm text-gray-700 cursor-pointer">Planejar próximo
+                                                mês</label>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
                         </div>
 
-                        <div class="space-y-3">
-                            <label
-                                class="checklist-item flex items-center p-4 border border-gray-200 rounded-xl cursor-pointer hover:bg-gray-50 transition-all select-none group">
-                                <input type="checkbox" id="check-oleo" class="peer sr-only"
-                                    onchange="updateChecklist()">
-                                <div
-                                    class="w-6 h-6 border-2 border-gray-300 rounded-lg peer-checked:bg-plena-orange peer-checked:border-plena-orange transition-all flex items-center justify-center mr-4">
-                                    <i data-lucide="check"
-                                        class="w-4 h-4 text-white opacity-0 peer-checked:opacity-100"></i>
-                                </div>
-                                <span class="font-bold text-gray-700">Verificar Óleo e Água</span>
-                            </label>
-                            <label
-                                class="checklist-item flex items-center p-4 border border-gray-200 rounded-xl cursor-pointer hover:bg-gray-50 transition-all select-none group">
-                                <input type="checkbox" id="check-pneu" class="peer sr-only"
-                                    onchange="updateChecklist()">
-                                <div
-                                    class="w-6 h-6 border-2 border-gray-300 rounded-lg peer-checked:bg-plena-orange peer-checked:border-plena-orange transition-all flex items-center justify-center mr-4">
-                                    <i data-lucide="check"
-                                        class="w-4 h-4 text-white opacity-0 peer-checked:opacity-100"></i>
-                                </div>
-                                <span class="font-bold text-gray-700">Calibrar Pneus</span>
-                            </label>
-                            <label
-                                class="checklist-item flex items-center p-4 border border-gray-200 rounded-xl cursor-pointer hover:bg-gray-50 transition-all select-none group">
-                                <input type="checkbox" id="check-meta" class="peer sr-only"
-                                    onchange="updateChecklist()">
-                                <div
-                                    class="w-6 h-6 border-2 border-gray-300 rounded-lg peer-checked:bg-plena-orange peer-checked:border-plena-orange transition-all flex items-center justify-center mr-4">
-                                    <i data-lucide="check"
-                                        class="w-4 h-4 text-white opacity-0 peer-checked:opacity-100"></i>
-                                </div>
-                                <span class="font-bold text-gray-700">Definir Meta do Dia</span>
-                            </label>
-                            <label
-                                class="checklist-item flex items-center p-4 border border-gray-200 rounded-xl cursor-pointer hover:bg-gray-50 transition-all select-none group">
-                                <input type="checkbox" id="check-limpeza" class="peer sr-only"
-                                    onchange="updateChecklist()">
-                                <div
-                                    class="w-6 h-6 border-2 border-gray-300 rounded-lg peer-checked:bg-plena-orange peer-checked:border-plena-orange transition-all flex items-center justify-center mr-4">
-                                    <i data-lucide="check"
-                                        class="w-4 h-4 text-white opacity-0 peer-checked:opacity-100"></i>
-                                </div>
-                                <span class="font-bold text-gray-700">Limpeza do Veículo</span>
-                            </label>
-                            <label
-                                class="checklist-item flex items-center p-4 border border-gray-200 rounded-xl cursor-pointer hover:bg-gray-50 transition-all select-none group">
-                                <input type="checkbox" id="check-close" class="peer sr-only"
-                                    onchange="updateChecklist()">
-                                <div
-                                    class="w-6 h-6 border-2 border-gray-300 rounded-lg peer-checked:bg-plena-orange peer-checked:border-plena-orange transition-all flex items-center justify-center mr-4">
-                                    <i data-lucide="check"
-                                        class="w-4 h-4 text-white opacity-0 peer-checked:opacity-100"></i>
-                                </div>
-                                <span class="font-bold text-gray-700">Fechamento e Custos</span>
-                            </label>
-                        </div>
-
-                        <div class="mt-6 flex justify-between items-center pt-4 border-t border-gray-100">
-                            <span class="text-sm font-medium text-gray-500">
-                                <span id="checklist-completed">0</span> de <span id="checklist-total">5</span> tarefas
-                            </span>
+                        <div class="mt-6 text-center">
                             <button onclick="resetChecklist()"
-                                class="text-sm text-red-500 hover:text-red-700 font-medium hover:underline">
-                                Reiniciar Checklist
+                                class="px-6 py-2 bg-red-600 text-white rounded-lg text-sm font-bold hover:bg-red-700">
+                                <i data-lucide="rotate-ccw" class="w-4 h-4 inline mr-2"></i> Reiniciar Checklist
                             </button>
+                        </div>
+                    </div>
+
+                    <!-- Footer -->
+                    <div class="text-center text-gray-500 text-sm mt-12 pb-6">
+                        <p>💡 Dúvidas? Entre em contato:</p>
+                        <a href="mailto:tecnologia@plenainformatica.com.br"
+                            class="text-plena-orange font-bold hover:underline">tecnologia@plenainformatica.com.br</a>
+                        <p class="mt-2 text-xs">Plena Manager v4.1 Pro • Plena Soluções Digitais</p>
+                    </div>
+                </div>
+            </section>
+
+            <!-- ABOUT View -->
+            <section id="view-about" class="view-section hide fade-in">
+                <div class="max-w-4xl mx-auto pb-12">
+                    <div class="bg-white p-8 rounded-2xl shadow-sm border border-gray-100">
+                        <!-- Header -->
+                        <div class="text-center mb-8">
+                            <div
+                                class="w-20 h-20 rounded-full bg-gradient-to-r from-plena-orange to-plena-dark flex items-center justify-center mx-auto mb-4">
+                                <i data-lucide="rocket" class="w-10 h-10 text-white"></i>
+                            </div>
+                            <h2 class="text-2xl font-bold text-gray-800 mb-2">Sobre a Plena</h2>
+                            <p class="text-gray-600">Democratizando a tecnologia para pequenos negócios</p>
+                            <p class="text-xs text-gray-500 mt-2">Versão 4.1 Pro • CNPJ: 17.347.919/0001-59</p>
+                        </div>
+
+                        <!-- Licença -->
+                        <div class="mb-8 border-b pb-6">
+                            <h3 class="font-bold text-gray-800 mb-4 flex items-center">
+                                <i data-lucide="scale" class="w-5 h-5 mr-2 text-plena-orange"></i>
+                                Licença de Uso
+                            </h3>
+                            <div class="text-sm text-gray-700 space-y-3 bg-gray-50 p-4 rounded-xl">
+                                <p>Este software é protegido pela <strong>Lei 9.610/98 (Lei de Direitos
+                                        Autorais)</strong>.</p>
+                                <p><strong>Uso Pessoal Intransferível:</strong> Cada instalação é licenciada para uso
+                                    individual. É proibida a redistribuição, revenda ou uso comercial sem autorização
+                                    expressa.</p>
+                                <p><strong>Propriedade Intelectual:</strong> Todo o código-fonte, design e
+                                    funcionalidades são propriedade exclusiva da Plena Soluções Digitais LTDA.</p>
+                            </div>
+                        </div>
+
+                        <!-- LGPD -->
+                        <div class="mb-8 border-b pb-6">
+                            <h3 class="font-bold text-gray-800 mb-4 flex items-center">
+                                <i data-lucide="shield-check" class="w-5 h-5 mr-2 text-green-600"></i>
+                                Privacidade e LGPD
+                            </h3>
+                            <div class="text-sm text-gray-700 space-y-3 bg-green-50 p-4 rounded-xl">
+                                <p><strong>🔒 Local-First:</strong> Todos os seus dados ficam armazenados APENAS no seu
+                                    dispositivo (navegador). Não utilizamos servidores externos nem coletamos
+                                    informações pessoais.</p>
+                                <p><strong>🛡️ Privacy by Design:</strong> O sistema foi desenvolvido com privacidade
+                                    desde a concepção. Você é o único controlador dos seus dados.</p>
+                                <p><strong>📱 Seus Dados, Suas Regras:</strong> Você pode exportar, deletar ou
+                                    transferir seus dados a qualquer momento via backup.</p>
+                            </div>
+                        </div>
+
+                        <!-- Termo de Isenção -->
+                        <div class="mb-8">
+                            <h3 class="font-bold text-gray-800 mb-4 flex items-center">
+                                <i data-lucide="alert-triangle" class="w-5 h-5 mr-2 text-red-600"></i>
+                                Termo de Isenção de Responsabilidade
+                            </h3>
+                            <div class="text-sm text-gray-700 space-y-3 bg-red-50 p-4 rounded-xl">
+                                <p><strong>⚖️ Não Substitui Contador:</strong> Este sistema é uma ferramenta de gestão
+                                    financeira pessoal. Não substitui serviços de contabilidade profissional ou
+                                    consultoria fiscal.</p>
+                                <p><strong>💾 Backup é Sua Responsabilidade:</strong> Como os dados ficam apenas no seu
+                                    dispositivo, você é responsável por fazer backups regulares. A Plena não se
+                                    responsabiliza por perda de dados.</p>
+                                <p><strong>🎯 Uso por sua Conta e Risco:</strong> O software é fornecido "como está".
+                                    Use-o como ferramenta auxiliar para organização financeira.</p>
+                            </div>
+                        </div>
+
+                        <!-- Footer -->
+                        <div class="text-center pt-6 border-t">
+                            <p class="text-sm text-gray-600 mb-3">Entre em contato:</p>
+                            <a href="mailto:tecnologia@plenainformatica.com.br"
+                                class="text-plena-orange font-bold hover:underline">
+                                tecnologia@plenainformatica.com.br
+                            </a>
+                            <p class="text-xs text-gray-500 mt-4">© 2025 Plena Soluções Digitais LTDA • Todos os
+                                direitos reservados</p>
+                        </div>
+                    </div>
+                </div>
+            </section>
+
+            <section id="view-instructions" class="view-section hide fade-in">
+                <div class="max-w-4xl mx-auto">
+                    <div class="text-center mb-8">
+                        <h2 class="text-2xl font-bold text-gray-800 mb-2">Manual Completo de Uso</h2>
+                        <p class="text-gray-600">Aprenda a usar 100% do sistema Plena Manager</p>
+                    </div>
+
+                    <!-- Quick Start -->
+                    <div class="bg-white p-6 rounded-2xl shadow-sm border border-gray-100 mb-6">
+                        <h3 class="font-bold text-gray-800 mb-4 flex items-center">
+                            <i data-lucide="rocket" class="w-5 h-5 mr-2 text-plena-orange"></i>
+                            Começo Rápido
+                        </h3>
+                        <div class="grid grid-cols-1 md:grid-cols-3 gap-4">
+                            <div class="bg-blue-50 p-4 rounded-xl text-center">
+                                <div
+                                    class="w-10 h-10 rounded-full bg-blue-100 flex items-center justify-center mx-auto mb-3">
+                                    <i data-lucide="plus" class="w-5 h-5 text-blue-600"></i>
+                                </div>
+                                <p class="text-sm font-medium mb-1">1. Cadastre Transações</p>
+                                <p class="text-xs text-gray-600">Registre todas as entradas e saídas</p>
+                            </div>
+                            <div class="bg-green-50 p-4 rounded-xl text-center">
+                                <div
+                                    class="w-10 h-10 rounded-full bg-green-100 flex items-center justify-center mx-auto mb-3">
+                                    <i data-lucide="bar-chart" class="w-5 h-5 text-green-600"></i>
+                                </div>
+                                <p class="text-sm font-medium mb-1">2. Acompanhe Gráficos</p>
+                                <p class="text-xs text-gray-600">Visualize seu fluxo de caixa</p>
+                            </div>
+                            <div class="bg-purple-50 p-4 rounded-xl text-center">
+                                <div
+                                    class="w-10 h-10 rounded-full bg-purple-100 flex items-center justify-center mx-auto mb-3">
+                                    <i data-lucide="shield-check" class="w-5 h-5 text-purple-600"></i>
+                                </div>
+                                <p class="text-sm font-medium mb-1">3. Faça Backup</p>
+                                <p class="text-xs text-gray-600">Proteja seus dados regularmente</p>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- FAQ Accordion -->
+                    <div class="space-y-4">
+                        <details
+                            class="group bg-white border border-gray-200 rounded-xl overflow-hidden open:shadow-md">
+                            <summary
+                                class="flex items-center justify-between p-4 cursor-pointer select-none text-gray-800 font-bold hover:bg-gray-50">
+                                <div class="flex items-center gap-3">
+                                    <div
+                                        class="w-8 h-8 rounded-full bg-blue-100 flex items-center justify-center text-blue-600">
+                                        <i data-lucide="shield-check" class="w-4 h-4"></i>
+                                    </div>
+                                    Como garantir que não vou perder meus dados?
+                                </div>
+                                <i data-lucide="chevron-down"
+                                    class="w-5 h-5 transition-transform group-open:rotate-180 text-gray-400"></i>
+                            </summary>
+                            <div class="p-4 pt-0 text-sm text-gray-600 leading-relaxed border-t border-gray-100">
+                                <p class="mb-3">O sistema é <strong>Local-First</strong>, ou seja, seus dados ficam
+                                    salvos no navegador do seu dispositivo. Para não perdê-los:</p>
+                                <ol class="list-decimal pl-5 space-y-2 mb-3">
+                                    <li>Vá até <strong>Configurações</strong> no menu</li>
+                                    <li>Clique em <strong>Baixar Backup Completo</strong></li>
+                                    <li>Salve o arquivo .json em local seguro</li>
+                                    <li>Faça backup pelo menos uma vez por semana</li>
+                                </ol>
+                                <div class="bg-yellow-50 p-3 rounded-lg border border-yellow-100">
+                                    <p class="text-xs text-yellow-800"><strong>Dica:</strong> Envie o backup para seu
+                                        e-mail ou Google Drive</p>
+                                </div>
+                            </div>
+                        </details>
+
+                        <details
+                            class="group bg-white border border-gray-200 rounded-xl overflow-hidden open:shadow-md">
+                            <summary
+                                class="flex items-center justify-between p-4 cursor-pointer select-none text-gray-800 font-bold hover:bg-gray-50">
+                                <div class="flex items-center gap-3">
+                                    <div
+                                        class="w-8 h-8 rounded-full bg-green-100 flex items-center justify-center text-green-600">
+                                        <i data-lucide="smartphone" class="w-4 h-4"></i>
+                                    </div>
+                                    Como instalar como Aplicativo no celular?
+                                </div>
+                                <i data-lucide="chevron-down"
+                                    class="w-5 h-5 transition-transform group-open:rotate-180 text-gray-400"></i>
+                            </summary>
+                            <div class="p-4 pt-0 text-sm text-gray-600 leading-relaxed border-t border-gray-100">
+                                <p class="mb-3">O Plena Manager é um PWA (Progressive Web App) e pode ser instalado
+                                    direto no celular:</p>
+                                <div class="grid grid-cols-1 md:grid-cols-2 gap-4 mt-3">
+                                    <div class="bg-gray-50 p-3 rounded-lg">
+                                        <strong class="text-sm">Android (Chrome):</strong>
+                                        <p class="text-xs mt-1">Clique nos 3 pontos → "Adicionar à tela inicial"</p>
+                                    </div>
+                                    <div class="bg-gray-50 p-3 rounded-lg">
+                                        <strong class="text-sm">iPhone (Safari):</strong>
+                                        <p class="text-xs mt-1">Compartilhar → "Adicionar à tela de início"</p>
+                                    </div>
+                                </div>
+                            </div>
+                        </details>
+
+                        <details
+                            class="group bg-white border border-gray-200 rounded-xl overflow-hidden open:shadow-md">
+                            <summary
+                                class="flex items-center justify-between p-4 cursor-pointer select-none text-gray-800 font-bold hover:bg-gray-50">
+                                <div class="flex items-center gap-3">
+                                    <div
+                                        class="w-8 h-8 rounded-full bg-purple-100 flex items-center justify-center text-purple-600">
+                                        <i data-lucide="share-2" class="w-4 h-4"></i>
+                                    </div>
+                                    Como compartilhar relatórios com meu contador?
+                                </div>
+                                <i data-lucide="chevron-down"
+                                    class="w-5 h-5 transition-transform group-open:rotate-180 text-gray-400"></i>
+                            </summary>
+                            <div class="p-4 pt-0 text-sm text-gray-600 leading-relaxed border-t border-gray-100">
+                                <p class="mb-3">Você pode compartilhar relatórios de várias formas:</p>
+                                <ul class="list-disc pl-5 space-y-2">
+                                    <li><strong>WhatsApp:</strong> Gere relatório e clique no botão verde</li>
+                                    <li><strong>PDF:</strong> Exporte o relatório completo em PDF</li>
+                                    <li><strong>CSV:</strong> Exporte os dados para Excel/Google Sheets</li>
+                                    <li><strong>Impressão:</strong> Imprima diretamente do sistema</li>
+                                </ul>
+                            </div>
+                        </details>
+                    </div>
+
+                    <!-- Support Section -->
+                    <div class="mt-8 bg-gradient-to-r from-plena-orange to-plena-dark p-6 rounded-2xl text-white">
+                        <div class="flex flex-col md:flex-row items-center justify-between gap-6">
+                            <div>
+                                <h3 class="text-xl font-bold mb-2">Precisa de Ajuda?</h3>
+                                <p class="text-white/90">Nossa equipe está pronta para te auxiliar</p>
+                            </div>
+                            <div class="flex flex-col sm:flex-row gap-3">
+                                <a href="mailto:tecnologia@plenainformatica.com.br"
+                                    class="bg-white text-plena-orange px-6 py-3 rounded-lg font-bold hover:bg-gray-100 transition-colors text-center w-full sm:w-auto">
+                                    <i data-lucide="mail" class="w-4 h-4 inline mr-2"></i> Tecnologia / Suporte
+                                </a>
+                            </div>
                         </div>
                     </div>
                 </div>
@@ -1146,36 +1408,26 @@
                         <!-- Company Header -->
                         <div class="text-center mb-8">
                             <div
-                                class="w-20 h-20 bg-gradient-to-br from-plena-orange to-plena-dark rounded-2xl flex items-center justify-center mx-auto mb-4 shadow-lg shadow-orange-200">
-                                <i data-lucide="car-taxi-front" class="w-10 h-10 text-white"></i>
+                                class="w-20 h-20 rounded-full bg-gradient-to-r from-plena-orange to-plena-dark flex items-center justify-center mx-auto mb-4">
+                                <i data-lucide="rocket" class="w-10 h-10 text-white"></i>
                             </div>
-                            <h2 class="text-3xl font-bold text-gray-800 mb-2">Plena Driver</h2>
-                            <p class="text-gray-500 font-medium">Soluções Digitais & Inteligência Artificial</p>
-                            <div class="mt-4 flex justify-center gap-2">
-                                <span class="px-3 py-1 bg-gray-100 rounded-full text-xs font-bold text-gray-600">v2.1.0
-                                    Pro</span>
-                                <span
-                                    class="px-3 py-1 bg-green-50 rounded-full text-xs font-bold text-green-700">Sistema
-                                    Oficial</span>
-                            </div>
+                            <h2 class="text-2xl font-bold text-gray-800 mb-2">Plena Soluções Digitais</h2>
+                            <p class="text-gray-600">Democratizando a tecnologia para pequenos negócios</p>
                         </div>
 
                         <!-- Legal Notice -->
                         <div class="bg-red-50 border-l-4 border-red-500 p-4 mb-8">
-                            <div class="flex items-start">
-                                <i data-lucide="shield-alert" class="w-5 h-5 text-red-600 mr-3 mt-0.5"></i>
-                                <div>
-                                    <h3 class="text-sm font-bold text-red-800 uppercase mb-1">Aviso Legal de Propriedade
-                                    </h3>
-                                    <p class="text-sm text-red-700 leading-relaxed">
-                                        Este software é protegido por leis de direitos autorais e tratados
-                                        internacionais. A
-                                        reprodução ou distribuição não autorizada deste programa, ou de qualquer parte
-                                        dele,
-                                        pode resultar em severas penalidades civis e criminais, e será processada na
-                                        máxima
-                                        extensão possível sob a lei.
-                                    </p>
+                            <div class="flex">
+                                <div class="flex-shrink-0">
+                                    <i data-lucide="alert-triangle" class="h-5 w-5 text-red-600"></i>
+                                </div>
+                                <div class="ml-3">
+                                    <h3 class="text-sm font-bold text-red-800 uppercase">Aviso Legal</h3>
+                                    <div class="mt-2 text-sm text-red-700">
+                                        <p>Este software é protegido pela Lei de Direitos Autorais (9.610/98). A
+                                            reprodução, distribuição ou modificação não autorizada constitui violação de
+                                            propriedade intelectual.</p>
+                                    </div>
                                 </div>
                             </div>
                         </div>
@@ -1187,35 +1439,52 @@
                                     <i data-lucide="target" class="w-5 h-5 mr-2 text-plena-orange"></i>
                                     Nossa Missão
                                 </h3>
-                                <div class="bg-gray-50 p-6 rounded-xl border border-gray-100 h-full">
-                                    <p class="text-gray-600 leading-relaxed">
-                                        Empoderar motoristas de aplicativo com ferramentas profissionais de gestão
-                                        financeira,
-                                        permitindo que tomem decisões baseadas em dados e maximizem seus lucros reais
-                                        por KM.
-                                    </p>
-                                </div>
+                                <p class="text-gray-600 mb-4">
+                                    Criar ferramentas digitais profissionais, acessíveis e simples que substituam o
+                                    papel e as planilhas complexas na gestão de pequenos negócios.
+                                </p>
+                                <ul class="space-y-2">
+                                    <li class="flex items-center text-sm text-gray-600">
+                                        <i data-lucide="check" class="w-4 h-4 mr-2 text-green-500"></i>
+                                        Tecnologia Local-First (seus dados são seus)
+                                    </li>
+                                    <li class="flex items-center text-sm text-gray-600">
+                                        <i data-lucide="check" class="w-4 h-4 mr-2 text-green-500"></i>
+                                        Sem mensalidades abusivas
+                                    </li>
+                                    <li class="flex items-center text-sm text-gray-600">
+                                        <i data-lucide="check" class="w-4 h-4 mr-2 text-green-500"></i>
+                                        Funciona 100% offline
+                                    </li>
+                                </ul>
                             </div>
                             <div>
                                 <h3 class="font-bold text-gray-800 mb-4 flex items-center">
-                                    <i data-lucide="users" class="w-5 h-5 mr-2 text-plena-dark"></i>
+                                    <i data-lucide="users" class="w-5 h-5 mr-2 text-plena-orange"></i>
                                     Para Quem Desenvolvemos
                                 </h3>
-                                <div class="bg-gray-50 p-6 rounded-xl border border-gray-100 h-full">
-                                    <ul class="space-y-3">
-                                        <li class="flex items-center text-gray-600">
-                                            <div class="w-2 h-2 bg-plena-orange rounded-full mr-3"></div>
-                                            Motoristas Uber / 99 / InDriver
-                                        </li>
-                                        <li class="flex items-center text-gray-600">
-                                            <div class="w-2 h-2 bg-plena-dark rounded-full mr-3"></div>
-                                            Taxistas Profissionais
-                                        </li>
-                                        <li class="flex items-center text-gray-600">
-                                            <div class="w-2 h-2 bg-blue-500 rounded-full mr-3"></div>
-                                            Entregadores Parceiros
-                                        </li>
-                                    </ul>
+                                <div class="space-y-3">
+                                    <div class="flex items-center p-3 bg-gray-50 rounded-lg">
+                                        <div
+                                            class="w-8 h-8 rounded-full bg-blue-100 flex items-center justify-center mr-3">
+                                            <i data-lucide="wrench" class="w-4 h-4 text-blue-600"></i>
+                                        </div>
+                                        <span class="text-sm font-medium">Autônomos e Prestadores</span>
+                                    </div>
+                                    <div class="flex items-center p-3 bg-gray-50 rounded-lg">
+                                        <div
+                                            class="w-8 h-8 rounded-full bg-green-100 flex items-center justify-center mr-3">
+                                            <i data-lucide="store" class="w-4 h-4 text-green-600"></i>
+                                        </div>
+                                        <span class="text-sm font-medium">Comércios Locais</span>
+                                    </div>
+                                    <div class="flex items-center p-3 bg-gray-50 rounded-lg">
+                                        <div
+                                            class="w-8 h-8 rounded-full bg-purple-100 flex items-center justify-center mr-3">
+                                            <i data-lucide="scissors" class="w-4 h-4 text-purple-600"></i>
+                                        </div>
+                                        <span class="text-sm font-medium">Salões e Barbearias</span>
+                                    </div>
                                 </div>
                             </div>
                         </div>
@@ -1253,7 +1522,7 @@
     <div id="transactionModal" class="fixed inset-0 modal-backdrop hidden z-50 flex items-center justify-center p-4">
         <div class="bg-white rounded-2xl shadow-2xl w-full max-w-md transform transition-all p-6">
             <div class="flex justify-between items-center mb-6">
-                <h3 class="text-lg font-bold text-gray-800">Novo Lançamento</h3>
+                <h3 class="text-lg font-bold text-gray-800">Nova Movimentação</h3>
                 <button onclick="closeModal('transactionModal')" class="text-gray-400 hover:text-gray-600">
                     <i data-lucide="x"></i>
                 </button>
@@ -1268,7 +1537,7 @@
                             onchange="renderCatOptions()">
                         <div
                             class="py-2 text-sm font-bold text-gray-500 rounded-md peer-checked:bg-white peer-checked:text-green-600 shadow-sm transition-all">
-                            Ganho (+)
+                            Receita
                         </div>
                     </label>
                     <label class="cursor-pointer text-center">
@@ -1276,7 +1545,7 @@
                             onchange="renderCatOptions()">
                         <div
                             class="py-2 text-sm font-bold text-gray-500 rounded-md peer-checked:bg-white peer-checked:text-red-600 shadow-sm transition-all">
-                            Gasto (-)
+                            Despesa
                         </div>
                     </label>
                 </div>
@@ -1292,28 +1561,28 @@
                     <label class="text-xs font-bold text-gray-500 uppercase">Descrição</label>
                     <input type="text" id="t-desc" required
                         class="w-full border p-2 rounded-lg text-sm focus:border-plena-orange outline-none"
-                        placeholder="Ex: Corrida Uber, Gasolina, Manutenção...">
+                        placeholder="Ex: Venda à vista ou Pagamento de conta">
                 </div>
 
                 <div class="grid grid-cols-2 gap-4">
                     <div>
                         <label class="text-xs font-bold text-gray-500 uppercase">Categoria</label>
-                        <select id="t-cat" onchange="checkFuel(this)"
-                            class="w-full border p-2 rounded-lg text-sm bg-white outline-none" required>
+                        <select id="t-cat" class="w-full border p-2 rounded-lg text-sm bg-white outline-none" required>
                             <!-- Options will be populated by JavaScript -->
                         </select>
                     </div>
                     <div>
-                        <label class="text-xs font-bold text-gray-500 uppercase">KM Rodado</label>
-                        <input type="number" id="t-km" step="0.1" placeholder="KM Rodado"
-                            class="w-full border p-2 rounded-lg text-sm outline-none">
+                        <label class="text-xs font-bold text-gray-500 uppercase">Pagamento</label>
+                        <select id="t-method" class="w-full border p-2 rounded-lg text-sm bg-white outline-none"
+                            required>
+                            <option value="Dinheiro">Dinheiro</option>
+                            <option value="Pix">Pix</option>
+                            <option value="Débito">Débito</option>
+                            <option value="Crédito">Crédito</option>
+                            <option value="Transferência">Transferência</option>
+                            <option value="Outro">Outro</option>
+                        </select>
                     </div>
-                </div>
-
-                <div id="fuel-field" class="hidden">
-                    <label class="text-xs font-bold text-gray-500 uppercase">Litros Abastecidos</label>
-                    <input type="number" id="t-liters" step="0.01" placeholder="0.00 L"
-                        class="w-full border p-2 rounded-lg text-sm outline-none bg-yellow-50 border-yellow-200">
                 </div>
 
                 <div>
@@ -1323,8 +1592,8 @@
                 </div>
 
                 <button type="submit"
-                    class="w-full bg-plena-orange text-black py-3 rounded-xl font-bold shadow-lg shadow-yellow-200 hover:bg-yellow-500 transition-all mt-2">
-                    Salvar Lançamento
+                    class="w-full bg-plena-orange text-white py-3 rounded-xl font-bold shadow-lg shadow-orange-200 hover:bg-plena-dark transition-all mt-2">
+                    Salvar Transação
                 </button>
             </form>
         </div>
@@ -1343,26 +1612,19 @@
                     <div class="flex justify-between items-center p-3 bg-green-50 rounded-lg border border-green-100">
                         <div class="flex items-center">
                             <i data-lucide="trending-up" class="w-4 h-4 text-green-600 mr-2"></i>
-                            <span class="text-sm">Ganhos</span>
+                            <span class="text-sm">Entradas</span>
                         </div>
                         <span id="close-inc" class="font-bold text-green-700">R$ 0,00</span>
                     </div>
                     <div class="flex justify-between items-center p-3 bg-red-50 rounded-lg border border-red-100">
                         <div class="flex items-center">
                             <i data-lucide="trending-down" class="w-4 h-4 text-red-600 mr-2"></i>
-                            <span class="text-sm">Custos</span>
+                            <span class="text-sm">Saídas</span>
                         </div>
                         <span id="close-exp" class="font-bold text-red-700">R$ 0,00</span>
                     </div>
-                    <div class="flex justify-between items-center p-3 bg-yellow-50 rounded-lg border border-yellow-100">
-                        <div class="flex items-center">
-                            <i data-lucide="map-pinned" class="w-4 h-4 text-yellow-600 mr-2"></i>
-                            <span class="text-sm">KM Rodado</span>
-                        </div>
-                        <span id="close-km" class="font-bold text-yellow-700">0 km</span>
-                    </div>
                     <div class="flex justify-between items-center pt-4 border-t">
-                        <span class="font-bold text-gray-800">Lucro do Dia</span>
+                        <span class="font-bold text-gray-800">Saldo Final</span>
                         <span id="close-bal" class="font-bold text-2xl text-gray-900">R$ 0,00</span>
                     </div>
                 </div>
@@ -1396,19 +1658,18 @@
     <!-- JavaScript -->
     <script>
         // ESTADO GLOBAL
-        const DB_KEY = 'plena_driver_pro_v2';
+        const DB_KEY = 'plena_ultimate_pro_v4';
         const defaultDB = {
             transactions: [],
             categories: [
-                { id: '1', name: 'Uber', type: 'income', color: '#10B981' },
-                { id: '2', name: '99', type: 'income', color: '#FCD34D' },
-                { id: '3', name: 'Indriver', type: 'income', color: '#3B82F6' },
-                { id: '4', name: 'Particular', type: 'income', color: '#8B5CF6' },
-                { id: '5', name: 'Combustível', type: 'expense', color: '#EF4444' },
-                { id: '6', name: 'Manutenção', type: 'expense', color: '#F97316' },
-                { id: '7', name: 'Aluguel Carro', type: 'expense', color: '#888888' },
-                { id: '8', name: 'Alimentação', type: 'expense', color: '#6366F1' },
-                { id: '9', name: 'Lavagem', type: 'expense', color: '#14B8A6' }
+                { id: '1', name: 'Vendas', type: 'income', color: '#10B981' },
+                { id: '2', name: 'Serviços', type: 'income', color: '#3B82F6' },
+                { id: '3', name: 'Fornecedor', type: 'expense', color: '#F59E0B' },
+                { id: '4', name: 'Aluguel', type: 'expense', color: '#EF4444' },
+                { id: '5', name: 'Pessoal', type: 'expense', color: '#8B5CF6' },
+                { id: '6', name: 'Transporte', type: 'expense', color: '#6366F1' },
+                { id: '7', name: 'Marketing', type: 'expense', color: '#EC4899' },
+                { id: '8', name: 'Investimento', type: 'expense', color: '#14B8A6' }
             ],
             settings: {
                 companyName: '',
@@ -1475,8 +1736,6 @@
             renderDashboard();
             renderCats();
             updateDataStatus();
-            updateTutorialProgress();
-            loadChecklistState();
 
             // Configurar periodicidade para salvar
             setInterval(save, 30000); // Salva a cada 30 segundos
@@ -1510,14 +1769,14 @@
             // Atualizar título da página
             const titles = {
                 dashboard: 'Dashboard',
-                transactions: 'Corridas & Gastos',
+                transactions: 'Transações',
                 reports: 'Relatórios',
                 settings: 'Configurações',
-                instructions: 'Manual do Motorista',
+                instructions: 'Manual de Uso',
                 about: 'Sobre a Plena'
             };
 
-            document.getElementById('page-title').innerText = titles[view] || 'Plena Driver';
+            document.getElementById('page-title').innerText = titles[view] || 'Plena Manager';
 
             // Fechar sidebar no mobile
             if (window.innerWidth < 1024) {
@@ -1560,39 +1819,36 @@
                 .reduce((sum, t) => sum + t.amount, 0);
             const balance = income - expense;
 
-            // Calcular KM e combustível
-            const totalKm = monthTrans.reduce((sum, t) => sum + (Number(t.km) || 0), 0);
-            const fuelTransactions = monthTrans.filter(t => t.liters && t.liters > 0);
-            const totalLiters = fuelTransactions.reduce((sum, t) => sum + (Number(t.liters) || 0), 0);
-            const avgFuel = totalKm > 0 ? (totalLiters / totalKm).toFixed(3) : 0;
-
-            // Lucro por KM
-            const profitPerKm = totalKm > 0 ? (balance / totalKm) : 0;
+            // Calcular total geral
+            const totalBalance = db.transactions.reduce((sum, t) => {
+                return sum + (t.type === 'income' ? t.amount : -t.amount);
+            }, 0);
 
             // Atualizar cards
-            document.getElementById('dash-balance').innerText = fmtMoney(balance);
-            document.getElementById('dash-km').innerText = totalKm.toFixed(1) + ' km';
-            document.getElementById('dash-profit-km').innerText = fmtMoney(profitPerKm) + ' /km';
-
-            // Atualizar consumo de combustível
-            document.getElementById('fuel-avg').innerText = avgFuel + ' L/km';
-            document.getElementById('fuel-total').innerText = totalLiters.toFixed(1) + ' L';
+            document.getElementById('dash-balance').innerText = fmtMoney(totalBalance);
+            document.getElementById('dash-income').innerText = fmtMoney(income);
+            document.getElementById('dash-expense').innerText = fmtMoney(expense);
 
             // Atualizar alerta de saldo negativo
             const balanceAlert = document.getElementById('balance-alert');
-            balanceAlert.classList.toggle('hidden', balance >= 0);
+            balanceAlert.classList.toggle('hidden', totalBalance >= 0);
 
             // Calcular e mostrar crescimento
             const prevMonth = getPreviousMonthData(currentMonth);
-            const kmGrowth = calculatePercentage(totalKm, prevMonth.km);
+            const incomeGrowth = calculatePercentage(income, prevMonth.income);
+            const expenseGrowth = calculatePercentage(expense, prevMonth.expense);
 
-            document.getElementById('km-growth').innerText = `${kmGrowth}%`;
+            document.getElementById('income-growth').innerText = `${incomeGrowth}%`;
+            document.getElementById('expense-growth').innerText = `${expenseGrowth}%`;
 
             // Atualizar gráfico
             renderChart(currentMonth);
 
             // Atualizar top despesas
             renderTopExpenses(monthTrans);
+
+            // Atualizar balanço por categoria
+            renderCategoryBalance(monthTrans);
 
             // Atualizar transações recentes
             renderRecentTransactions();
@@ -1612,7 +1868,8 @@
             const prevTrans = db.transactions.filter(t => t.date.startsWith(prevMonthStr));
 
             return {
-                km: prevTrans.reduce((sum, t) => sum + (Number(t.km) || 0), 0)
+                income: prevTrans.filter(t => t.type === 'income').reduce((a, b) => a + b.amount, 0),
+                expense: prevTrans.filter(t => t.type === 'expense').reduce((a, b) => a + b.amount, 0)
             };
         }
 
@@ -1620,44 +1877,61 @@
             const chartArea = document.getElementById('chart-area');
             const transactions = db.transactions.filter(t => t.date.startsWith(month));
 
-            // Preparar dados dos últimos 7 dias
-            const daysData = [];
-            for (let i = 6; i >= 0; i--) {
-                const d = new Date();
-                d.setDate(d.getDate() - i);
-                const ds = d.toISOString().split('T')[0];
-                const dayTrans = transactions.filter(t => t.date === ds);
+            // Agrupar por semana
+            const weeks = {};
+            transactions.forEach(t => {
+                const date = new Date(t.date);
+                const weekStart = getWeekStart(date);
+                const weekKey = weekStart.toISOString().split('T')[0];
 
-                daysData.push({
-                    label: `${d.getDate()}/${d.getMonth() + 1}`,
-                    income: dayTrans.filter(t => t.type === 'income').reduce((a, b) => a + b.amount, 0),
-                    expense: dayTrans.filter(t => t.type === 'expense').reduce((a, b) => a + b.amount, 0)
-                });
-            }
+                if (!weeks[weekKey]) {
+                    weeks[weekKey] = { income: 0, expense: 0, label: `Sem ${getWeekNumber(date)}` };
+                }
 
-            const maxValue = Math.max(...daysData.map(d => Math.max(d.income, d.expense)), 100);
+                if (t.type === 'income') {
+                    weeks[weekKey].income += t.amount;
+                } else {
+                    weeks[weekKey].expense += t.amount;
+                }
+            });
+
+            // Preparar dados para o gráfico
+            const weeksArray = Object.values(weeks).slice(-4); // Últimas 4 semanas
+            const maxValue = Math.max(...weeksArray.map(w => Math.max(w.income, w.expense)), 100);
 
             let chartHTML = '';
-            daysData.forEach(day => {
-                const incomeHeight = (day.income / maxValue) * 100;
-                const expenseHeight = (day.expense / maxValue) * 100;
+            weeksArray.forEach(week => {
+                const incomeHeight = (week.income / maxValue) * 100;
+                const expenseHeight = (week.expense / maxValue) * 100;
 
                 chartHTML += `
                     <div class="bar-group">
                         <div class="bar-wrapper">
                             <div class="bar bg-green-500" 
                                  style="height:${incomeHeight}%"
-                                 data-value="${fmtMoney(day.income)}"></div>
+                                 data-value="${fmtMoney(week.income)}"></div>
                             <div class="bar bg-red-500" 
                                  style="height:${expenseHeight}%"
-                                 data-value="${fmtMoney(day.expense)}"></div>
+                                 data-value="${fmtMoney(week.expense)}"></div>
                         </div>
-                        <div class="x-label">${day.label}</div>
+                        <div class="x-label">${week.label}</div>
                     </div>
                 `;
             });
 
             chartArea.innerHTML = chartHTML || '<p class="text-gray-400 text-sm">Sem dados para exibir</p>';
+        }
+
+        function getWeekStart(date) {
+            const day = date.getDay();
+            const diff = date.getDate() - day + (day === 0 ? -6 : 1);
+            return new Date(date.setDate(diff));
+        }
+
+        function getWeekNumber(date) {
+            const firstDay = new Date(date.getFullYear(), 0, 1);
+            const pastDays = (date - firstDay) / 86400000;
+            return Math.ceil((pastDays + firstDay.getDay() + 1) / 7);
         }
 
         function renderTopExpenses(transactions) {
@@ -1676,7 +1950,7 @@
             const container = document.getElementById('top-expenses');
 
             if (topExpenses.length === 0) {
-                container.innerHTML = '<p class="text-gray-400 text-sm text-center">Sem gastos este mês</p>';
+                container.innerHTML = '<p class="text-gray-400 text-sm text-center">Sem despesas este mês</p>';
                 return;
             }
 
@@ -1696,6 +1970,49 @@
             `).join('');
         }
 
+        function renderCategoryBalance(transactions) {
+            const categoryMap = {};
+
+            transactions.forEach(t => {
+                const cat = db.categories.find(c => c.id === t.catId);
+                const catName = cat ? cat.name : 'Geral';
+                const catType = cat ? cat.type : t.type;
+
+                if (!categoryMap[catName]) {
+                    categoryMap[catName] = { income: 0, expense: 0, color: cat?.color || '#6B7280' };
+                }
+
+                if (t.type === 'income') {
+                    categoryMap[catName].income += t.amount;
+                } else {
+                    categoryMap[catName].expense += t.amount;
+                }
+            });
+
+            const container = document.getElementById('category-balance');
+            const categories = Object.entries(categoryMap).slice(0, 4);
+
+            if (categories.length === 0) {
+                container.innerHTML = '<p class="text-gray-400 text-sm text-center">Sem dados por categoria</p>';
+                return;
+            }
+
+            container.innerHTML = categories.map(([name, data]) => {
+                const net = data.income - data.expense;
+                return `
+                    <div class="flex items-center justify-between p-2 hover:bg-gray-50 rounded-lg">
+                        <div class="flex items-center">
+                            <div class="w-3 h-3 rounded-full mr-2" style="background:${data.color}"></div>
+                            <span class="text-sm text-gray-700">${name}</span>
+                        </div>
+                        <span class="text-sm font-bold ${net >= 0 ? 'text-green-600' : 'text-red-600'}">
+                            ${net >= 0 ? '+' : ''}${fmtMoney(net)}
+                        </span>
+                    </div>
+                `;
+            }).join('');
+        }
+
         function renderRecentTransactions() {
             const container = document.getElementById('recent-transactions');
             const recent = db.transactions
@@ -1709,8 +2026,6 @@
 
             container.innerHTML = recent.map(t => {
                 const cat = db.categories.find(c => c.id === t.catId);
-                const kmInfo = t.km ? `• ${t.km} km` : '';
-                const litersInfo = t.liters ? `• ${t.liters} L` : '';
                 return `
                     <div class="flex items-center justify-between p-3 hover:bg-gray-50 rounded-lg border border-gray-100">
                         <div class="flex items-center">
@@ -1720,7 +2035,7 @@
                             </div>
                             <div>
                                 <p class="text-sm font-medium text-gray-800">${t.desc}</p>
-                                <p class="text-xs text-gray-500">${fmtDate(t.date)} • ${cat?.name || 'Geral'} ${kmInfo} ${litersInfo}</p>
+                                <p class="text-xs text-gray-500">${fmtDate(t.date)} • ${cat?.name || 'Geral'}</p>
                             </div>
                         </div>
                         <span class="text-sm font-bold ${t.type === 'income' ? 'text-green-600' : 'text-red-600'}">
@@ -1742,7 +2057,8 @@
 
             // Filtrar transações
             let filtered = db.transactions.filter(t => {
-                const matchesTerm = t.desc.toLowerCase().includes(term);
+                const matchesTerm = t.desc.toLowerCase().includes(term) ||
+                    (t.method && t.method.toLowerCase().includes(term));
                 const matchesType = filter === 'all' || t.type === filter;
                 const matchesDate = (!start || t.date >= start) && (!end || t.date <= end);
 
@@ -1768,15 +2084,13 @@
             tbody.innerHTML = filtered.map(t => {
                 const cat = db.categories.find(c => c.id === t.catId);
                 const isIncome = t.type === 'income';
-                const kmInfo = t.km ? `<div class="text-xs text-blue-600">${t.km} km</div>` : '';
-                const litersInfo = t.liters ? `<div class="text-xs text-orange-600">${t.liters} L</div>` : '';
 
                 return `
                     <tr class="hover:bg-gray-50 group border-b border-gray-100">
                         <td class="px-6 py-4 text-gray-500 whitespace-nowrap">${fmtDate(t.date)}</td>
                         <td class="px-6 py-4">
                             <div class="font-medium text-gray-800">${t.desc}</div>
-                            ${litersInfo}
+                            <div class="text-xs text-gray-400">${t.method || 'Não especificado'}</div>
                         </td>
                         <td class="px-6 py-4">
                             <span class="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium" 
@@ -1784,9 +2098,7 @@
                                 ${cat?.name || 'Geral'}
                             </span>
                         </td>
-                        <td class="px-6 py-4">
-                            ${kmInfo}
-                        </td>
+                        <td class="px-6 py-4 text-sm text-gray-500">${t.method || '-'}</td>
                         <td class="px-6 py-4 text-right font-bold ${isIncome ? 'text-green-600' : 'text-red-600'}">
                             ${isIncome ? '+' : '-'} ${fmtMoney(t.amount)}
                         </td>
@@ -1848,31 +2160,21 @@
 
             if (transaction) {
                 // Modo edição
-                title.textContent = 'Editar Lançamento';
+                title.textContent = 'Editar Transação';
                 document.getElementById('t-id').value = transaction.id;
                 document.querySelector(`input[name="t-type"][value="${transaction.type}"]`).checked = true;
                 document.getElementById('t-amount').value = transaction.amount;
                 document.getElementById('t-desc').value = transaction.desc;
                 document.getElementById('t-cat').value = transaction.catId;
-                document.getElementById('t-km').value = transaction.km || '';
+                document.getElementById('t-method').value = transaction.method;
                 document.getElementById('t-date').value = transaction.date;
-
-                // Verificar se é combustível
-                const cat = db.categories.find(c => c.id === transaction.catId);
-                if (cat && (cat.name.toLowerCase().includes('combust') ||
-                    cat.name.toLowerCase().includes('gasolina') ||
-                    cat.name.toLowerCase().includes('etanol'))) {
-                    document.getElementById('fuel-field').classList.remove('hidden');
-                    document.getElementById('t-liters').value = transaction.liters || '';
-                }
             } else {
                 // Modo criação
-                title.textContent = 'Novo Lançamento';
+                title.textContent = 'Nova Transação';
                 form.reset();
                 document.getElementById('t-id').value = '';
                 document.getElementById('t-date').value = new Date().toISOString().split('T')[0];
                 document.querySelector('input[name="t-type"][value="expense"]').checked = true;
-                document.getElementById('fuel-field').classList.add('hidden');
             }
 
             modal.classList.remove('hidden');
@@ -1886,12 +2188,10 @@
                 .reduce((sum, t) => sum + t.amount, 0);
             const expense = todayTrans.filter(t => t.type === 'expense')
                 .reduce((sum, t) => sum + t.amount, 0);
-            const km = todayTrans.reduce((sum, t) => sum + (Number(t.km) || 0), 0);
             const balance = income - expense;
 
             document.getElementById('close-inc').textContent = fmtMoney(income);
             document.getElementById('close-exp').textContent = fmtMoney(expense);
-            document.getElementById('close-km').textContent = km.toFixed(1) + ' km';
             document.getElementById('close-bal').textContent = fmtMoney(balance);
             document.getElementById('close-date').textContent = fmtDate(today);
             document.getElementById('close-time').textContent = new Date().toLocaleTimeString('pt-BR', {
@@ -1904,16 +2204,6 @@
 
         function closeModal(modalId) {
             document.getElementById(modalId).classList.add('hidden');
-        }
-
-        function checkFuel(select) {
-            const txt = select.options[select.selectedIndex].text.toLowerCase();
-            const field = document.getElementById('fuel-field');
-            if (txt.includes('combust') || txt.includes('gasolina') || txt.includes('etanol')) {
-                field.classList.remove('hidden');
-            } else {
-                field.classList.add('hidden');
-            }
         }
 
         function renderCatOptions() {
@@ -1936,9 +2226,8 @@
             const amount = parseFloat(document.getElementById('t-amount').value);
             const desc = document.getElementById('t-desc').value.trim();
             const catId = document.getElementById('t-cat').value;
-            const km = document.getElementById('t-km').value ? parseFloat(document.getElementById('t-km').value) : 0;
+            const method = document.getElementById('t-method').value;
             const date = document.getElementById('t-date').value;
-            const liters = document.getElementById('t-liters').value ? parseFloat(document.getElementById('t-liters').value) : 0;
 
             if (!desc || !amount || amount <= 0) {
                 alert('Por favor, preencha todos os campos corretamente.');
@@ -1951,9 +2240,8 @@
                 amount,
                 desc,
                 catId,
-                km,
-                date,
-                liters
+                method,
+                date
             };
 
             if (id) {
@@ -1973,7 +2261,6 @@
             // Resetar formulário
             e.target.reset();
             document.getElementById('t-date').value = new Date().toISOString().split('T')[0];
-            document.getElementById('fuel-field').classList.add('hidden');
 
             // Atualizar views
             if (document.getElementById('view-dashboard').classList.contains('hide') === false) {
@@ -1983,7 +2270,7 @@
                 renderTransactions();
             }
 
-            showNotification('Lançamento salvo com sucesso!', 'success');
+            showNotification('Transação salva com sucesso!', 'success');
         }
 
         function editTransaction(id) {
@@ -1994,7 +2281,7 @@
         }
 
         function deleteTransaction(id) {
-            if (confirm('Tem certeza que deseja excluir este lançamento?')) {
+            if (confirm('Tem certeza que deseja excluir esta transação?')) {
                 db.transactions = db.transactions.filter(t => t.id !== id);
                 save();
 
@@ -2006,7 +2293,7 @@
                     renderTransactions();
                 }
 
-                showNotification('Lançamento excluído com sucesso!', 'success');
+                showNotification('Transação excluída com sucesso!', 'success');
             }
         }
 
@@ -2025,13 +2312,11 @@
                 .reduce((sum, t) => sum + t.amount, 0);
             const expense = transactions.filter(t => t.type === 'expense')
                 .reduce((sum, t) => sum + t.amount, 0);
-            const km = transactions.reduce((sum, t) => sum + (Number(t.km) || 0), 0);
             const balance = income - expense;
 
             document.getElementById('rep-inc').textContent = fmtMoney(income);
             document.getElementById('rep-exp').textContent = fmtMoney(expense);
             document.getElementById('rep-bal').textContent = fmtMoney(balance);
-            document.getElementById('rep-km').textContent = km.toFixed(1) + ' km';
 
             // Gerar análise por categoria
             renderCategoryReport(transactions);
@@ -2095,7 +2380,7 @@
                             <div class="w-3 h-3 rounded-full mr-3" style="background:${data.color}"></div>
                             <div>
                                 <p class="text-sm font-medium text-gray-800">${name}</p>
-                                <p class="text-xs text-gray-500">${data.type === 'income' ? 'Ganho' : 'Gasto'}</p>
+                                <p class="text-xs text-gray-500">${data.type === 'income' ? 'Receita' : 'Despesa'}</p>
                             </div>
                         </div>
                         <div class="text-right">
@@ -2111,16 +2396,15 @@
 
         // EXPORTAÇÃO E COMPARTILHAMENTO
         function exportCSV() {
-            const headers = ['Data', 'Descrição', 'Categoria', 'Tipo', 'KM', 'Litros', 'Valor'];
+            const headers = ['Data', 'Descrição', 'Categoria', 'Tipo', 'Pagamento', 'Valor'];
             const rows = db.transactions.map(t => {
                 const cat = db.categories.find(c => c.id === t.catId);
                 return [
                     fmtDate(t.date),
                     `"${t.desc}"`,
                     cat?.name || 'Geral',
-                    t.type === 'income' ? 'Ganho' : 'Gasto',
-                    t.km || '0',
-                    t.liters || '0',
+                    t.type === 'income' ? 'Receita' : 'Despesa',
+                    t.method || 'Não especificado',
                     t.amount.toFixed(2).replace('.', ',')
                 ];
             });
@@ -2131,7 +2415,7 @@
             const a = document.createElement('a');
 
             a.href = url;
-            a.download = `corridas_plena_${new Date().toISOString().slice(0, 10)}.csv`;
+            a.download = `transacoes_plena_${new Date().toISOString().slice(0, 10)}.csv`;
             a.click();
 
             URL.revokeObjectURL(url);
@@ -2144,14 +2428,12 @@
             const income = document.getElementById('rep-inc').textContent;
             const expense = document.getElementById('rep-exp').textContent;
             const balance = document.getElementById('rep-bal').textContent;
-            const km = document.getElementById('rep-km').textContent;
 
-            const message = `*🚖 Relatório de Desempenho - Plena Driver*%0A%0A` +
+            const message = `*📊 Relatório Financeiro - Plena Manager*%0A%0A` +
                 `*Período:* ${fmtDate(start)} à ${fmtDate(end)}%0A%0A` +
-                `✅ *Ganhos:* ${income}%0A` +
-                `🔻 *Gastos:* ${expense}%0A` +
-                `🛣 *KM Rodados:* ${km}%0A` +
-                `💰 *Lucro Líquido:* ${balance}%0A%0A` +
+                `✅ *Entradas:* ${income}%0A` +
+                `🔻 *Saídas:* ${expense}%0A` +
+                `💰 *Saldo:* ${balance}%0A%0A` +
                 `_Gerado em ${new Date().toLocaleDateString('pt-BR')}_`;
 
             window.open(`https://wa.me/?text=${encodeURIComponent(message)}`, '_blank');
@@ -2162,16 +2444,14 @@
             const income = document.getElementById('close-inc').textContent;
             const expense = document.getElementById('close-exp').textContent;
             const balance = document.getElementById('close-bal').textContent;
-            const km = document.getElementById('close-km').textContent;
 
-            const message = `*🏁 Fechamento do Dia - Driver*%0A%0A` +
+            const message = `*🔒 Fechamento de Caixa*%0A%0A` +
                 `*Data:* ${fmtDate(today)}%0A` +
                 `*Hora:* ${new Date().toLocaleTimeString('pt-BR', { hour: '2-digit', minute: '2-digit' })}%0A%0A` +
-                `✅ *Ganhos:* ${income}%0A` +
-                `🔻 *Gastos:* ${expense}%0A` +
-                `🛣 *KM Rodado:* ${km}%0A` +
-                `💰 *Lucro do Dia:* ${balance}%0A%0A` +
-                `_Plena Driver - Controle para Motoristas_`;
+                `✅ *Entradas:* ${income}%0A` +
+                `🔻 *Saídas:* ${expense}%0A` +
+                `💰 *Saldo Final:* ${balance}%0A%0A` +
+                `_Plena Manager - Controle Financeiro_`;
 
             window.open(`https://wa.me/?text=${encodeURIComponent(message)}`, '_blank');
         }
@@ -2182,10 +2462,10 @@
 
             document.body.innerHTML = `
                 <div style="padding: 20px; font-family: sans-serif;">
-                    <h1 style="text-align: center; color: #F59E0B;">Relatório de Desempenho</h1>
+                    <h1 style="text-align: center; color: #FF6600;">Relatório Financeiro</h1>
                     <div style="margin: 20px 0;">${printContent}</div>
                     <p style="text-align: center; color: #666; font-size: 12px; margin-top: 30px;">
-                        Gerado por Plena Driver • ${new Date().toLocaleDateString('pt-BR')}
+                        Gerado por Plena Manager • ${new Date().toLocaleDateString('pt-BR')}
                     </p>
                 </div>
             `;
@@ -2201,10 +2481,10 @@
 
             document.body.innerHTML = `
                 <div style="padding: 20px; font-family: sans-serif;">
-                    <h1 style="text-align: center; color: #F59E0B;">Corridas e Gastos</h1>
+                    <h1 style="text-align: center; color: #FF6600;">Transações Financeiras</h1>
                     <div style="margin: 20px 0;">${printContent}</div>
                     <p style="text-align: center; color: #666; font-size: 12px; margin-top: 30px;">
-                        Gerado por Plena Driver • ${new Date().toLocaleDateString('pt-BR')}
+                        Gerado por Plena Manager • ${new Date().toLocaleDateString('pt-BR')}
                     </p>
                 </div>
             `;
@@ -2220,10 +2500,10 @@
 
             document.body.innerHTML = `
                 <div style="padding: 20px; font-family: sans-serif;">
-                    <h1 style="text-align: center; color: #F59E0B;">Fechamento do Dia</h1>
+                    <h1 style="text-align: center; color: #FF6600;">Fechamento de Caixa</h1>
                     <div style="margin: 20px 0;">${printContent}</div>
                     <p style="text-align: center; color: #666; font-size: 12px; margin-top: 30px;">
-                        Gerado por Plena Driver • ${new Date().toLocaleDateString('pt-BR')}
+                        Gerado por Plena Manager • ${new Date().toLocaleDateString('pt-BR')}
                     </p>
                 </div>
             `;
@@ -2257,7 +2537,7 @@
                         <div>
                             <span class="text-sm font-medium text-gray-800">${cat.name}</span>
                             <span class="text-xs ${cat.type === 'income' ? 'text-green-600' : 'text-red-600'} ml-2">
-                                ${cat.type === 'income' ? 'Ganho' : 'Gasto'}
+                                ${cat.type === 'income' ? 'Receita' : 'Despesa'}
                             </span>
                         </div>
                     </div>
@@ -2304,7 +2584,7 @@
 
             // Limpar formulário
             document.getElementById('new-cat-name').value = '';
-            document.getElementById('new-cat-color').value = '#F59E0B';
+            document.getElementById('new-cat-color').value = '#FF6600';
 
             showNotification('Categoria adicionada com sucesso!', 'success');
         }
@@ -2333,12 +2613,12 @@
             const backupData = {
                 ...db,
                 exportedAt: new Date().toISOString(),
-                version: 'plena_driver_v2'
+                version: 'plena_manager_v4'
             };
 
             const dataStr = JSON.stringify(backupData, null, 2);
             const dataUri = 'data:application/json;charset=utf-8,' + encodeURIComponent(dataStr);
-            const exportFileName = `plena_driver_backup_${new Date().toISOString().slice(0, 10)}.json`;
+            const exportFileName = `plena_backup_${new Date().toISOString().slice(0, 10)}.json`;
 
             const linkElement = document.createElement('a');
             linkElement.setAttribute('href', dataUri);
@@ -2390,12 +2670,12 @@
         }
 
         function clearAllTransactions() {
-            if (confirm('Tem certeza que deseja limpar TODOS os lançamentos? Esta ação é irreversível!')) {
+            if (confirm('Tem certeza que deseja limpar TODAS as transações? Esta ação é irreversível!')) {
                 db.transactions = [];
                 save();
                 renderDashboard();
                 renderTransactions();
-                showNotification('Todos os lançamentos foram removidos!', 'success');
+                showNotification('Todas as transações foram removidas!', 'success');
             }
         }
 
@@ -2412,7 +2692,7 @@
             const income = db.transactions.filter(t => t.type === 'income').length;
             const expense = db.transactions.filter(t => t.type === 'expense').length;
 
-            console.log(`Dados atualizados: ${total} lançamentos (${income} ganhos, ${expense} gastos)`);
+            console.log(`Dados atualizados: ${total} transações (${income} receitas, ${expense} despesas)`);
         }
 
         function showNotification(message, type = 'info') {
@@ -2441,88 +2721,6 @@
             }, 3000);
         }
 
-        // MANUAL FUNCTIONS - PADRONIZAÇÃO PLENA
-        function scrollToSection(sectionId) {
-            const el = document.getElementById(sectionId);
-            if (el) {
-                el.scrollIntoView({ behavior: 'smooth', block: 'start' });
-            }
-        }
-
-        function markSectionComplete(id) {
-            const completed = JSON.parse(localStorage.getItem('driver-tutorial-completed') || '[]');
-            if (!completed.includes(id)) {
-                completed.push(id);
-                localStorage.setItem('driver-tutorial-completed', JSON.stringify(completed));
-                updateTutorialProgress();
-                showNotification('Seção concluída!', 'success');
-            }
-        }
-
-        function updateTutorialProgress() {
-            const sections = ['instalacao', 'config', 'gestao', 'relatorios', 'backup', 'faq', 'checklist'];
-            const completed = JSON.parse(localStorage.getItem('driver-tutorial-completed') || '[]');
-            const progress = (completed.length / sections.length) * 100;
-
-            const progressBar = document.getElementById('tutorial-progress');
-            const completedSteps = document.getElementById('completed-steps');
-
-            if (progressBar) progressBar.style.width = `${progress}%`;
-            if (completedSteps) completedSteps.textContent = `${completed.length}/${sections.length} etapas`;
-        }
-
-        function updateChecklist() {
-            const checkboxes = document.querySelectorAll('#checklist input[type="checkbox"]');
-            const total = checkboxes.length;
-            const checked = document.querySelectorAll('#checklist input[type="checkbox"]:checked').length;
-            const percent = Math.round((checked / total) * 100);
-
-            const percentEl = document.getElementById('checklist-percent');
-            const progressEl = document.getElementById('checklist-progress');
-            const completedEl = document.getElementById('checklist-completed');
-            const totalEl = document.getElementById('checklist-total');
-
-            if (percentEl) percentEl.textContent = `${percent}%`;
-            if (progressEl) progressEl.style.width = `${percent}%`;
-            if (completedEl) completedEl.textContent = checked;
-            if (totalEl) totalEl.textContent = total;
-
-            // Visual style update
-            checkboxes.forEach(cb => {
-                const item = cb.closest('.checklist-item');
-                if (cb.checked) {
-                    item.classList.add('bg-orange-50', 'border-plena-orange');
-                    item.classList.remove('border-gray-200');
-                } else {
-                    item.classList.remove('bg-orange-50', 'border-plena-orange');
-                    item.classList.add('border-gray-200');
-                }
-            });
-
-            // Save state
-            const state = {};
-            checkboxes.forEach(cb => state[cb.id] = cb.checked);
-            localStorage.setItem('driver-checklist-state', JSON.stringify(state));
-        }
-
-        function resetChecklist() {
-            if (confirm('Deseja reiniciar seu checklist diário?')) {
-                localStorage.removeItem('driver-checklist-state');
-                document.querySelectorAll('#checklist input[type="checkbox"]').forEach(cb => cb.checked = false);
-                updateChecklist();
-                showNotification('Checklist reiniciado', 'info');
-            }
-        }
-
-        function loadChecklistState() {
-            const state = JSON.parse(localStorage.getItem('driver-checklist-state') || '{}');
-            Object.keys(state).forEach(id => {
-                const cb = document.getElementById(id);
-                if (cb) cb.checked = state[id];
-            });
-            updateChecklist();
-        }
-
         // PWA INSTALL PROMPT
         let deferredPrompt;
 
@@ -2532,7 +2730,7 @@
 
             // Mostrar botão de instalação
             const installButton = document.createElement('button');
-            installButton.className = 'fixed bottom-4 right-4 bg-plena-orange text-black px-4 py-2 rounded-lg shadow-lg z-40';
+            installButton.className = 'fixed bottom-4 right-4 bg-plena-orange text-white px-4 py-2 rounded-lg shadow-lg z-40';
             installButton.innerHTML = '<i data-lucide="download" class="w-4 h-4 inline mr-2"></i>Instalar App';
             installButton.onclick = () => {
                 deferredPrompt.prompt();
@@ -2555,24 +2753,14 @@
             showNotification('Modo offline ativado. Seus dados estão seguros localmente.', 'warning');
         });
 
-        // SECURITY: BRAND INTEGRITY LOCK (mantido do original)
-        setInterval(() => {
-            const footer = document.querySelector('.sidebar .border-t');
-            if (footer) {
-                const text = footer.innerText || "";
-                if (!text.includes('Plena')) {
-                    document.body.innerHTML = `
-                        <div style="height:100vh;background:#1a1a1a;color:#ef4444;display:flex;flex-direction:column;align-items:center;justify-content:center;text-align:center;font-family:sans-serif;padding:20px;">
-                            <h1 style="font-size:2rem;margin-bottom:20px;font-weight:bold;">⚠️ VIOLAÇÃO DE SEGURANÇA</h1>
-                            <p style="font-size:1.2rem;">A assinatura digital deste software foi modificada ilegalmente.</p>
-                            <p style="margin-top:20px;color:white;font-size:0.9rem;">Entre em contato com o suporte oficial: tecnologia@plenainformatica.com.br</p>
-                            <p style="margin-top:10px;color:#666;font-size:0.8rem;">Error Code: INTEGRITY_CHECK_FAILED</p>
-                        </div>
-                    `;
-                    throw new Error("PIRACY DETECTED");
-                }
-            }
-        }, 8000);
+        // MANUAL FUNCTIONS
+        function scrollToSection(sectionId) { const el = document.getElementById(sectionId); if (el) el.scrollIntoView({ behavior: 'smooth', block: 'start' }); }
+        function markSectionComplete(id) { const c = JSON.parse(localStorage.getItem('tutorial-completed') || '[]'); if (!c.includes(id)) { c.push(id); localStorage.setItem('tutorial-completed', JSON.stringify(c)); updateTutorialProgress(); showNotification('Seção concluída!', 'success'); } }
+        function updateTutorialProgress() { const s = ['instalacao', 'config', 'transacoes', 'relatorios', 'backup', 'faq', 'checklist']; const c = JSON.parse(localStorage.getItem('tutorial-completed') || '[]'); const p = (c.length / s.length) * 100; const pb = document.getElementById('tutorial-progress'); const cs = document.getElementById('completed-steps'); if (pb) pb.style.width = `${p}%`; if (cs) cs.textContent = `${c.length}/${s.length} etapas`; }
+        function updateChecklist() { const cbs = document.querySelectorAll('#checklist input[type="checkbox"]'); const t = cbs.length; const ch = document.querySelectorAll('#checklist input[type="checkbox"]:checked').length; const pct = Math.round((ch / t) * 100); document.getElementById('checklist-percent').textContent = `${pct}%`; document.getElementById('checklist-progress').style.width = `${pct}%`; document.getElementById('checklist-completed').textContent = ch; document.getElementById('checklist-total').textContent = t; cbs.forEach(cb => { const it = cb.closest('.checklist-item'); if (cb.checked) it.classList.add('completed'); else it.classList.remove('completed'); }); const st = {}; cbs.forEach(cb => st[cb.id] = cb.checked); localStorage.setItem('checklist-state', JSON.stringify(st)); }
+        function resetChecklist() { if (confirm('Reiniciar checklist?')) { localStorage.removeItem('checklist-state'); document.querySelectorAll('#checklist input[type="checkbox"]').forEach(cb => cb.checked = false); updateChecklist(); } }
+        function loadChecklistState() { const st = JSON.parse(localStorage.getItem('checklist-state') || '{}'); Object.keys(st).forEach(id => { const cb = document.getElementById(id); if (cb) cb.checked = st[id]; }); updateChecklist(); }
+        function showExample(type) { showNotification('Exemplo: ' + type, 'info'); }
 
         // INICIALIZAR APLICATIVO
         document.addEventListener('DOMContentLoaded', init);
